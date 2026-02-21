@@ -315,5 +315,4 @@ cypress/screenshots
 .ruff_cache/
 
 # ai
-CLAUDE.md
 .claude/
