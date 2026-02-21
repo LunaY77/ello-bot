@@ -26,8 +26,15 @@ classifiers = [
 dependencies = [
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
+    "bcrypt>=5.0.0",
     "fastapi>=0.129.0",
+    "loguru>=0.7.3",
+    "psycopg2-binary>=2.9.11",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "pyjwt>=2.11.0",
     "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.22",
     "sqlalchemy>=2.0.46",
     "uvicorn[standard]>=0.41.0",
 ]
@@ -46,14 +53,14 @@ Documentation = "https://github.com/LunaY77/ello-bot"
 Repository = "https://github.com/LunaY77/ello-bot"
 
 [project.scripts]
-ello-server = "ello_bot.main:main"
-lint = "ello_bot.tools.scripts:lint"
+ello-server = "app.main:main"
+lint = "app.tools.scripts:lint"
 
 [tool.setuptools.dynamic]
-version = { attr = "ello_bot.__version__" }
+version = { attr = "app.__version__" }
 
 [tool.setuptools.packages.find]
-include = ["ello_bot*"]
+include = ["app*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

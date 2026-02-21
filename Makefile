@@ -4,7 +4,8 @@ SHELL := /bin/bash
 	backend-run backend-lint backend-format backend-fmt backend-check backend-test \
 	db-up db-down db-logs db-reset \
 	frontend-dev frontend-build frontend-lint frontend-format \
-	lint format fmt check test
+	lint format fmt check test \
+	db-migration db-upgrade db-downgrade db-migrate
 
 help:
 	@echo "Targets:"
@@ -33,7 +34,7 @@ docker-reset:
 
 # ---------- Backend (Python / uv) ----------
 backend-run:
-	cd backend && uv run uvicorn ello_bot.main:app --reload --host 0.0.0.0 --port 8000
+	cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 backend-check:
 	cd backend && uv run ruff check .
@@ -47,6 +48,18 @@ backend-format backend-fmt:
 
 backend-test:
 	cd backend && uv run pytest -q
+
+# ---------- Database Migrations (Alembic) ----------
+db-migration:
+	cd backend && uv run alembic revision --autogenerate -m "$(msg)"
+
+db-upgrade:
+	cd backend && uv run alembic upgrade head
+
+db-downgrade:
+	cd backend && uv run alembic downgrade -1
+
+db-migrate: db-migration db-upgrade
 
 # ---------- Frontend (React/Vite) ----------
 frontend-dev:

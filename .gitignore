@@ -15,7 +15,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 .nvmrc
-CLAUDE.md
 # C extensions
 *.so
 
@@ -314,3 +313,7 @@ cypress/screenshots
 
 # ruff cache
 .ruff_cache/
+
+# ai
+CLAUDE.md
+.claude/
