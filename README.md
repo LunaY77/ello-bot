@@ -59,13 +59,14 @@ Run `make help` or refer to the table below.
 | `make docker-down` | Stop and remove containers |
 | `make backend-run` | Start FastAPI dev server (port 8000) |
 | `make backend-test` | Run backend tests |
-| `make backend-lint` | Lint and format backend code |
+| `make backend-lint` | Lint fix + format backend code (ruff) |
+| `make backend-check` | Lint check backend code (ruff, no fix) |
 | `make frontend-dev` | Start frontend dev server |
 | `make frontend-build` | Build frontend for production |
 | `make db-upgrade` | Apply all pending migrations |
 | `make db-migration msg="..."` | Generate a new migration |
-| `make lint` | Lint both frontend and backend |
-| `make format` | Format both frontend and backend |
+| `make lint` | Lint fix + format both frontend and backend |
+| `make check` | Lint check both frontend and backend |
 
 ## License
 

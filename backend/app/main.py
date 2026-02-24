@@ -2,6 +2,7 @@ import uuid as _uuid
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -160,3 +161,18 @@ app.add_exception_handler(Exception, general_exception_handler)
 
 app.include_router(auth_router)
 app.include_router(user_router)
+
+# =============== Main Entry Point ===============
+
+
+def main():
+    uvicorn.run(
+        "app.main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -55,7 +55,8 @@ Repository = "https://github.com/LunaY77/ello-bot"
 [project.scripts]
 ello-server = "app.main:main"
 lint = "app.tools.scripts:lint"
-gen-openapi = "app.tools.openapi_gen:main"
+check = "app.tools.scripts:check"
+gen-openapi = "app.tools.scripts:gen_openapi"
 
 [tool.setuptools.dynamic]
 version = { attr = "app.__version__" }

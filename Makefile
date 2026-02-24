@@ -1,23 +1,24 @@
 SHELL := /bin/bash
 
 .PHONY: help \
-	backend-run backend-lint backend-format backend-fmt backend-check backend-test \
+	backend-run backend-lint backend-check backend-test \
 	db-up db-down db-logs db-reset \
-	frontend-dev frontend-build frontend-lint frontend-format \
-	lint format fmt check test \
+	frontend-dev frontend-build frontend-lint frontend-check \
+	lint check test \
 	db-migration db-upgrade db-downgrade db-migrate \
 	sync-api
 
 help:
 	@echo "Targets:"
 	@echo "  make docker-up           Start postgres (docker compose)"
-	@echo "  make backend-run     Run FastAPI dev server"
-	@echo "  make backend-lint    Ruff lint (fix) + format"
-	@echo "  make frontend-lint   ESLint"
-	@echo "  make frontend-format Prettier format"
-	@echo "  make lint            Lint both frontend & backend"
-	@echo "  make format          Format both frontend & backend"
-	@echo "  make sync-api        Generate OpenAPI spec then codegen frontend client"
+	@echo "  make backend-run         Run FastAPI dev server"
+	@echo "  make backend-lint        Ruff lint (fix) + format"
+	@echo "  make backend-check       Ruff lint (check only)"
+	@echo "  make frontend-lint       Prettier format + ESLint fix"
+	@echo "  make frontend-check      ESLint check"
+	@echo "  make lint                Lint+format both frontend & backend"
+	@echo "  make check               Check both frontend & backend"
+	@echo "  make sync-api            Generate OpenAPI spec then codegen frontend client"
 
 # ---------- Docker  ----------
 docker-up:
@@ -36,17 +37,13 @@ docker-reset:
 
 # ---------- Backend (Python / uv) ----------
 backend-run:
-	cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	cd backend && uv run ello-server
 
 backend-check:
-	cd backend && uv run ruff check .
+	cd backend && uv run check
 
 backend-lint:
-	cd backend && uv run ruff check . --fix
-	cd backend && uv run ruff format .
-
-backend-format backend-fmt:
-	cd backend && uv run ruff format .
+	cd backend && uv run lint
 
 backend-test:
 	cd backend && uv run pytest -q
@@ -70,18 +67,17 @@ frontend-dev:
 frontend-build:
 	cd frontend && pnpm run build
 
-frontend-lint:
+frontend-check:
 	cd frontend && pnpm run lint
 
-frontend-format:
+frontend-lint:
 	cd frontend && pnpm run format
+	cd frontend && pnpm run lint:fix
 
 # ---------- Combined ----------
-lint: frontend-lint backend-check
+lint: frontend-lint backend-lint
 
-format fmt: frontend-format backend-format
-
-check: frontend-lint backend-check
+check: frontend-check backend-check
 
 test: backend-test
 

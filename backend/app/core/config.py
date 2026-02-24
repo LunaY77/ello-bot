@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     JWT_ISSUER: str = Field(default="app", description="JWT issuer")
     JWT_AUDIENCE: str = Field(default="app", description="JWT audience")
 
+    # Server configuration
+    HOST: str = Field(default="0.0.0.0", description="Server host")
+    PORT: int = Field(default=8000, description="Server port")
+
     # CORS configuration
     CORS_ORIGINS: list[str] = Field(default=["*"], description="Allowed CORS origins")
 
