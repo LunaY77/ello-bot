@@ -1,0 +1,36 @@
+# Error Code Registry - Single Source of Truth
+# Format: {Source}{DD}{NN}  Source=A(framework)/B(business)/C(third_party)
+# Each domain reserves 100 codes (xx00-xx99), step=1
+#
+# Domain sections: framework | business | third_party
+# Add entries under the appropriate section using `allocate` command.
+#
+# Example entry:
+#   user:
+#     range: B0100-B0199
+#     description: User basic operations
+#     location: app/service/user.py
+#     next_available: B0101
+
+framework:
+  # A = framework / infrastructure errors
+  common:
+    range: A0001-A0099
+    description: Common framework error codes
+    location: app/core/exception.py
+    next_available: A0010
+
+business:
+  # B = business logic errors
+  user:
+    range: B0100-B0199
+    description: User domain errors (authentication, profile, etc.)
+    location: app/service/user.py
+    next_available: B0104
+    reserved_ranges:
+    - B0100-B0149: User basic operations
+    - B0150-B0199: User advanced operations (reserved for future)
+
+
+third_party:
+  # C = third-party / external system errors

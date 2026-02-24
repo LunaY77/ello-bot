@@ -14,12 +14,12 @@ Router → Service → Repository → Model
 
 ### 各层职责
 
-| 层级 | 目录 | 职责 |
-|------|------|------|
-| Router | `app/router/` | HTTP 请求/响应处理，调用 Service，返回 Result |
-| Service | `app/service/` | 业务逻辑，错误码定义，调用 Repository |
-| Repository | `app/repository/` | 数据库 CRUD，不含业务逻辑，不管理事务 |
-| Model | `app/model/` | SQLAlchemy ORM 模型定义 |
+| 层级       | 目录              | 职责                                          |
+| ---------- | ----------------- | --------------------------------------------- |
+| Router     | `app/router/`     | HTTP 请求/响应处理，调用 Service，返回 Result |
+| Service    | `app/service/`    | 业务逻辑，错误码定义，调用 Repository         |
+| Repository | `app/repository/` | 数据库 CRUD，不含业务逻辑，不管理事务         |
+| Model      | `app/model/`      | SQLAlchemy ORM 模型定义                       |
 
 ### 规则
 
@@ -44,19 +44,51 @@ def register(request: UserCreate, db: DbSession):
 
 ## 2. 错误码最佳实践
 
-### 错误码规范
+### 错误码格式
 
-| 前缀 | 含义 | 示例 |
-|------|------|------|
-| `A` | 参数校验错误 | `A0001` 参数校验失败 |
-| `B` | 业务逻辑错误 | `B0001` 未授权访问 |
-| `C` | 系统异常 | `C0001` 系统异常 |
+- **5 位字符**：来源码（1位）+ 编号（4位）
+- **来源码**：
+    - `A`：基础/框架层（`CommonErrorCode`）
+    - `B`：业务层（各业务模块）
+    - `C`：第三方/外部系统
+
+### 编号规则
+
+- 范围：`0001-9999`
+- 步长：**100**（预留扩展空间）
+- 示例：`B0001`, `B0101`, `B0201`
+
+### 业务域号段分配
+
+按业务域以 100 为间隔划分号段：
+
+| 号段    | 业务域       |
+| ------- | ------------ |
+| `B01xx` | 用户基础操作 |
+| `B02xx` | 用户高级操作 |
+| `B03xx` | 用户权限     |
+| `B11xx` | 订单基础操作 |
+| `B12xx` | 订单支付操作 |
+
+> 新增业务域时，选择未被占用的百位号段，并在此表中登记。
+
+### ⚠️ 错误码操作必须使用 `/errorcode` Skill
+
+**凡涉及错误码的任何操作（查询、新增、分配号段），必须调用 `/errorcode` skill，禁止直接修改文件或凭记忆操作。**
+
+```
+/errorcode list                        # 查看所有错误码
+/errorcode check "描述"                # 新增前先检查是否可复用
+/errorcode allocate <domain>           # 为新业务域分配号段
+/errorcode add <domain> <code> <name> <message>  # 添加新错误码
+```
 
 ### 定义规则
 
 - **通用错误码**：定义在 `app/core/exception.py` 的 `CommonErrorCode` 中
 - **业务错误码**：定义在对应的 `app/service/xxx.py` 中，紧邻使用它的 Service 类
-- 每个业务模块的错误码编号**不得与其他模块重复**
+- 新增错误码前，**必须先执行 `/errorcode check <描述>` 检查是否有可复用的现有错误码**
+- 每个业务模块的错误码编号**不得与其他模块重复**（`/errorcode add` 会自动校验）
 - 抛出异常统一使用 `BusinessException`，不要直接抛出 `HTTPException`
 
 ```python
@@ -75,20 +107,28 @@ raise HTTPException(status_code=404, detail="User not found")
 
 - 所有 Schema 定义在 `app/schema/` 目录下
 - 请求 Schema 和响应 Schema 分开定义，命名清晰
-- 使用 `Field(...)` 添加描述和示例
-- 使用 `@field_validator` 进行字段级校验，校验失败抛出 `ValueError`
+- 使用 `Field(...)` 添加描述和示例和简单的校验
+- 优先使用 pydantic v2 内置的约束类型（如 `HttpUrl`、`EmailStr` 等）进行字段约束
+- 若 pydantic v2 内置的约束类型无法满足需求，再使用自定义约束, 使用 `Annotated` + `StringConstraints`，**不使用 `@field_validator`**
 
 ```python
-# ✅ 正确
-class UserCreate(UserBase):
-    password: str = Field(..., description="Password", examples=["password123"])
+from typing import Annotated
+from pydantic import StringConstraints
 
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not (6 <= len(v) <= 100):
-            raise ValueError("Password must be between 6 and 100 characters")
-        return v
+UserName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=50)]
+Password = Annotated[str, StringConstraints(min_length=6, max_length=100)]
+
+class UserCreate(UserBase):
+    password: Password = Field(..., description="Password", examples=["password123"])
+```
+
+```python
+from pydantic import BaseModel, Field
+
+class Payload(BaseModel):
+    age: int = Field(ge=0, le=150)          # 范围
+    ratio: float = Field(gt=0, lt=1)        # 开区间
+    strict_int: int = Field(strict=True)   # 不接受 "123" -> 123 的隐式转换
 ```
 
 ### ORM 模型转换

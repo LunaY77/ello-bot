@@ -1,11 +1,12 @@
 """Shared test fixtures and configuration."""
 
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from unittest.mock import patch
 
 from app.core.database import Base, get_db
 from app.main import app
@@ -28,9 +29,7 @@ def db_engine():
 
 @pytest.fixture
 def session_factory(db_engine):
-    return sessionmaker(
-        autocommit=False, autoflush=False, bind=db_engine, expire_on_commit=False
-    )
+    return sessionmaker(autocommit=False, autoflush=False, bind=db_engine, expire_on_commit=False)
 
 
 @pytest.fixture

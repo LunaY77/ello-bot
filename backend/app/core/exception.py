@@ -44,27 +44,17 @@ class ErrorCode(Protocol):
 
 @unique
 class CommonErrorCode(Enum):
-    """Common Error Code Enum
+    """Common Error Code Enum"""
 
-    Error code rules:
-    - Axxxx: Parameter validation errors
-    - Bxxxx: Business logic errors
-    - Cxxxx: System exceptions
-    """
-
-    PARAM_ERROR = ("A0001", "Parameter validation failed")
-    MISSING_PARAMETER = ("A0002", "Missing required parameter")
-    INVALID_PARAMETER = ("A0003", "Invalid parameter format")
-
-    UNAUTHORIZED = ("B0001", "Unauthorized access")
-    FORBIDDEN = ("B0002", "Forbidden access")
-    NOT_FOUND = ("B0003", "Resource not found")
-    TOKEN_EXPIRED = ("B0004", "Token expired")
-    TOKEN_INVALID = ("B0005", "Invalid Token")
-
-    SYSTEM_ERROR = ("C0001", "System exception")
-    DATABASE_ERROR = ("C0002", "Database exception")
-    CACHE_ERROR = ("C0003", "Cache exception")
+    SYSTEM_ERROR = ("A0001", "System error")
+    PARAM_ERROR = ("A0002", "Parameter validation failed")
+    MISSING_PARAMETER = ("A0003", "Missing required parameter")
+    INVALID_PARAMETER = ("A0004", "Invalid parameter format")
+    UNAUTHORIZED = ("A0005", "Unauthorized access")
+    FORBIDDEN = ("A0006", "Forbidden access")
+    NOT_FOUND = ("A0007", "Resource not found")
+    TOKEN_EXPIRED = ("A0008", "Token expired")
+    TOKEN_INVALID = ("A0009", "Invalid Token")
 
     def __init__(self, error_code: str, error_msg: str) -> None:
         self._error_code = error_code
@@ -125,12 +115,12 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = exc.errors()
     log.warning(f"Validation error: {errors} - {request.url.path}")
 
-    raw_msg = (
-        errors[0].get("msg", CommonErrorCode.PARAM_ERROR.error_msg)
-        if errors
-        else CommonErrorCode.PARAM_ERROR.error_msg
-    )
-    message = raw_msg.removeprefix("Value error, ")
+    if errors:
+        field = _field_from_loc(errors[0].get("loc", ()))
+        msg = errors[0].get("msg", CommonErrorCode.PARAM_ERROR.error_msg)
+        message = f"{field}: {msg}" if field else msg
+    else:
+        message = CommonErrorCode.PARAM_ERROR.error_msg
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -138,6 +128,24 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
             code=CommonErrorCode.PARAM_ERROR.error_code, message=message
         ).model_dump(),
     )
+
+
+def _field_from_loc(loc: tuple) -> str:
+    """Extract field name from error location
+
+    Args:
+        loc: Error location tuple from Pydantic validation error
+
+    Returns:
+        str: Extracted field name for error reporting
+    """
+    if not loc:
+        return ""
+    prefix = loc[0]
+    if prefix in ("body", "query", "path", "header", "cookie"):
+        return ".".join(str(x) for x in loc[1:])
+    else:
+        return ".".join(str(x) for x in loc)
 
 
 def general_exception_handler(request: Request, exc: Exception):

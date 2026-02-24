@@ -26,9 +26,9 @@ from app.utils import create_access_token, hash_password, verify_password
 class UserErrorCode(Enum):
     """User business error code enum"""
 
-    USER_NOT_FOUND = ("B0001", "User not found")
-    INVALID_PASSWORD = ("B0002", "Invalid password")
-    USERNAME_EXISTS = ("B0003", "Username already exists")
+    USER_NOT_FOUND = ("B0101", "User not found")
+    INVALID_PASSWORD = ("B0102", "Invalid password")
+    USERNAME_EXISTS = ("B0103", "Username already exists")
 
     def __init__(self, error_code: str, error_msg: str) -> None:
         self._error_code = error_code

@@ -12,76 +12,38 @@ Used for API request and response data validation, includes:
 - UserWithToken: User info and Token returned after successful login
 """
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints
+
+# ============== Request Types ==============
+
+UserName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=50)]
+
+Password = Annotated[str, StringConstraints(min_length=6, max_length=100)]
 
 # ============== Request Schemas ==============
 
 
 class UserBase(BaseModel):
-    username: str = Field(..., description="Username", examples=["john_doe"])
-
-    @field_validator("username")
-    @classmethod
-    def validate_username(cls, v: str) -> str:
-        v = v.strip()
-        if not (3 <= len(v) <= 50):
-            raise ValueError("Username must be between 3 and 50 characters")
-        return v
+    username: UserName = Field(..., description="Username", examples=["john_doe"])
 
 
 class UserCreate(UserBase):
-    password: str = Field(..., description="Password", examples=["password123"])
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not (6 <= len(v) <= 100):
-            raise ValueError("Password must be between 6 and 100 characters")
-        return v
+    password: Password = Field(..., description="Password", examples=["password123"])
 
 
 class UserLogin(BaseModel):
-    username: str = Field(..., description="Username")
-    password: str = Field(..., description="Password")
-
-    @field_validator("username")
-    @classmethod
-    def validate_username(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("Username is required")
-        return v.strip()
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("Password is required")
-        return v
+    username: UserName = Field(..., description="Username")
+    password: Password = Field(..., description="Password")
 
 
 class ResetPasswordRequest(BaseModel):
-    new_password: str = Field(..., description="New password")
-
-    @field_validator("new_password")
-    @classmethod
-    def validate_new_password(cls, v: str) -> str:
-        if not (6 <= len(v) <= 100):
-            raise ValueError("Password must be between 6 and 100 characters")
-        return v
+    new_password: Password = Field(..., description="New password")
 
 
 class UploadAvatarRequest(BaseModel):
-    avatar_url: str = Field(..., description="Avatar URL")
-
-    @field_validator("avatar_url")
-    @classmethod
-    def validate_avatar_url(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("Avatar URL is required")
-        if not (v.startswith("http://") or v.startswith("https://")):
-            raise ValueError("Avatar URL must start with http:// or https://")
-        return v
+    avatar_url: HttpUrl = Field(..., description="Avatar URL")
 
 
 # ============== Response Schemas ==============
