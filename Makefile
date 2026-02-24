@@ -5,7 +5,8 @@ SHELL := /bin/bash
 	db-up db-down db-logs db-reset \
 	frontend-dev frontend-build frontend-lint frontend-format \
 	lint format fmt check test \
-	db-migration db-upgrade db-downgrade db-migrate
+	db-migration db-upgrade db-downgrade db-migrate \
+	sync-api
 
 help:
 	@echo "Targets:"
@@ -16,6 +17,7 @@ help:
 	@echo "  make frontend-format Prettier format"
 	@echo "  make lint            Lint both frontend & backend"
 	@echo "  make format          Format both frontend & backend"
+	@echo "  make sync-api        Generate OpenAPI spec then codegen frontend client"
 
 # ---------- Docker  ----------
 docker-up:
@@ -82,3 +84,7 @@ format fmt: frontend-format backend-format
 check: frontend-lint backend-check
 
 test: backend-test
+
+sync-api:
+	cd backend && uv run gen-openapi
+	cd frontend && pnpm codegen:api

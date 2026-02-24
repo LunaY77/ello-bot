@@ -138,7 +138,7 @@ app.add_middleware(RequestIDMiddleware)
 # ============= Routes =============
 
 
-@app.get("/health", response_model=Result[dict])
+@app.get("/health", response_model=Result)
 async def health_check():
     db_ok = False
     try:

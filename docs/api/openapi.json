@@ -1,0 +1,599 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI Auth App",
+    "description": "Ello Bot Backend API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "User Registration",
+        "description": "Register a new user with username and password.",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_UserResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "User Login",
+        "description": "Login with username and password, returns user info and access token.",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_UserWithToken_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User",
+        "description": "Get the currently authenticated user's information.",
+        "operationId": "get_current_user_info_api_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_UserResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{user_id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Info",
+        "description": "Get user information by user ID.",
+        "operationId": "get_user_info_api_users__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_UserResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/reset": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Reset Password",
+        "description": "Reset the password for the currently authenticated user.",
+        "operationId": "reset_password_api_users_reset_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/avatar": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Upload Avatar",
+        "description": "Upload a new avatar for the currently authenticated user.",
+        "operationId": "upload_avatar_api_users_avatar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadAvatarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ResetPasswordRequest": {
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 6,
+            "title": "New Password",
+            "description": "New password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_password"
+        ],
+        "title": "ResetPasswordRequest"
+      },
+      "Result": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Result",
+        "description": "Result wrapper for service layer operations\n\nEncapsulates success/failure of an operation along with data or error information.\n\nAttributes:\n    success: Indicates if the operation was successful\n    data: The result data if successful, otherwise None\n    code: Error code if failed, \"0\" if successful\n    message: Error message if failed, \"Success\" if successful"
+      },
+      "Result_NoneType_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "type": "null",
+            "title": "Data"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Result[NoneType]"
+      },
+      "Result_UserResponse_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Result[UserResponse]"
+      },
+      "Result_UserWithToken_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserWithToken"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Result[UserWithToken]"
+      },
+      "UploadAvatarRequest": {
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Avatar Url",
+            "description": "Avatar URL"
+          }
+        },
+        "type": "object",
+        "required": [
+          "avatar_url"
+        ],
+        "title": "UploadAvatarRequest"
+      },
+      "UserCreate": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username",
+            "examples": [
+              "john_doe"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 6,
+            "title": "Password",
+            "description": "Password",
+            "examples": [
+              "password123"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "UserCreate"
+      },
+      "UserResponse": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username",
+            "examples": [
+              "john_doe"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "User ID"
+          },
+          "avatar": {
+            "type": "string",
+            "title": "Avatar",
+            "description": "Avatar URL",
+            "default": ""
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "User role",
+            "default": "user"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Is active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "id"
+        ],
+        "title": "UserResponse",
+        "description": "User response schema (sanitized)\n\nUser information returned to client, does not contain sensitive information.\n\nAttributes:\n    id: User ID\n    avatar: Avatar URL\n    role: User role\n    is_active: Is active"
+      },
+      "UserWithToken": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "JWT access token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "Token type",
+            "default": "bearer"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username",
+            "examples": [
+              "john_doe"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "User ID"
+          },
+          "avatar": {
+            "type": "string",
+            "title": "Avatar",
+            "description": "Avatar URL",
+            "default": ""
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "User role",
+            "default": "user"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Is active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "username",
+          "id"
+        ],
+        "title": "UserWithToken",
+        "description": "User info and Token returned after successful login\n\nInherits UserResponse and Token, contains complete user info and token."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
