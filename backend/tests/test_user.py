@@ -31,7 +31,7 @@ def test_get_user_by_id_not_found(client, auth_headers):
     assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "B0001"
+    assert data["code"] == "B0101"
 
 
 def test_reset_password(client, test_user, auth_headers):
@@ -54,7 +54,7 @@ def test_reset_password_too_short(client, auth_headers):
     assert response.status_code == 422
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "A0001"
+    assert data["code"] == "A0002"
 
 
 def test_reset_password_unauthorized(client):
@@ -82,7 +82,7 @@ def test_upload_avatar_invalid_url(client, auth_headers):
     assert response.status_code == 422
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "A0001"
+    assert data["code"] == "A0002"
 
 
 def test_upload_avatar_unauthorized(client):

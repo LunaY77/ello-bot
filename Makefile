@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 .PHONY: help \
+	setup \
 	backend-run backend-lint backend-check backend-test \
 	db-up db-down db-logs db-reset \
 	frontend-dev frontend-build frontend-lint frontend-check \
@@ -10,15 +11,22 @@ SHELL := /bin/bash
 
 help:
 	@echo "Targets:"
-	@echo "  make docker-up           Start postgres (docker compose)"
-	@echo "  make backend-run         Run FastAPI dev server"
-	@echo "  make backend-lint        Ruff lint (fix) + format"
-	@echo "  make backend-check       Ruff lint (check only)"
-	@echo "  make frontend-lint       Prettier format + ESLint fix"
-	@echo "  make frontend-check      ESLint check"
-	@echo "  make lint                Lint+format both frontend & backend"
-	@echo "  make check               Check both frontend & backend"
-	@echo "  make sync-api            Generate OpenAPI spec then codegen frontend client"
+	@echo "  make setup                Install all deps and git hooks"
+	@echo "  make docker-up            Start postgres (docker compose)"
+	@echo "  make backend-run          Run FastAPI dev server"
+	@echo "  make backend-lint         Ruff lint (fix) + format"
+	@echo "  make backend-check        Ruff lint (check only)"
+	@echo "  make frontend-lint        Prettier format + ESLint fix"
+	@echo "  make frontend-check       ESLint check"
+	@echo "  make lint                 Lint+format both frontend & backend"
+	@echo "  make check                Check both frontend & backend"
+	@echo "  make sync-api             Generate OpenAPI spec then codegen frontend client"
+
+# ---------- Setup ----------
+setup:
+	cd backend && uv sync
+	cd backend && uv run pre-commit install --install-hooks
+	cd frontend && pnpm install
 
 # ---------- Docker  ----------
 docker-up:

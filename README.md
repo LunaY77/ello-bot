@@ -18,32 +18,38 @@ ello-bot/
 - Node.js 18+ and [pnpm](https://pnpm.io/)
 - Docker (for PostgreSQL)
 
-### 1. Start the Database
+### 1. Install dependencies and git hooks
+
+```bash
+make setup
+```
+
+### 2. Start the Database
 
 ```bash
 make docker-up
 ```
 
-### 2. Configure Environment
+### 3. Configure Environment
 
 ```bash
 cp backend/.env.example backend/.env
 # Edit backend/.env with your settings
 ```
 
-### 3. Run Database Migrations
+### 4. Run Database Migrations
 
 ```bash
 make db-upgrade
 ```
 
-### 4. Start the Backend
+### 5. Start the Backend
 
 ```bash
 make backend-run
 ```
 
-### 5. Start the Frontend
+### 6. Start the Frontend
 
 ```bash
 make frontend-dev
@@ -55,6 +61,7 @@ Run `make help` or refer to the table below.
 
 | Command | Description |
 |---------|-------------|
+| `make setup` | Install all deps and git hooks |
 | `make docker-up` | Start PostgreSQL via Docker Compose |
 | `make docker-down` | Stop and remove containers |
 | `make backend-run` | Start FastAPI dev server (port 8000) |

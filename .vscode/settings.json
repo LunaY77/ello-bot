@@ -1,0 +1,7 @@
+{
+    "python.analysis.typeCheckingMode": "standard",
+    "npm.packageManager": "pnpm",
+    "search.exclude": {
+        "**/.venv": true
+    }
+}

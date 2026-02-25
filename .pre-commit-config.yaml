@@ -1,14 +1,16 @@
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.10
+    hooks:
+      - id: ruff
+      - id: ruff-format
+        args: [--check]
+
   - repo: local
     hooks:
-      - id: repo-format
-        name: format frontend+backend
-        entry: bash -lc 'make format'
+      - id: frontend-check
+        name: eslint check
+        entry: bash -c 'cd frontend && pnpm run lint'
         language: system
         pass_filenames: false
-
-      - id: repo-lint
-        name: lint frontend+backend
-        entry: bash -lc 'make lint'
-        language: system
-        pass_filenames: false
+        files: ^frontend/src/

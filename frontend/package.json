@@ -14,7 +14,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "codegen:api": "orval --config orval.config.ts && node src/api/internal/postprocess-orval.mjs"
+    "codegen:api": "orval --config orval.config.ts && node src/api/internal/postprocess-orval.mjs",
+    "prepare": "uv run pre-commit install --install-hooks || true"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

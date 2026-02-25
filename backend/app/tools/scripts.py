@@ -2,6 +2,7 @@
 Scripts for ello-bot.
 Do not import this module from application code (e.g., repository) to avoid accidental misuse.
 """
+
 import json
 import pathlib
 import subprocess

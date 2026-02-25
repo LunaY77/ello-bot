@@ -24,7 +24,7 @@ def test_register_duplicate_username(client, test_user):
     assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "B0003"
+    assert data["code"] == "B0103"
 
 
 def test_register_username_too_short(client):
@@ -35,7 +35,7 @@ def test_register_username_too_short(client):
     assert response.status_code == 422
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "A0001"
+    assert data["code"] == "A0002"
 
 
 def test_register_password_too_short(client):
@@ -46,7 +46,7 @@ def test_register_password_too_short(client):
     assert response.status_code == 422
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "A0001"
+    assert data["code"] == "A0002"
 
 
 def test_login_success(client, test_user):
@@ -71,7 +71,7 @@ def test_login_wrong_password(client, test_user):
     assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "B0002"
+    assert data["code"] == "B0102"
 
 
 def test_login_nonexistent_user(client):
@@ -82,4 +82,4 @@ def test_login_nonexistent_user(client):
     assert response.status_code == 400
     data = response.json()
     assert data["success"] is False
-    assert data["code"] == "B0002"
+    assert data["code"] == "B0102"

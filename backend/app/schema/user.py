@@ -14,13 +14,22 @@ Used for API request and response data validation, includes:
 
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints
+from pydantic import AnyUrl, BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints
 
 # ============== Request Types ==============
 
 UserName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=50)]
 
 Password = Annotated[str, StringConstraints(min_length=6, max_length=100)]
+
+
+def _parse_url(v: object) -> str:
+    from pydantic import TypeAdapter
+
+    return str(TypeAdapter(AnyUrl).validate_python(v))
+
+
+AvatarUrl = Annotated[str, BeforeValidator(_parse_url)]
 
 # ============== Request Schemas ==============
 
@@ -43,7 +52,7 @@ class ResetPasswordRequest(BaseModel):
 
 
 class UploadAvatarRequest(BaseModel):
-    avatar_url: HttpUrl = Field(..., description="Avatar URL")
+    avatar_url: AvatarUrl = Field(..., description="Avatar URL")
 
 
 # ============== Response Schemas ==============
