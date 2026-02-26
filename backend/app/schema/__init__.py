@@ -1,23 +1,19 @@
 """Schema layer"""
 
 from app.schema.user import (
+    AuthResponse,
+    LoginRequest,
+    RegisterRequest,
     ResetPasswordRequest,
-    Token,
     UploadAvatarRequest,
-    UserBase,
-    UserCreate,
-    UserLogin,
-    UserResponse,
-    UserWithToken,
+    UserInfoResponse,
 )
 
 __all__ = [
-    "UserBase",
-    "UserCreate",
-    "UserLogin",
-    "UserResponse",
-    "Token",
-    "UserWithToken",
+    "RegisterRequest",
+    "LoginRequest",
+    "UserInfoResponse",
+    "AuthResponse",
     "ResetPasswordRequest",
     "UploadAvatarRequest",
 ]

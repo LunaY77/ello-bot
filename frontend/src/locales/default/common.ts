@@ -24,4 +24,13 @@ export default {
   'landing.subtitle': 'Your AI Assistant',
   'landing.login': 'Sign In',
   'landing.register': 'Get Started',
+  'dashboard.title': 'Dashboard',
+  'dashboard.welcome': 'Welcome back, {{name}}',
+  'dashboard.role': 'Your role is: {{role}}',
+  'dashboard.capabilities': 'In this app you can:',
+  'dashboard.manageProfile': 'Manage profile',
+  'dashboard.resetPassword': 'Reset password',
+  'dashboard.updateAvatar': 'Update avatar',
+  'dashboard.admin': 'Admin',
+  'dashboard.user': 'User',
 } as const;

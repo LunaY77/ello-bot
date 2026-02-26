@@ -8,4 +8,11 @@ export default {
   server: 'Server error. Please try again later.',
   tryAgain: 'Try Again',
   goBack: 'Go Back',
+  'fallback.title': 'Oops, something went wrong :(',
+  'fallback.message':
+    'The application encountered an unexpected error. Please try refreshing the page.',
+  'fallback.refresh': 'Refresh Page',
+  'boundary.title': 'Something went wrong',
+  'boundary.message':
+    'The application encountered an error. Please refresh the page.',
 } as const;

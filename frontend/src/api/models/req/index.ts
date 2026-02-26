@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './login-request';
+export * from './register-request';
 export * from './reset-password-request';
 export * from './upload-avatar-request';
-export * from './user-create';

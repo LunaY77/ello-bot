@@ -6,17 +6,17 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface UserCreate {
+export interface LoginRequest {
   /**
    * Username
    * @minLength 3
-   * @maxLength 50
+   * @maxLength 20
    */
   username: string;
   /**
    * Password
    * @minLength 6
-   * @maxLength 100
+   * @maxLength 20
    */
   password: string;
 }

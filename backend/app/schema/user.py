@@ -18,9 +18,9 @@ from pydantic import AnyUrl, BaseModel, BeforeValidator, ConfigDict, Field, Stri
 
 # ============== Request Types ==============
 
-UserName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=50)]
+UserName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=20)]
 
-Password = Annotated[str, StringConstraints(min_length=6, max_length=100)]
+Password = Annotated[str, StringConstraints(min_length=6, max_length=20)]
 
 
 def _parse_url(v: object) -> str:
@@ -34,43 +34,44 @@ AvatarUrl = Annotated[str, BeforeValidator(_parse_url)]
 # ============== Request Schemas ==============
 
 
-class UserBase(BaseModel):
+class RegisterRequest(BaseModel):
     username: UserName = Field(..., description="Username", examples=["john_doe"])
-
-
-class UserCreate(UserBase):
     password: Password = Field(..., description="Password", examples=["password123"])
 
 
-class UserLogin(BaseModel):
-    username: UserName = Field(..., description="Username")
-    password: Password = Field(..., description="Password")
+class LoginRequest(BaseModel):
+    username: UserName = Field(..., description="Username", examples=["john_doe"])
+    password: Password = Field(..., description="Password", examples=["password123"])
 
 
 class ResetPasswordRequest(BaseModel):
-    new_password: Password = Field(..., description="New password")
+    new_password: Password = Field(..., description="New password", examples=["newpassword123"])
 
 
 class UploadAvatarRequest(BaseModel):
-    avatar_url: AvatarUrl = Field(..., description="Avatar URL")
+    avatar_url: AvatarUrl = Field(
+        ..., description="Avatar URL", examples=["https://example.com/avatar.jpg"]
+    )
 
 
 # ============== Response Schemas ==============
 
 
-class UserResponse(UserBase):
-    """User response schema (sanitized)
+class UserInfoResponse(BaseModel):
+    """User Info response schema (sanitized)
 
     User information returned to client, does not contain sensitive information.
 
     Attributes:
         id: User ID
+        username: Username
         avatar: Avatar URL
         role: User role
         is_active: Is active
     """
 
     id: int = Field(..., description="User ID")
+    username: UserName = Field(..., description="Username", examples=["john_doe"])
     avatar: str = Field(default="", description="Avatar URL")
     role: str = Field(default="user", description="User role")
     is_active: bool = Field(default=True, description="Is active")
@@ -79,22 +80,15 @@ class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class Token(BaseModel):
-    """Token response schema
+class AuthResponse(BaseModel):
+    """Authentication response schema
+
+    Contains user information and token returned after successful login or registration.
 
     Attributes:
-        access_token: JWT access token
-        token_type: Token type
+        user: User information (sanitized)
+        token: JWT access token
     """
 
-    access_token: str = Field(..., description="JWT access token")
-    token_type: str = Field(default="bearer", description="Token type")
-
-
-class UserWithToken(UserResponse, Token):
-    """User info and Token returned after successful login
-
-    Inherits UserResponse and Token, contains complete user info and token.
-    """
-
-    pass
+    user: UserInfoResponse = Field(..., description="User information")
+    token: str = Field(..., description="JWT access token")

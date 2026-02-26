@@ -36,7 +36,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreate"
+                "$ref": "#/components/schemas/RegisterRequest"
               }
             }
           },
@@ -48,7 +48,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_UserResponse_"
+                  "$ref": "#/components/schemas/Result_AuthResponse_"
                 }
               }
             }
@@ -78,7 +78,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreate"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             }
           },
@@ -90,7 +90,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_UserWithToken_"
+                  "$ref": "#/components/schemas/Result_AuthResponse_"
                 }
               }
             }
@@ -122,7 +122,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_UserResponse_"
+                  "$ref": "#/components/schemas/Result_UserInfoResponse_"
                 }
               }
             }
@@ -155,7 +155,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_UserResponse_"
+                  "$ref": "#/components/schemas/Result_UserInfoResponse_"
                 }
               }
             }
@@ -260,6 +260,26 @@
   },
   "components": {
     "schemas": {
+      "AuthResponse": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserInfoResponse",
+            "description": "User information"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "JWT access token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user",
+          "token"
+        ],
+        "title": "AuthResponse",
+        "description": "Authentication response schema\n\nContains user information and token returned after successful login or registration.\n\nAttributes:\n    user: User information (sanitized)\n    token: JWT access token"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -273,14 +293,77 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username",
+            "examples": [
+              "john_doe"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 6,
+            "title": "Password",
+            "description": "Password",
+            "examples": [
+              "password123"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username",
+            "examples": [
+              "john_doe"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 6,
+            "title": "Password",
+            "description": "Password",
+            "examples": [
+              "password123"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
       "ResetPasswordRequest": {
         "properties": {
           "new_password": {
             "type": "string",
-            "maxLength": 100,
+            "maxLength": 20,
             "minLength": 6,
             "title": "New Password",
-            "description": "New password"
+            "description": "New password",
+            "examples": [
+              "newpassword123"
+            ]
           }
         },
         "type": "object",
@@ -320,6 +403,37 @@
         "title": "Result",
         "description": "Result wrapper for service layer operations\n\nEncapsulates success/failure of an operation along with data or error information.\n\nAttributes:\n    success: Indicates if the operation was successful\n    data: The result data if successful, otherwise None\n    code: Error code if failed, \"0\" if successful\n    message: Error message if failed, \"Success\" if successful"
       },
+      "Result_AuthResponse_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "Result[AuthResponse]"
+      },
       "Result_NoneType_": {
         "properties": {
           "code": {
@@ -345,7 +459,7 @@
         "type": "object",
         "title": "Result[NoneType]"
       },
-      "Result_UserResponse_": {
+      "Result_UserInfoResponse_": {
         "properties": {
           "code": {
             "type": "string",
@@ -360,7 +474,7 @@
           "data": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/UserResponse"
+                "$ref": "#/components/schemas/UserInfoResponse"
               },
               {
                 "type": "null"
@@ -374,48 +488,17 @@
           }
         },
         "type": "object",
-        "title": "Result[UserResponse]"
-      },
-      "Result_UserWithToken_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserWithToken"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "type": "object",
-        "title": "Result[UserWithToken]"
+        "title": "Result[UserInfoResponse]"
       },
       "UploadAvatarRequest": {
         "properties": {
           "avatar_url": {
             "type": "string",
-            "maxLength": 2083,
-            "minLength": 1,
-            "format": "uri",
             "title": "Avatar Url",
-            "description": "Avatar URL"
+            "description": "Avatar URL",
+            "examples": [
+              "https://example.com/avatar.jpg"
+            ]
           }
         },
         "type": "object",
@@ -424,52 +507,22 @@
         ],
         "title": "UploadAvatarRequest"
       },
-      "UserCreate": {
+      "UserInfoResponse": {
         "properties": {
-          "username": {
-            "type": "string",
-            "maxLength": 50,
-            "minLength": 3,
-            "title": "Username",
-            "description": "Username",
-            "examples": [
-              "john_doe"
-            ]
-          },
-          "password": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 6,
-            "title": "Password",
-            "description": "Password",
-            "examples": [
-              "password123"
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
-        "title": "UserCreate"
-      },
-      "UserResponse": {
-        "properties": {
-          "username": {
-            "type": "string",
-            "maxLength": 50,
-            "minLength": 3,
-            "title": "Username",
-            "description": "Username",
-            "examples": [
-              "john_doe"
-            ]
-          },
           "id": {
             "type": "integer",
             "title": "Id",
             "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Username",
+            "examples": [
+              "john_doe"
+            ]
           },
           "avatar": {
             "type": "string",
@@ -492,67 +545,11 @@
         },
         "type": "object",
         "required": [
-          "username",
-          "id"
+          "id",
+          "username"
         ],
-        "title": "UserResponse",
-        "description": "User response schema (sanitized)\n\nUser information returned to client, does not contain sensitive information.\n\nAttributes:\n    id: User ID\n    avatar: Avatar URL\n    role: User role\n    is_active: Is active"
-      },
-      "UserWithToken": {
-        "properties": {
-          "access_token": {
-            "type": "string",
-            "title": "Access Token",
-            "description": "JWT access token"
-          },
-          "token_type": {
-            "type": "string",
-            "title": "Token Type",
-            "description": "Token type",
-            "default": "bearer"
-          },
-          "username": {
-            "type": "string",
-            "maxLength": 50,
-            "minLength": 3,
-            "title": "Username",
-            "description": "Username",
-            "examples": [
-              "john_doe"
-            ]
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id",
-            "description": "User ID"
-          },
-          "avatar": {
-            "type": "string",
-            "title": "Avatar",
-            "description": "Avatar URL",
-            "default": ""
-          },
-          "role": {
-            "type": "string",
-            "title": "Role",
-            "description": "User role",
-            "default": "user"
-          },
-          "is_active": {
-            "type": "boolean",
-            "title": "Is Active",
-            "description": "Is active",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "access_token",
-          "username",
-          "id"
-        ],
-        "title": "UserWithToken",
-        "description": "User info and Token returned after successful login\n\nInherits UserResponse and Token, contains complete user info and token."
+        "title": "UserInfoResponse",
+        "description": "User Info response schema (sanitized)\n\nUser information returned to client, does not contain sensitive information.\n\nAttributes:\n    id: User ID\n    username: Username\n    avatar: Avatar URL\n    role: User role\n    is_active: Is active"
       },
       "ValidationError": {
         "properties": {

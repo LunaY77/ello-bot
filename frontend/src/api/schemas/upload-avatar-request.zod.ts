@@ -7,13 +7,6 @@
  */
 import { z as zod } from 'zod';
 
-export const uploadAvatarRequestSchemaAvatarUrlMax = 2083;
-
 export const UploadAvatarRequestSchema = zod.object({
-  avatarUrl: zod
-    .string()
-    .url()
-    .min(1)
-    .max(uploadAvatarRequestSchemaAvatarUrlMax)
-    .describe('Avatar URL'),
+  avatarUrl: zod.string().describe('Avatar URL'),
 });

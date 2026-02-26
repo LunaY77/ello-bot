@@ -5,7 +5,7 @@ User Router
 from fastapi import APIRouter
 
 from app.core import Result, get_current_user
-from app.schema import ResetPasswordRequest, UploadAvatarRequest, UserResponse
+from app.schema import ResetPasswordRequest, UploadAvatarRequest, UserInfoResponse
 from app.service import UserServiceDep
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
@@ -13,17 +13,17 @@ router = APIRouter(prefix="/api/users", tags=["Users"])
 
 @router.get(
     "/me",
-    response_model=Result[UserResponse],
+    response_model=Result[UserInfoResponse],
     summary="Get Current User",
     description="Get the currently authenticated user's information.",
 )
 def get_current_user_info():
-    return Result.ok(data=UserResponse.model_validate(get_current_user()))
+    return Result.ok(data=UserInfoResponse.model_validate(get_current_user()))
 
 
 @router.get(
     "/{user_id}",
-    response_model=Result[UserResponse],
+    response_model=Result[UserInfoResponse],
     summary="Get User Info",
     description="Get user information by user ID.",
 )

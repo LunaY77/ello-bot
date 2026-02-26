@@ -4,13 +4,12 @@
  * Provides layout structure for the main app interface
  */
 
-import { Home, PanelLeft, Users, User2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Home, PanelLeft, User2, Users } from 'lucide-react';
+import { useEffect, useState, type JSX } from 'react';
 import { NavLink, useNavigate, useNavigation } from 'react-router';
 
-import { Link } from '../ui/link';
-
 import { Button } from '@/components/ui/button';
+import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
 import { cn } from '@/utils/cn';
 
@@ -45,7 +44,7 @@ const Progress = () => {
             return 100;
           }
           const newProgress = oldProgress + 10;
-          return newProgress > 100 ? 100 : newProgress;
+          return Math.min(newProgress, 100);
         });
       }, 300);
 

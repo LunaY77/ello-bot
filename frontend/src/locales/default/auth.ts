@@ -10,7 +10,9 @@ export default {
   'register.subtitle': 'Create a new account to get started',
   'register.username': 'Username',
   'register.password': 'Password',
+  'register.confirmPassword': 'Confirm Password',
   'register.submit': 'Register',
   'register.hasAccount': 'Already have an account?',
   'register.login': 'Sign In',
+  'register.passwordMismatch': 'Passwords do not match',
 } as const;

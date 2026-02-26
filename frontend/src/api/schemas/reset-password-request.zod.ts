@@ -8,7 +8,7 @@
 import { z as zod } from 'zod';
 
 export const resetPasswordRequestSchemaNewPasswordMin = 6;
-export const resetPasswordRequestSchemaNewPasswordMax = 100;
+export const resetPasswordRequestSchemaNewPasswordMax = 20;
 
 export const ResetPasswordRequestSchema = zod.object({
   newPassword: zod

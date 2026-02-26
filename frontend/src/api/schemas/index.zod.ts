@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from './login-request.zod';
+export * from './register-request.zod';
 export * from './reset-password-request.zod';
 export * from './upload-avatar-request.zod';
-export * from './user-create.zod';

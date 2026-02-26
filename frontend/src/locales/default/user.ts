@@ -1,7 +1,13 @@
 export default {
   'profile.title': 'Profile',
+  'profile.userInfo': 'User Information',
   'profile.username': 'Username',
   'profile.role': 'Role',
+  'profile.status': 'Status',
+  'profile.active': 'Active',
+  'profile.inactive': 'Inactive',
+  'profile.roleAdmin': 'Admin',
+  'profile.roleUser': 'User',
   'profile.avatar': 'Avatar',
   'profile.changeAvatar': 'Change Avatar',
   'profile.avatarUrl': 'Avatar URL',

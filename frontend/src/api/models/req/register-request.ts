@@ -6,11 +6,17 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface ResetPasswordRequest {
+export interface RegisterRequest {
   /**
-   * New password
+   * Username
+   * @minLength 3
+   * @maxLength 20
+   */
+  username: string;
+  /**
+   * Password
    * @minLength 6
    * @maxLength 20
    */
-  newPassword: string;
+  password: string;
 }

@@ -7,25 +7,26 @@
  */
 
 /**
- * User response schema (sanitized)
+ * User Info response schema (sanitized)
 
 User information returned to client, does not contain sensitive information.
 
 Attributes:
     id: User ID
+    username: Username
     avatar: Avatar URL
     role: User role
     is_active: Is active
  */
-export interface UserResponse {
+export interface UserInfoResponse {
+  /** User ID */
+  id: number;
   /**
    * Username
    * @minLength 3
-   * @maxLength 50
+   * @maxLength 20
    */
   username: string;
-  /** User ID */
-  id: number;
   /** Avatar URL */
   avatar?: string;
   /** User role */

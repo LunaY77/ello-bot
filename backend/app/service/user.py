@@ -18,7 +18,7 @@ from app.core import (
     log,
 )
 from app.repository import UserRepositoryDep
-from app.schema import UserResponse, UserWithToken
+from app.schema import AuthResponse, UserInfoResponse
 from app.utils import create_access_token, hash_password, verify_password
 
 
@@ -60,7 +60,16 @@ class UserService:
         """
         self.user_repo = user_repo
 
-    def login(self, username: str, password: str) -> UserWithToken:
+    def login(self, username: str, password: str) -> AuthResponse:
+        """Login a user with username and password.
+
+        Args:
+            username: Username
+            password: Password
+
+        Returns:
+            AuthResponse: User information and access token
+        """
         log.debug(f"Attempting login for username: {username}")
 
         # Get user
@@ -82,12 +91,10 @@ class UserService:
 
         log.info(f"Login successful for username: {username}")
 
-        user_response = UserResponse.model_validate(user)
-        return UserWithToken(
-            **user_response.model_dump(), access_token=access_token, token_type="bearer"
-        )
+        user_response = UserInfoResponse.model_validate(user)
+        return AuthResponse(user=user_response, token=access_token)
 
-    def register(self, username: str, password: str) -> UserResponse:
+    def register(self, username: str, password: str) -> AuthResponse:
         """Register a new user
 
         Args:
@@ -95,7 +102,7 @@ class UserService:
             password: Desired password
 
         Returns:
-            UserResponse: Registered user information
+            AuthResponse: Registered user information and access token
         """
         log.debug(f"Attempting to register username: {username}")
 
@@ -109,7 +116,7 @@ class UserService:
         new_user = self.user_repo.create(username=username, password=hashed_password)
 
         log.info(f"User registered successfully: {username} (ID: {new_user.id})")
-        return UserResponse.model_validate(new_user)
+        return self.login(username, password)
 
     def reset_password(self, user_id: int, password: str) -> None:
         """Reset user password
@@ -129,14 +136,14 @@ class UserService:
         user.password = hashed_password
         self.user_repo.refresh(user)
 
-    def get_user_info(self, user_id: int) -> UserResponse:
+    def get_user_info(self, user_id: int) -> UserInfoResponse:
         """Get user information
 
         Args:
             user_id: User ID
 
         Returns:
-            UserResponse: User information
+            UserInfoResponse: User information
         """
         log.debug(f"Fetching user info for user ID: {user_id}")
 
@@ -145,7 +152,7 @@ class UserService:
         if not user or not user.is_active:
             raise BusinessException(UserErrorCode.USER_NOT_FOUND)
 
-        return UserResponse.model_validate(user)
+        return UserInfoResponse.model_validate(user)
 
     def upload_avatar(self, user_id: int, avatar_url: str) -> None:
         """Upload user avatar
