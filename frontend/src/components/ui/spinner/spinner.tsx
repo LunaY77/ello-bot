@@ -1,21 +1,21 @@
 /**
- * Spinner 加载动画组件
+ * Spinner Loading Component
  *
- * 功能说明：
- * 显示一个旋转的加载动画，用于指示异步操作正在进行中。
+ * Description:
+ * Displays a rotating loading animation to indicate that an asynchronous operation is in progress.
  *
- * 使用场景：
- * - 按钮加载状态
- * - 页面加载中
- * - 数据获取中
- * - 表单提交中
+ * Use Cases:
+ * - Button loading state
+ * - Page loading
+ * - Data fetching
+ * - Form submission
  */
 
 import { cn } from '@/utils/cn';
 
 /**
- * 尺寸配置
- * 定义不同尺寸的 Tailwind CSS 类名
+ * Size Configuration
+ * Defines Tailwind CSS class names for different sizes
  */
 const sizes = {
   sm: 'h-4 w-4',
@@ -25,7 +25,7 @@ const sizes = {
 };
 
 /**
- * 颜色变体配置
+ * Color Variant Configuration
  */
 const variants = {
   light: 'text-white',
@@ -33,32 +33,32 @@ const variants = {
 };
 
 /**
- * Spinner 组件的 Props 类型
+ * Spinner Component Props Type
  */
 export type SpinnerProps = {
-  /** 尺寸：sm | md | lg | xl */
+  /** Size: sm | md | lg | xl */
   size?: keyof typeof sizes;
-  /** 颜色变体：light | primary */
+  /** Color variant: light | primary */
   variant?: keyof typeof variants;
-  /** 自定义 className */
+  /** Custom className */
   className?: string;
 };
 
 /**
- * Spinner 加载动画组件
+ * Spinner Loading Component
  *
- * @param size - 尺寸，默认 'md'
- * @param variant - 颜色变体，默认 'primary'
- * @param className - 自定义 className
+ * @param size - Size, defaults to 'md'
+ * @param variant - Color variant, defaults to 'primary'
+ * @param className - Custom className
  *
  * @example
- * // 基础用法
+ * // Basic usage
  * <Spinner />
  *
- * // 小尺寸
+ * // Small size
  * <Spinner size="sm" />
  *
- * // 白色（用于深色背景）
+ * // White (for dark backgrounds)
  * <Spinner variant="light" />
  */
 export const Spinner = ({
@@ -79,17 +79,17 @@ export const Spinner = ({
         strokeLinecap="round"
         strokeLinejoin="round"
         className={cn(
-          'animate-spin', // Tailwind 的旋转动画
+          'animate-spin', // Tailwind's spin animation
           sizes[size],
           variants[variant],
           className,
         )}
       >
-        {/* 圆弧路径，形成加载动画效果 */}
+        {/* Arc path for loading animation effect */}
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
-      {/* 屏幕阅读器文本，提升无障碍访问性 */}
-      <span className="sr-only">加载中</span>
+      {/* Screen reader text for accessibility */}
+      <span className="sr-only">Loading</span>
     </>
   );
 };

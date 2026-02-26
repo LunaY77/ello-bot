@@ -27,7 +27,7 @@ async function stripZodInputTypes(dir) {
     if (!e.isFile() || !p.endsWith('.ts')) continue;
 
     const src = await fs.readFile(p, 'utf8');
-    // 删掉：export type XxxSchema = zod.input<typeof XxxSchema>;
+    // Remove lines like: export type XxxSchema = zod.input<typeof XxxSchema>;
     const next = src
       .replace(/^\s*export type\s+\w+\s*=\s*zod\.input<[^>]+>;\s*\n/gm, '')
       .replace(/\n{3,}/g, '\n\n');
@@ -77,6 +77,44 @@ async function removeTmpTargets() {
   }
 }
 
+/**
+ * Remove "-schema" from Zod schema file names and update barrel imports.
+ * e.g. "user-create-schema.zod.ts" → "user-create.zod.ts"
+ */
+async function renameSchemaFiles(dir) {
+  if (!(await exists(dir))) return;
+
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const renames = [];
+
+  for (const e of entries) {
+    if (!e.isFile()) continue;
+    const oldName = e.name;
+    const newName = oldName.replace(/-schema(\.zod\.ts)$/, '$1');
+    if (newName !== oldName) {
+      renames.push({ oldName, newName });
+      await fs.rename(path.join(dir, oldName), path.join(dir, newName));
+    }
+  }
+
+  // Update barrel index if it exists
+  if (renames.length === 0) return;
+  const indexFiles = entries.filter(
+    (e) => e.isFile() && e.name.startsWith('index'),
+  );
+  for (const idx of indexFiles) {
+    const p = path.join(dir, idx.name);
+    let src = await fs.readFile(p, 'utf8');
+    for (const { oldName, newName } of renames) {
+      const oldModule = oldName.replace(/\.ts$/, '');
+      const newModule = newName.replace(/\.ts$/, '');
+      src = src.replaceAll(oldModule, newModule);
+    }
+    await fs.writeFile(p, src, 'utf8');
+  }
+}
+
 await stripZodInputTypes(SCHEMAS_DIR);
+await renameSchemaFiles(SCHEMAS_DIR);
 await writeResultType();
 await removeTmpTargets();

@@ -1,36 +1,36 @@
 /**
- * 日期格式化工具
+ * Date Formatting Utility
  *
- * 功能说明：
- * 本模块提供日期时间格式化功能。
- * 在前端开发中，从后端 API 获取的时间戳需要转换为用户友好的格式显示。
+ * Feature Description:
+ * This module provides date and time formatting functionality.
+ * In frontend development, timestamps from backend APIs need to be converted to user-friendly formats for display.
  *
- * 为什么需要日期格式化：
- * 1. 后端通常返回 Unix 时间戳（毫秒）或 ISO 8601 格式字符串
- * 2. 前端需要根据用户地区和业务场景显示不同的格式
- * 3. 需要处理时区转换、相对时间等复杂场景
+ * Why date formatting is needed:
+ * 1. Backend typically returns Unix timestamps (milliseconds) or ISO 8601 format strings
+ * 2. Frontend needs to display different formats based on user locale and business scenarios
+ * 3. Complex scenarios like timezone conversion and relative time need to be handled
  */
 
 import { default as dayjs } from 'dayjs';
 
 /**
- * 格式化日期时间
+ * Format date and time
  *
- * @param date - Unix 时间戳（毫秒）或日期字符串
- * @returns 格式化后的日期字符串
+ * @param date - Unix timestamp (milliseconds) or date string
+ * @returns Formatted date string
  *
  * @example
  * formatDate(1704067200000) → "2024-01-01 08:00"
- * formatDate(Date.now()) → "当前时间"
+ * formatDate(Date.now()) → "Current time"
  */
 export const formatDate = (date: number | string) =>
   dayjs(date).format('YYYY-MM-DD HH:mm');
 
 /**
- * 格式化为相对时间
+ * Format as relative time
  *
- * @param date - Unix 时间戳（毫秒）或日期字符串
- * @returns 相对时间字符串（如 "3 天前"）
+ * @param date - Unix timestamp (milliseconds) or date string
+ * @returns Relative time string (e.g., "3 days ago")
  */
 export const formatRelativeDate = (date: number | string) => {
   const now = dayjs();
@@ -42,29 +42,29 @@ export const formatRelativeDate = (date: number | string) => {
     if (diffHours === 0) {
       const diffMinutes = now.diff(target, 'minute');
       if (diffMinutes === 0) {
-        return '刚刚';
+        return 'Just now';
       }
-      return `${diffMinutes} 分钟前`;
+      return `${diffMinutes} minutes ago`;
     }
-    return `${diffHours} 小时前`;
+    return `${diffHours} hours ago`;
   }
 
   if (diffDays < 7) {
-    return `${diffDays} 天前`;
+    return `${diffDays} days ago`;
   }
 
   if (diffDays < 30) {
-    return `${Math.floor(diffDays / 7)} 周前`;
+    return `${Math.floor(diffDays / 7)} weeks ago`;
   }
 
   return formatDate(date);
 };
 
 /**
- * 格式化为日期（不含时间）
+ * Format as date only (without time)
  *
- * @param date - Unix 时间戳（毫秒）或日期字符串
- * @returns 格式化后的日期字符串
+ * @param date - Unix timestamp (milliseconds) or date string
+ * @returns Formatted date string
  */
 export const formatDateOnly = (date: number | string) =>
   dayjs(date).format('YYYY-MM-DD');

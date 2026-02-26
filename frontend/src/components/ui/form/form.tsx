@@ -1,14 +1,14 @@
 /**
- * Form 表单组件
+ * Form Component
  *
- * 功能说明：
- * 基于 react-hook-form 和 zod 的表单组件，提供类型安全的表单处理。
+ * Description:
+ * A form component based on react-hook-form and zod, providing type-safe form handling.
  *
- * 核心特性：
- * - 使用 zod 进行表单验证
- * - 使用 react-hook-form 管理表单状态
- * - 提供 render props 模式，灵活渲染表单内容
- * - 支持 FormField、FormItem、FormLabel 等子组件
+ * Core Features:
+ * - Uses zod for form validation
+ * - Uses react-hook-form for form state management
+ * - Provides render props pattern for flexible form content rendering
+ * - Supports child components like FormField, FormItem, FormLabel
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,16 +29,16 @@ import {
 } from 'react-hook-form';
 import { type ZodType, type z } from 'zod';
 
-import { cn } from '@/utils/cn';
-
 import { Label } from './label';
 
+import { cn } from '@/utils/cn';
+
 // ============================================
-// FormField 相关
+// FormField Related
 // ============================================
 
 /**
- * FormField 上下文类型
+ * FormField Context Type
  */
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
@@ -52,8 +52,8 @@ const FormFieldContext = React.createContext<FormFieldContextValue>(
 );
 
 /**
- * FormField 组件
- * 包装 react-hook-form 的 Controller，提供字段上下文
+ * FormField Component
+ * Wraps react-hook-form's Controller to provide field context
  */
 const FormField = <
   TFieldValues extends FieldValues,
@@ -69,11 +69,11 @@ const FormField = <
 };
 
 // ============================================
-// FormItem 相关
+// FormItem Related
 // ============================================
 
 /**
- * FormItem 上下文类型
+ * FormItem Context Type
  */
 type FormItemContextValue = {
   id: string;
@@ -85,7 +85,7 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 
 /**
  * useFormField Hook
- * 获取当前表单字段的状态和 ID
+ * Gets current form field's state and ID
  */
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext);
@@ -95,7 +95,7 @@ const useFormField = () => {
   const fieldState = getFieldState(fieldContext.name, formState);
 
   if (!fieldContext) {
-    throw new Error('useFormField 必须在 <FormField> 内部使用');
+    throw new Error('useFormField must be used within <FormField>');
   }
 
   const { id } = itemContext;
@@ -111,8 +111,8 @@ const useFormField = () => {
 };
 
 /**
- * FormItem 组件
- * 表单字段的容器组件
+ * FormItem Component
+ * Container component for form fields
  */
 const FormItem = React.forwardRef<
   HTMLDivElement,
@@ -129,8 +129,8 @@ const FormItem = React.forwardRef<
 FormItem.displayName = 'FormItem';
 
 /**
- * FormLabel 组件
- * 表单字段的标签组件
+ * FormLabel Component
+ * Label component for form fields
  */
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
@@ -150,8 +150,8 @@ const FormLabel = React.forwardRef<
 FormLabel.displayName = 'FormLabel';
 
 /**
- * FormControl 组件
- * 表单控件的包装组件，提供无障碍属性
+ * FormControl Component
+ * Wrapper component for form controls providing accessibility attributes
  */
 const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
@@ -177,8 +177,8 @@ const FormControl = React.forwardRef<
 FormControl.displayName = 'FormControl';
 
 /**
- * FormDescription 组件
- * 表单字段的描述文本
+ * FormDescription Component
+ * Description text for form fields
  */
 const FormDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -198,8 +198,8 @@ const FormDescription = React.forwardRef<
 FormDescription.displayName = 'FormDescription';
 
 /**
- * FormMessage 组件
- * 表单字段的错误消息
+ * FormMessage Component
+ * Error message for form fields
  */
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
@@ -226,29 +226,29 @@ const FormMessage = React.forwardRef<
 FormMessage.displayName = 'FormMessage';
 
 // ============================================
-// Form 主组件
+// Form Main Component
 // ============================================
 
 /**
- * Form 组件的 Props 类型
+ * Form Component Props Type
  */
 type FormProps<TFormValues extends FieldValues, Schema> = {
-  /** 表单提交处理函数 */
+  /** Form submission handler */
   onSubmit: SubmitHandler<TFormValues>;
-  /** Zod 验证 Schema */
+  /** Zod validation Schema */
   schema: Schema;
-  /** 自定义 className */
+  /** Custom className */
   className?: string;
-  /** 渲染函数，接收 form methods */
+  /** Render function, receives form methods */
   children: (methods: UseFormReturn<TFormValues>) => React.ReactNode;
-  /** react-hook-form 配置选项 */
+  /** react-hook-form configuration options */
   options?: UseFormProps<TFormValues>;
-  /** 表单 ID */
+  /** Form ID */
   id?: string;
 };
 
 /**
- * Form 表单组件
+ * Form Component
  *
  * @example
  * <Form
@@ -258,11 +258,11 @@ type FormProps<TFormValues extends FieldValues, Schema> = {
  *   {({ register, formState }) => (
  *     <>
  *       <Input
- *         label="邮箱"
+ *         label="Email"
  *         error={formState.errors.email}
  *         registration={register('email')}
  *       />
- *       <Button type="submit">登录</Button>
+ *       <Button type="submit">Login</Button>
  *     </>
  *   )}
  * </Form>

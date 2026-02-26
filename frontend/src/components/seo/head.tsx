@@ -1,43 +1,43 @@
 /**
- * Head SEO 组件
+ * Head SEO Component
  *
- * 功能说明：
- * 使用 react-helmet-async 管理页面的 head 标签，
- * 包括标题、描述等 SEO 相关的 meta 信息。
+ * Functionality:
+ * Uses react-helmet-async to manage page head tags,
+ * including title, description and other SEO-related meta information.
  *
- * 特性：
- * - 动态设置页面标题
- * - 支持自定义描述
- * - 自动添加应用名称后缀
+ * Features:
+ * - Dynamic page title setting
+ * - Support for custom descriptions
+ * - Automatic app name suffix addition
  */
 
 import { Helmet, HelmetData } from 'react-helmet-async';
 
 /**
- * Head 组件的 Props 类型
+ * Props type for Head component
  */
 type HeadProps = {
-  /** 页面标题 */
+  /** Page title */
   title?: string;
-  /** 页面描述 */
+  /** Page description */
   description?: string;
 };
 
 /**
- * HelmetData 实例
- * 用于服务端渲染时的数据收集
+ * HelmetData instance
+ * Used for data collection during server-side rendering
  */
 const helmetData = new HelmetData({});
 
 /**
- * Head SEO 组件
+ * Head SEO Component
  *
- * @param title - 页面标题，会自动添加应用名称后缀
- * @param description - 页面描述，用于 SEO
+ * @param title - Page title, automatically appended with app name suffix
+ * @param description - Page description, used for SEO
  *
  * @example
- * <Head title="登录" description="用户登录页面" />
- * // 渲染结果: <title>登录 | Ello</title>
+ * <Head title="Login" description="User login page" />
+ * // Rendered result: <title>Login | ello</title>
  */
 export const Head = ({ title = '', description = '' }: HeadProps = {}) => {
   return (

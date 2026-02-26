@@ -6,6 +6,5 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export * from './result';
 export * from './user-response';
 export * from './user-with-token';

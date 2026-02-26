@@ -1,243 +1,273 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AnyObj = Record<string, any>;
 
-const RESULT_PREFIX = "Result_";
+const RESULT_PREFIX = 'Result_';
 
 function isObj(v: unknown): v is AnyObj {
-    return !!v && typeof v === "object" && !Array.isArray(v);
+  return !!v && typeof v === 'object' && !Array.isArray(v);
 }
 
 function walk(node: any, fn: (obj: AnyObj) => void) {
-    if (Array.isArray(node)) return node.forEach((x) => walk(x, fn));
-    if (!isObj(node)) return;
-    fn(node);
-    Object.values(node).forEach((v) => walk(v, fn));
+  if (Array.isArray(node)) return node.forEach((x) => walk(x, fn));
+  if (!isObj(node)) return;
+  fn(node);
+  Object.values(node).forEach((v) => walk(v, fn));
 }
 
 function stripExamples(spec: AnyObj) {
-    walk(spec, (obj) => {
-        if ("examples" in obj) delete obj.examples;
-    });
+  walk(spec, (obj) => {
+    if ('examples' in obj) delete obj.examples;
+  });
 }
 
 function normalizeNullability(spec: AnyObj) {
-    // anyOf: [X, null]  -> X + nullable: true (更利于生成具体 zod)
-    walk(spec, (obj) => {
-        const anyOf = obj.anyOf;
-        if (!Array.isArray(anyOf) || anyOf.length !== 2) return;
+  // anyOf: [X, null]  -> X + nullable: true (更利于生成具体 zod)
+  walk(spec, (obj) => {
+    const anyOf = obj.anyOf;
+    if (!Array.isArray(anyOf) || anyOf.length !== 2) return;
 
-        const [a, b] = anyOf;
-        const isNull = (x: any) =>
-            isObj(x) &&
-            (x.type === "null" ||
-                (Array.isArray(x.type) && x.type.includes("null")));
-        const isNonNull = (x: any) => !isNull(x);
+    const [a, b] = anyOf;
+    const isNull = (x: any) =>
+      isObj(x) &&
+      (x.type === 'null' || (Array.isArray(x.type) && x.type.includes('null')));
+    const isNonNull = (x: any) => !isNull(x);
 
-        if (isNull(a) && isNonNull(b)) {
-            delete obj.anyOf;
-            Object.assign(obj, b);
-            obj.nullable = true;
-        } else if (isNull(b) && isNonNull(a)) {
-            delete obj.anyOf;
-            Object.assign(obj, a);
-            obj.nullable = true;
-        }
-    });
+    if (isNull(a) && isNonNull(b)) {
+      delete obj.anyOf;
+      Object.assign(obj, b);
+      obj.nullable = true;
+    } else if (isNull(b) && isNonNull(a)) {
+      delete obj.anyOf;
+      Object.assign(obj, a);
+      obj.nullable = true;
+    }
+  });
 }
 
 function removeValidationError(spec: AnyObj) {
-    // remove 422 responses
-    for (const pathItem of Object.values(spec.paths ?? {})) {
-        if (!isObj(pathItem)) continue;
-        for (const op of Object.values(pathItem)) {
-            if (!isObj(op) || !isObj(op.responses)) continue;
-            if (op.responses["422"]) delete op.responses["422"];
-        }
+  // remove 422 responses
+  for (const pathItem of Object.values(spec.paths ?? {})) {
+    if (!isObj(pathItem)) continue;
+    for (const op of Object.values(pathItem)) {
+      if (!isObj(op) || !isObj(op.responses)) continue;
+      if (op.responses['422']) delete op.responses['422'];
     }
+  }
 
-    // remove schemas
-    const schemas = spec.components?.schemas;
-    if (isObj(schemas)) {
-        delete schemas.ValidationError;
-        delete schemas.HTTPValidationError;
-    }
+  // remove schemas
+  const schemas = spec.components?.schemas;
+  if (isObj(schemas)) {
+    delete schemas.ValidationError;
+    delete schemas.HTTPValidationError;
+  }
 }
 
 function rewriteAndDropResultSchemas(spec: AnyObj) {
-    const schemas = spec.components?.schemas;
-    if (!isObj(schemas)) return;
+  const schemas = spec.components?.schemas;
+  if (!isObj(schemas)) return;
 
-    // dict wrapper -> AnyObject
-    if (!schemas.AnyObject)
-        schemas.AnyObject = { type: "object", additionalProperties: true };
+  // dict wrapper -> AnyObject
+  if (!schemas.AnyObject)
+    schemas.AnyObject = { type: 'object', additionalProperties: true };
 
-    const refMap = new Map<string, string>();
-    const noneResultRef = new Set<string>();
+  const refMap = new Map<string, string>();
+  const noneResultRef = new Set<string>();
 
-    for (const name of Object.keys(schemas)) {
-        if (!name.startsWith(RESULT_PREFIX)) continue;
+  for (const name of Object.keys(schemas)) {
+    if (!name.startsWith(RESULT_PREFIX)) continue;
 
-        const innerRaw = name.slice(RESULT_PREFIX.length).replace(/_+$/, "");
-        const from = `#/components/schemas/${name}`;
+    const innerRaw = name.slice(RESULT_PREFIX.length).replace(/_+$/, '');
+    const from = `#/components/schemas/${name}`;
 
-        if (innerRaw === "NoneType" || innerRaw === "None") {
-            noneResultRef.add(from);
-            continue;
-        }
-
-        const to =
-            innerRaw === "dict" || innerRaw === "Dict"
-                ? "#/components/schemas/AnyObject"
-                : `#/components/schemas/${innerRaw}`;
-
-        refMap.set(from, to);
+    if (innerRaw === 'NoneType' || innerRaw === 'None') {
+      noneResultRef.add(from);
+      continue;
     }
 
-    // rewrite $ref
-    walk(spec, (obj) => {
-        if (typeof obj.$ref !== "string") return;
-        const r = obj.$ref;
+    const to =
+      innerRaw === 'dict' || innerRaw === 'Dict'
+        ? '#/components/schemas/AnyObject'
+        : `#/components/schemas/${innerRaw}`;
 
-        if (noneResultRef.has(r)) {
-            // 对 Result_NoneType_：让上层 response content 变成空（见下方专门处理）
-            return;
-        }
+    refMap.set(from, to);
+  }
 
-        const replaced = refMap.get(r);
-        if (replaced) obj.$ref = replaced;
-    });
+  // Also handle bare "Result" (e.g. /health endpoint) — treat as NoneType (void response)
+  const bareResultRef = '#/components/schemas/Result';
+  noneResultRef.add(bareResultRef);
+  walk(spec, (obj) => {
+    if (typeof obj.$ref !== 'string') return;
+    const r = obj.$ref;
 
-    // 对 Result_NoneType_ 的响应：删掉 application/json（让 client 侧是 void/无 body）
-    for (const pathItem of Object.values(spec.paths ?? {})) {
-        if (!isObj(pathItem)) continue;
-        for (const op of Object.values(pathItem)) {
-            if (!isObj(op) || !isObj(op.responses)) continue;
-            for (const resp of Object.values(op.responses)) {
-                if (!isObj(resp)) continue;
-                const schemaRef =
-                    resp.content?.["application/json"]?.schema?.$ref;
-                if (schemaRef === "#/components/schemas/Result_NoneType_") {
-                    delete resp.content?.["application/json"];
-                    if (resp.content && Object.keys(resp.content).length === 0)
-                        delete resp.content;
-                }
-            }
-        }
+    if (noneResultRef.has(r)) {
+      // 对 Result_NoneType_：让上层 response content 变成空（见下方专门处理）
+      return;
     }
 
-    // drop Result_* schemas
-    for (const name of Object.keys(schemas)) {
-        if (name.startsWith(RESULT_PREFIX)) delete schemas[name];
+    const replaced = refMap.get(r);
+    if (replaced) obj.$ref = replaced;
+  });
+
+  // 对 Result_NoneType_ 的响应：删掉 application/json（让 client 侧是 void/无 body）
+  for (const pathItem of Object.values(spec.paths ?? {})) {
+    if (!isObj(pathItem)) continue;
+    for (const op of Object.values(pathItem)) {
+      if (!isObj(op) || !isObj(op.responses)) continue;
+      for (const resp of Object.values(op.responses)) {
+        if (!isObj(resp)) continue;
+        const schemaRef = resp.content?.['application/json']?.schema?.$ref;
+        if (schemaRef === '#/components/schemas/Result_NoneType_') {
+          delete resp.content?.['application/json'];
+          if (resp.content && Object.keys(resp.content).length === 0)
+            delete resp.content;
+        }
+      }
     }
+  }
+
+  // drop Result_* schemas and bare Result
+  for (const name of Object.keys(schemas)) {
+    if (name === 'Result' || name.startsWith(RESULT_PREFIX))
+      delete schemas[name];
+  }
 }
 
 function collectSchemaRefsFromRequestBodies(spec: AnyObj): Set<string> {
-    const names = new Set<string>();
-    for (const pathItem of Object.values(spec.paths ?? {})) {
-        if (!isObj(pathItem)) continue;
-        for (const op of Object.values(pathItem)) {
-            if (!isObj(op)) continue;
-            const ref =
-                op.requestBody?.content?.["application/json"]?.schema?.$ref;
-            const m =
-                typeof ref === "string"
-                    ? ref.match(/^#\/components\/schemas\/(.+)$/)
-                    : null;
-            if (m?.[1]) names.add(m[1]);
-        }
+  const names = new Set<string>();
+  for (const pathItem of Object.values(spec.paths ?? {})) {
+    if (!isObj(pathItem)) continue;
+    for (const op of Object.values(pathItem)) {
+      if (!isObj(op)) continue;
+      const ref = op.requestBody?.content?.['application/json']?.schema?.$ref;
+      const m =
+        typeof ref === 'string'
+          ? ref.match(/^#\/components\/schemas\/(.+)$/)
+          : null;
+      if (m?.[1]) names.add(m[1]);
     }
-    return names;
+  }
+  return names;
 }
 
 function collectSchemaRefsFromSuccessResponses(spec: AnyObj): Set<string> {
-    const names = new Set<string>();
-    for (const pathItem of Object.values(spec.paths ?? {})) {
-        if (!isObj(pathItem)) continue;
-        for (const op of Object.values(pathItem)) {
-            if (!isObj(op) || !isObj(op.responses)) continue;
-            for (const [status, resp] of Object.entries(op.responses)) {
-                if (!status.startsWith("2")) continue;
-                if (!isObj(resp)) continue;
-                const ref = resp.content?.["application/json"]?.schema?.$ref;
-                const m =
-                    typeof ref === "string"
-                        ? ref.match(/^#\/components\/schemas\/(.+)$/)
-                        : null;
-                if (m?.[1]) names.add(m[1]);
-            }
-        }
+  const names = new Set<string>();
+  for (const pathItem of Object.values(spec.paths ?? {})) {
+    if (!isObj(pathItem)) continue;
+    for (const op of Object.values(pathItem)) {
+      if (!isObj(op) || !isObj(op.responses)) continue;
+      for (const [status, resp] of Object.entries(op.responses)) {
+        if (!status.startsWith('2')) continue;
+        if (!isObj(resp)) continue;
+        const ref = resp.content?.['application/json']?.schema?.$ref;
+        const m =
+          typeof ref === 'string'
+            ? ref.match(/^#\/components\/schemas\/(.+)$/)
+            : null;
+        if (m?.[1]) names.add(m[1]);
+      }
     }
-    return names;
+  }
+  return names;
 }
 
 function expandDeps(spec: AnyObj, roots: Set<string>): Set<string> {
-    const schemas = spec.components?.schemas;
-    if (!isObj(schemas)) return new Set(roots);
+  const schemas = spec.components?.schemas;
+  if (!isObj(schemas)) return new Set(roots);
 
-    const keep = new Set<string>(roots);
-    const stack = [...roots];
+  const keep = new Set<string>(roots);
+  const stack = [...roots];
 
-    while (stack.length) {
-        const cur = stack.pop()!;
-        const sch = schemas[cur];
-        if (!sch) continue;
+  while (stack.length) {
+    const cur = stack.pop()!;
+    const sch = schemas[cur];
+    if (!sch) continue;
 
-        walk(sch, (obj) => {
-            const ref = obj.$ref;
-            const m =
-                typeof ref === "string"
-                    ? ref.match(/^#\/components\/schemas\/(.+)$/)
-                    : null;
-            if (m?.[1] && !keep.has(m[1])) {
-                keep.add(m[1]);
-                stack.push(m[1]);
-            }
-        });
+    walk(sch, (obj) => {
+      const ref = obj.$ref;
+      const m =
+        typeof ref === 'string'
+          ? ref.match(/^#\/components\/schemas\/(.+)$/)
+          : null;
+      if (m?.[1] && !keep.has(m[1])) {
+        keep.add(m[1]);
+        stack.push(m[1]);
+      }
+    });
+  }
+  return keep;
+}
+
+function toCamel(s: string) {
+  return s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+}
+
+function camelizeSchemaProps(spec: any) {
+  const localWalk = (node: any) => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) return node.forEach(localWalk);
+
+    // Check for `properties` existence only — do NOT require `type === "object"`.
+    // OpenAPI 3.1 schemas may omit the explicit `type` field even when they have properties.
+    if (node.properties && typeof node.properties === 'object') {
+      const nextProps: any = {};
+      for (const [k, v] of Object.entries(node.properties))
+        nextProps[toCamel(k)] = v;
+      node.properties = nextProps;
+
+      if (Array.isArray(node.required)) {
+        node.required = node.required.map((k: string) => toCamel(k));
+      }
     }
-    return keep;
+
+    Object.values(node).forEach(localWalk);
+  };
+
+  localWalk(spec);
 }
 
 function pruneSchemas(spec: AnyObj, keep: Set<string>) {
-    const schemas = spec.components?.schemas;
-    if (!isObj(schemas)) return;
-    const next: AnyObj = {};
-    for (const k of keep) {
-        if (schemas[k]) next[k] = schemas[k];
-    }
-    spec.components = spec.components ?? {};
-    spec.components.schemas = next;
+  const schemas = spec.components?.schemas;
+  if (!isObj(schemas)) return;
+  const next: AnyObj = {};
+  for (const k of keep) {
+    if (schemas[k]) next[k] = schemas[k];
+  }
+  spec.components = spec.components ?? {};
+  spec.components.schemas = next;
 }
 
 function baseTransform(input: any): AnyObj {
-    const spec: AnyObj = structuredClone(input);
+  const spec: AnyObj = structuredClone(input);
 
-    // 让生成器走更稳定的 OAS3.0 路径（FastAPI 是 3.1.0）
-    spec.openapi = "3.0.3";
+  // 让生成器走更稳定的 OAS3.0 路径（FastAPI 是 3.1.0）
+  spec.openapi = '3.0.3';
 
-    stripExamples(spec);
-    normalizeNullability(spec);
-    removeValidationError(spec);
-    rewriteAndDropResultSchemas(spec);
+  stripExamples(spec);
+  normalizeNullability(spec);
+  removeValidationError(spec);
+  rewriteAndDropResultSchemas(spec);
+  // Camelize AFTER Result schema rewriting so all surviving schemas are covered.
+  camelizeSchemaProps(spec);
 
-    return spec;
+  return spec;
 }
 
 // 只保留“请求体”相关 schemas，并清空 paths（避免生成 endpoint 代码）
 export function transformReqOnly(input: any): AnyObj {
-    const spec = baseTransform(input);
-    const roots = collectSchemaRefsFromRequestBodies(spec);
-    const keep = expandDeps(spec, roots);
-    pruneSchemas(spec, keep);
-    spec.paths = {}; // 只生成 models/schemas
-    return spec;
+  const spec = baseTransform(input);
+  const roots = collectSchemaRefsFromRequestBodies(spec);
+  const keep = expandDeps(spec, roots);
+  pruneSchemas(spec, keep);
+  spec.paths = {}; // 只生成 models/schemas
+  return spec;
 }
 
 // 只保留“响应体(2xx)”相关 schemas，并清空 paths（避免生成 endpoint 代码）
 export function transformRespOnly(input: any): AnyObj {
-    const spec = baseTransform(input);
-    const roots = collectSchemaRefsFromSuccessResponses(spec);
-    const keep = expandDeps(spec, roots);
-    pruneSchemas(spec, keep);
-    spec.paths = {};
-    return spec;
+  const spec = baseTransform(input);
+  const roots = collectSchemaRefsFromSuccessResponses(spec);
+  const keep = expandDeps(spec, roots);
+  pruneSchemas(spec, keep);
+  spec.paths = {};
+  return spec;
 }

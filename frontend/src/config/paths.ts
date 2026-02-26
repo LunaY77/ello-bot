@@ -1,58 +1,58 @@
 /**
- * 路由配置模块
+ * Route Configuration Module
  *
- * 【核心功能】
- * - 集中管理应用的所有路由路径
- * - 提供类型安全的路由访问方式
- * - 分离路由定义（path）和路由生成逻辑（getHref）
+ * [Core Features]
+ * - Centrally manage all route paths of the application
+ * - Provide type-safe route access
+ * - Separate route definition (path) from route generation logic (getHref)
  *
- * 【path 与 getHref 的区别】
- * - path：路由路径定义，用于配置路由系统
- *   - 示例：'users/:userId'（含动态参数 :userId）
- *   - 用途：传递给 <Route path="..." /> 组件
- * - getHref：生成实际 URL 的函数，用于导航链接
- *   - 示例：'/app/users/123'（替换动态参数为实际值）
- *   - 用途：传递给 <Link to="..." /> 或 navigate() 函数
+ * [Difference between path and getHref]
+ * - path: Route path definition, used for configuring the routing system
+ *   - Example: 'users/:userId' (with dynamic parameter :userId)
+ *   - Usage: Passed to <Route path="..." /> component
+ * - getHref: Function to generate actual URL for navigation links
+ *   - Example: '/app/users/123' (replacing dynamic parameters with actual values)
+ *   - Usage: Passed to <Link to="..." /> or navigate() function
  *
- * 【路由层级结构】
- * - /：首页（公开访问）
- * - /auth：认证相关页面（登录、注册）
- * - /app：应用主界面（需要认证）
- *   - /app/dashboard：仪表板
- *   - /app/users：用户列表
- *   - /app/profile：个人资料
+ * [Route Hierarchy]
+ * - /: Home page (public access)
+ * - /auth: Authentication pages (login, register)
+ * - /app: Main application interface (requires authentication)
+ *   - /app/dashboard: Dashboard
+ *   - /app/users: User list
+ *   - /app/profile: Profile
  */
 
 /**
- * 路由配置对象
+ * Route Configuration Object
  *
- * 【as const 的作用】
- * - TypeScript 的类型断言，将对象设置为只读
- * - 启用更精确的类型推断（字面量类型而非宽泛的 string 类型）
- * - 防止运行时意外修改路由配置
+ * [Purpose of as const]
+ * - TypeScript type assertion, making the object read-only
+ * - Enables more precise type inference (literal types instead of broad string types)
+ * - Prevents accidental runtime modifications to route configuration
  */
 export const paths = {
-  // ==================== 公开页面 ====================
+  // ==================== Public Pages ====================
 
   /**
-   * 首页路由
-   * 用途：应用的入口页面，通常展示产品介绍或引导用户登录
+   * Home route
+   * Usage: Entry page of the application, typically displays product intro or prompts user to login
    */
   home: {
     path: '/',
     getHref: () => '/',
   },
 
-  // ==================== 认证相关页面 ====================
+  // ==================== Authentication Pages ====================
 
   /**
-   * 认证页面组
-   * 包含用户注册和登录功能
+   * Authentication page group
+   * Contains user registration and login functionality
    */
   auth: {
     /**
-     * 注册页面
-     * @param redirectTo - 注册成功后重定向的路径（可选）
+     * Registration page
+     * @param redirectTo - Path to redirect after successful registration (optional)
      */
     register: {
       path: '/auth/register',
@@ -61,8 +61,8 @@ export const paths = {
     },
 
     /**
-     * 登录页面
-     * @param redirectTo - 登录成功后重定向的路径（可选）
+     * Login page
+     * @param redirectTo - Path to redirect after successful login (optional)
      */
     login: {
       path: '/auth/login',
@@ -71,15 +71,15 @@ export const paths = {
     },
   },
 
-  // ==================== 应用主界面（需要认证）====================
+  // ==================== Main Application (Requires Authentication) ====================
 
   /**
-   * 应用主界面组
-   * 所有路由都以 /app 为前缀，需要在路由配置中嵌套定义
+   * Application main interface group
+   * All routes are prefixed with /app and need to be nested in route configuration
    */
   app: {
     /**
-     * 应用根路由
+     * Application root route
      */
     root: {
       path: '/app',
@@ -87,8 +87,8 @@ export const paths = {
     },
 
     /**
-     * 仪表板页面
-     * path 为空字符串表示默认子路由
+     * Dashboard page
+     * Empty path string indicates default sub-route
      */
     dashboard: {
       path: '',
@@ -96,7 +96,7 @@ export const paths = {
     },
 
     /**
-     * 用户列表页面
+     * Users list page
      */
     users: {
       path: 'users',
@@ -104,8 +104,8 @@ export const paths = {
     },
 
     /**
-     * 用户详情页面
-     * @param id - 用户的唯一标识符
+     * User detail page
+     * @param id - User's unique identifier
      */
     user: {
       path: 'users/:userId',
@@ -113,7 +113,7 @@ export const paths = {
     },
 
     /**
-     * 个人资料页面
+     * Profile page
      */
     profile: {
       path: 'profile',

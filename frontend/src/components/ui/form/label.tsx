@@ -1,13 +1,13 @@
 /**
- * Label 标签组件
+ * Label Component
  *
- * 功能说明：
- * 基于 Radix UI Label 的表单标签组件，用于标识表单字段。
+ * Description:
+ * A form label component based on Radix UI Label, used to identify form fields.
  *
- * 特性：
- * - 无障碍访问支持
- * - 与表单控件关联
- * - 支持禁用状态样式
+ * Features:
+ * - Accessibility support
+ * - Association with form controls
+ * - Disabled state styling support
  */
 
 import * as LabelPrimitive from '@radix-ui/react-label';
@@ -17,17 +17,17 @@ import * as React from 'react';
 import { cn } from '@/utils/cn';
 
 /**
- * 标签样式变体
+ * Label Style Variants
  */
 const labelVariants = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 );
 
 /**
- * Label 组件
+ * Label Component
  *
  * @example
- * <Label htmlFor="email">邮箱</Label>
+ * <Label htmlFor="email">Email</Label>
  * <input id="email" type="email" />
  */
 const Label = React.forwardRef<

@@ -1,0 +1,16 @@
+export default {
+  'login.title': 'Sign In',
+  'login.subtitle': 'Sign in to your account',
+  'login.username': 'Username',
+  'login.password': 'Password',
+  'login.submit': 'Sign In',
+  'login.noAccount': "Don't have an account?",
+  'login.register': 'Register',
+  'register.title': 'Create Account',
+  'register.subtitle': 'Create a new account to get started',
+  'register.username': 'Username',
+  'register.password': 'Password',
+  'register.submit': 'Register',
+  'register.hasAccount': 'Already have an account?',
+  'register.login': 'Sign In',
+} as const;

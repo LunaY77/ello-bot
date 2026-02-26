@@ -12,5 +12,5 @@ export interface ResetPasswordRequest {
    * @minLength 6
    * @maxLength 100
    */
-  new_password: string;
+  newPassword: string;
 }

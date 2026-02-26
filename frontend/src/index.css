@@ -3,55 +3,55 @@
 @tailwind utilities;
 
 /**
- * 全局样式和 CSS 变量定义
+ * Global Styles and CSS Variable Definitions
  *
- * 使用 HSL 格式的 CSS 变量实现主题系统
- * 修改这些变量即可切换主题（如暗色模式）
+ * Uses HSL-formatted CSS variables for the theme system
+ * Modify these variables to switch themes (e.g., dark mode)
  */
 @layer base {
   :root {
-    /* 背景和前景色 */
+    /* Background and foreground colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
-    /* 卡片颜色 */
+    /* Card colors */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
 
-    /* 弹出层颜色 */
+    /* Popover colors */
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* 主要颜色 - 用于主要按钮、链接等 */
+    /* Primary color - used for primary buttons, links, etc. */
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
-    /* 次要颜色 - 用于次要按钮等 */
+    /* Secondary color - used for secondary buttons, etc. */
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    /* 静音颜色 - 用于禁用状态等 */
+    /* Muted color - used for disabled states, etc. */
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* 强调颜色 */
+    /* Accent color */
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
-    /* 危险颜色 - 用于删除、警告等 */
+    /* Destructive color - used for deletion, warnings, etc. */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    /* 边框和输入框颜色 */
+    /* Border and input colors */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    /* 圆角大小 */
+    /* Border radius size */
     --radius: 0.5rem;
   }
 
-  /* 暗色模式 */
+  /* Dark mode */
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -95,22 +95,13 @@
 body {
   margin: 0;
   font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    'Roboto',
-    'Oxygen',
-    'Ubuntu',
-    'Cantarell',
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

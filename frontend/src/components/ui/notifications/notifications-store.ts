@@ -1,68 +1,68 @@
 /**
- * 通知状态管理 Store
+ * Notification State Management Store
  *
- * 功能说明：
- * 使用 Zustand 管理全局通知状态，支持添加和移除通知。
+ * Functionality:
+ * Uses Zustand to manage global notification state, supporting adding and removing notifications.
  *
- * 为什么使用 Zustand：
- * - 轻量级状态管理库
- * - 不需要 Provider 包裹
- * - 支持在组件外部访问状态（如 API 拦截器中）
+ * Why use Zustand:
+ * - Lightweight state management library
+ * - No need for Provider wrapper
+ * - Supports accessing state outside components (e.g., in API interceptors)
  */
 
 import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 
 /**
- * 通知类型定义
+ * Notification type definition
  */
 export type Notification = {
-  /** 通知唯一标识 */
+  /** Unique notification identifier */
   id: string;
-  /** 通知类型：info | warning | success | error */
+  /** Notification type: info | warning | success | error */
   type: 'info' | 'warning' | 'success' | 'error';
-  /** 通知标题 */
+  /** Notification title */
   title: string;
-  /** 通知详细消息（可选） */
+  /** Detailed notification message (optional) */
   message?: string;
 };
 
 /**
- * 通知 Store 类型定义
+ * Notification Store type definition
  */
 type NotificationsStore = {
-  /** 通知列表 */
+  /** List of notifications */
   notifications: Notification[];
-  /** 添加通知 */
+  /** Add a notification */
   addNotification: (notification: Omit<Notification, 'id'>) => void;
-  /** 移除通知 */
+  /** Dismiss a notification */
   dismissNotification: (id: string) => void;
 };
 
 /**
- * 通知状态管理 Hook
+ * Notification state management hook
  *
  * @example
- * // 在组件中使用
+ * // In component usage
  * const { notifications, addNotification, dismissNotification } = useNotifications();
  *
- * // 添加通知
+ * // Add a notification
  * addNotification({
  *   type: 'success',
- *   title: '操作成功',
- *   message: '数据已保存',
+ *   title: 'Operation Successful',
+ *   message: 'Data has been saved',
  * });
  *
- * // 在组件外部使用（如 API 拦截器）
+ * // Outside component usage (e.g., in API interceptor)
  * useNotifications.getState().addNotification({
  *   type: 'error',
- *   title: '请求失败',
+ *   title: 'Request Failed',
  * });
  */
 export const useNotifications = create<NotificationsStore>((set) => ({
   notifications: [],
 
-  // 添加通知
+  // Add a notification
   addNotification: (notification) =>
     set((state) => ({
       notifications: [
@@ -71,7 +71,7 @@ export const useNotifications = create<NotificationsStore>((set) => ({
       ],
     })),
 
-  // 移除通知
+  // Dismiss a notification
   dismissNotification: (id) =>
     set((state) => ({
       notifications: state.notifications.filter(

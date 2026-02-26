@@ -31,5 +31,5 @@ export interface UserResponse {
   /** User role */
   role?: string;
   /** Is active */
-  is_active?: boolean;
+  isActive?: boolean;
 }

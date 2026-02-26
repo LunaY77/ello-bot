@@ -1,0 +1,16 @@
+export default {
+  'profile.title': 'Profile',
+  'profile.username': 'Username',
+  'profile.role': 'Role',
+  'profile.avatar': 'Avatar',
+  'profile.changeAvatar': 'Change Avatar',
+  'profile.avatarUrl': 'Avatar URL',
+  'profile.uploadAvatar': 'Upload Avatar',
+  'profile.avatarUpdated': 'Avatar updated successfully',
+  'resetPassword.title': 'Reset Password',
+  'resetPassword.newPassword': 'New Password',
+  'resetPassword.confirmPassword': 'Confirm Password',
+  'resetPassword.submit': 'Reset Password',
+  'resetPassword.success': 'Password reset successfully',
+  'resetPassword.mismatch': 'Passwords do not match',
+} as const;

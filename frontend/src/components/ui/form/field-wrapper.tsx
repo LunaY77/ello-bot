@@ -1,12 +1,12 @@
 /**
- * FieldWrapper 字段包装组件
+ * FieldWrapper Component
  *
- * 功能说明：
- * 包装表单字段，提供统一的标签和错误显示布局。
+ * Description:
+ * Wraps form fields to provide consistent label and error display layout.
  *
- * 使用场景：
- * - 包装 Input、Select 等表单控件
- * - 统一表单字段的布局结构
+ * Use Cases:
+ * - Wrapping Input, Select and other form controls
+ * - Consistent layout structure for form fields
  */
 
 import * as React from 'react';
@@ -16,22 +16,22 @@ import { Error } from './error';
 import { Label } from './label';
 
 /**
- * FieldWrapper 组件的 Props 类型
+ * FieldWrapper Component Props Type
  */
 type FieldWrapperProps = {
-  /** 字段标签 */
+  /** Field label */
   label?: string;
-  /** 自定义 className */
+  /** Custom className */
   className?: string;
-  /** 子元素（表单控件） */
+  /** Child elements (form controls) */
   children: React.ReactNode;
-  /** 字段错误 */
+  /** Field error */
   error?: FieldError | undefined;
 };
 
 /**
- * 传递给子组件的 Props 类型
- * 排除 className 和 children，只保留 label 和 error
+ * Props to pass through to child components
+ * Excludes className and children, keeping only label and error
  */
 export type FieldWrapperPassThroughProps = Omit<
   FieldWrapperProps,
@@ -39,14 +39,14 @@ export type FieldWrapperPassThroughProps = Omit<
 >;
 
 /**
- * FieldWrapper 字段包装组件
+ * FieldWrapper Component
  *
- * @param label - 字段标签
- * @param error - 字段错误
- * @param children - 表单控件
+ * @param label - Field label
+ * @param error - Field error
+ * @param children - Form control
  *
  * @example
- * <FieldWrapper label="邮箱" error={errors.email}>
+ * <FieldWrapper label="Email" error={errors.email}>
  *   <input type="email" {...register('email')} />
  * </FieldWrapper>
  */

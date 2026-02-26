@@ -1,53 +1,53 @@
 /**
- * 开关状态管理 Hook
+ * Disclosure State Management Hook
  *
- * 功能说明：
- * 本 Hook 用于管理布尔状态的开关，常用于：
- * - 模态框（Modal）的显示/隐藏
- * - 下拉菜单的展开/收起
- * - 侧边栏的打开/关闭
- * - 任何需要切换状态的场景
+ * Feature Description:
+ * This Hook is used to manage boolean toggle states, commonly used for:
+ * - Modal show/hide
+ * - Dropdown menu expand/collapse
+ * - Sidebar open/close
+ * - Any scenario that requires state toggling
  *
- * 为什么需要这个 Hook：
- * 1. 避免在每个组件中重复编写 useState + 回调函数
- * 2. 提供统一的 API（open, close, toggle）
- * 3. 使用 useCallback 优化性能，避免不必要的重渲染
+ * Why this Hook is needed:
+ * 1. Avoid repetitive useState + callback function writing in each component
+ * 2. Provide unified API (open, close, toggle)
+ * 3. Use useCallback for performance optimization, avoiding unnecessary re-renders
  */
 
 import * as React from 'react';
 
 /**
- * 开关状态管理 Hook
+ * Disclosure state management hook
  *
- * @param initial - 初始状态，默认为 false（关闭）
- * @returns 包含状态和操作方法的对象
+ * @param initial - Initial state, defaults to false (closed)
+ * @returns Object containing state and operation methods
  *
  * @example
- * // 基础用法
+ * // Basic usage
  * const { isOpen, open, close, toggle } = useDisclosure();
  *
- * // 模态框示例
+ * // Modal example
  * function MyComponent() {
  *   const { isOpen, open, close } = useDisclosure();
  *
  *   return (
  *     <>
- *       <button onClick={open}>打开模态框</button>
+ *       <button onClick={open}>Open Modal</button>
  *       <Modal isOpen={isOpen} onClose={close}>
- *         <p>模态框内容</p>
+ *         <p>Modal content</p>
  *       </Modal>
  *     </>
  *   );
  * }
  *
- * // 下拉菜单示例
+ * // Dropdown example
  * function Dropdown() {
  *   const { isOpen, toggle } = useDisclosure();
  *
  *   return (
  *     <div>
  *       <button onClick={toggle}>
- *         {isOpen ? '收起' : '展开'}
+ *         {isOpen ? 'Collapse' : 'Expand'}
  *       </button>
  *       {isOpen && <ul>...</ul>}
  *     </div>
@@ -55,18 +55,18 @@ import * as React from 'react';
  * }
  */
 export const useDisclosure = (initial = false) => {
-  // 管理开关状态
+  // Manage toggle state
   const [isOpen, setIsOpen] = React.useState(initial);
 
-  // 打开操作
-  // 使用 useCallback 确保函数引用稳定，避免子组件不必要的重渲染
+  // Open operation
+  // Use useCallback to ensure stable function reference, avoiding unnecessary re-renders in child components
   const open = React.useCallback(() => setIsOpen(true), []);
 
-  // 关闭操作
+  // Close operation
   const close = React.useCallback(() => setIsOpen(false), []);
 
-  // 切换操作
-  // 使用函数式更新确保获取最新状态
+  // Toggle operation
+  // Use functional update to ensure getting the latest state
   const toggle = React.useCallback(() => setIsOpen((state) => !state), []);
 
   return { isOpen, open, close, toggle };

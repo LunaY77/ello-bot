@@ -1,45 +1,48 @@
 /**
- * Input 输入框组件
+ * Input Component
  *
- * 功能说明：
- * 基于原生 input 的表单输入组件，集成 react-hook-form。
+ * Description:
+ * A form input component based on native input, integrated with react-hook-form.
  *
- * 特性：
- * - 支持 react-hook-form 的 register
- * - 自动显示标签和错误信息
- * - 支持所有原生 input 属性
+ * Features:
+ * - Supports react-hook-form's register
+ * - Automatically displays label and error messages
+ * - Supports all native input attributes
  */
 
 import * as React from 'react';
 import { type UseFormRegisterReturn } from 'react-hook-form';
 
+import {
+  FieldWrapper,
+  type FieldWrapperPassThroughProps,
+} from './field-wrapper';
+
 import { cn } from '@/utils/cn';
 
-import { FieldWrapper, type FieldWrapperPassThroughProps } from './field-wrapper';
-
 /**
- * Input 组件的 Props 类型
+ * Input Component Props Type
  */
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
   FieldWrapperPassThroughProps & {
-    /** 自定义 className */
+    /** Custom className */
     className?: string;
-    /** react-hook-form 的 register 返回值 */
+    /** react-hook-form's register return value */
     registration: Partial<UseFormRegisterReturn>;
   };
 
 /**
- * Input 输入框组件
+ * Input Component
  *
- * @param label - 字段标签
- * @param error - 字段错误
- * @param registration - react-hook-form 的 register 返回值
- * @param className - 自定义 className
- * @param type - 输入类型
+ * @param label - Field label
+ * @param error - Field error
+ * @param registration - react-hook-form's register return value
+ * @param className - Custom className
+ * @param type - Input type
  *
  * @example
  * <Input
- *   label="邮箱"
+ *   label="Email"
  *   type="email"
  *   error={errors.email}
  *   registration={register('email')}

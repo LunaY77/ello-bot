@@ -12,5 +12,5 @@ export interface UploadAvatarRequest {
    * @minLength 1
    * @maxLength 2083
    */
-  avatar_url: string;
+  avatarUrl: string;
 }

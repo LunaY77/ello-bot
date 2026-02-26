@@ -1,29 +1,29 @@
 /**
- * Error 错误提示组件
+ * Error Component
  *
- * 功能说明：
- * 显示表单字段的错误消息。
+ * Description:
+ * Displays error messages for form fields.
  *
- * 特性：
- * - 无障碍访问支持（role="alert"）
- * - 条件渲染（无错误时不渲染）
+ * Features:
+ * - Accessibility support (role="alert")
+ * - Conditional rendering (not rendered when no error)
  */
 
 /**
- * Error 组件的 Props 类型
+ * Error Component Props Type
  */
 export type ErrorProps = {
-  /** 错误消息 */
+  /** Error message */
   errorMessage?: string | null;
 };
 
 /**
- * Error 错误提示组件
+ * Error Component
  *
- * @param errorMessage - 错误消息，为空时不渲染
+ * @param errorMessage - Error message, not rendered when empty
  *
  * @example
- * <Error errorMessage="请输入有效的邮箱地址" />
+ * <Error errorMessage="Please enter a valid email address" />
  */
 export const Error = ({ errorMessage }: ErrorProps) => {
   if (!errorMessage) return null;

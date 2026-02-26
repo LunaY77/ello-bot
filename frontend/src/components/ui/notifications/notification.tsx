@@ -1,14 +1,14 @@
 /**
- * 单个通知组件
+ * Individual Notification Component
  *
- * 功能说明：
- * 显示单个通知消息，支持不同类型的图标和关闭按钮。
+ * Functionality:
+ * Displays a single notification message with support for different notification types with icons and a close button.
  */
 
-import { cn } from '@/utils/cn';
+// import { cn } from '@/utils/cn';
 
 /**
- * 不同类型通知的图标 SVG
+ * SVG icons for different notification types
  */
 const icons = {
   info: (
@@ -74,7 +74,7 @@ const icons = {
 };
 
 /**
- * Notification 组件的 Props 类型
+ * Props type for Notification component
  */
 export type NotificationProps = {
   notification: {
@@ -87,10 +87,10 @@ export type NotificationProps = {
 };
 
 /**
- * 单个通知组件
+ * Individual Notification Component
  *
- * @param notification - 通知数据
- * @param onDismiss - 关闭通知的回调函数
+ * @param notification - The notification data
+ * @param onDismiss - Callback function to dismiss the notification
  */
 export const Notification = ({
   notification: { id, type, title, message },
@@ -101,10 +101,10 @@ export const Notification = ({
       <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5">
         <div className="p-4" role="alert" aria-label={title}>
           <div className="flex items-start">
-            {/* 图标 */}
+            {/* Icon */}
             <div className="shrink-0">{icons[type]}</div>
 
-            {/* 内容 */}
+            {/* Content */}
             <div className="ml-3 w-0 flex-1 pt-0.5">
               <p className="text-sm font-medium text-gray-900">{title}</p>
               {message && (
@@ -112,13 +112,13 @@ export const Notification = ({
               )}
             </div>
 
-            {/* 关闭按钮 */}
+            {/* Close button */}
             <div className="ml-4 flex shrink-0">
               <button
                 className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                 onClick={() => onDismiss(id)}
               >
-                <span className="sr-only">关闭</span>
+                <span className="sr-only">Close</span>
                 <svg
                   className="size-5"
                   fill="none"

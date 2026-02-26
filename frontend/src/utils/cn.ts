@@ -1,49 +1,49 @@
 /**
- * CSS 类名合并工具
+ * CSS Class Name Merge Utility
  *
- * 功能说明：
- * 本模块提供一个用于合并和处理 Tailwind CSS 类名的工具函数。
- * 在前端开发中，动态构建 className 是常见需求，特别是在组件需要根据
- * 不同的状态（如加载中、错误、禁用等）应用不同样式时。
+ * Feature Description:
+ * This module provides a utility function for merging and handling Tailwind CSS class names.
+ * In frontend development, dynamically building className is a common requirement, especially
+ * when components need to apply different styles based on various states (e.g., loading, error, disabled).
  *
- * 为什么需要这个工具：
- * 1. Tailwind CSS 的原子化特性导致类名可能冲突（如 'p-4 p-2'）
- * 2. 动态类名需要条件合并（如按钮的变体样式）
- * 3. 多个来源的类名需要智能合并（如 props.className + 默认样式）
+ * Why this utility is needed:
+ * 1. Tailwind CSS's atomic nature can cause class name conflicts (e.g., 'p-4 p-2')
+ * 2. Dynamic class names need conditional merging (e.g., button variant styles)
+ * 3. Class names from multiple sources need intelligent merging (e.g., props.className + default styles)
  */
 
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 /**
- * 合并并优化 Tailwind CSS 类名
+ * Merge and optimize Tailwind CSS class names
  *
- * @param inputs - 可变参数，接受多种格式的类名输入：
- *                 - 字符串：'text-red-500 font-bold'
- *                 - 数组：['text-red-500', 'font-bold']
- *                 - 对象：{ 'text-red-500': true, 'font-bold': false }
- *                 - 混合：可以组合上述任意格式
+ * @param inputs - Variadic parameters accepting multiple class name formats:
+ *                 - String: 'text-red-500 font-bold'
+ *                 - Array: ['text-red-500', 'font-bold']
+ *                 - Object: { 'text-red-500': true, 'font-bold': false }
+ *                 - Mixed: Combine any of the above formats
  *
- * @returns 合并后的 className 字符串，已解决 Tailwind 类名冲突
+ * @returns Merged className string with Tailwind class conflicts resolved
  *
  * @example
- * // 基础用法
+ * // Basic usage
  * cn('text-red-500', 'font-bold') → 'text-red-500 font-bold'
  *
- * // 条件类名（适合根据状态切换样式）
+ * // Conditional class names (suitable for state-based style changes)
  * cn('base-class', isActive && 'active-class') → 'base-class active-class'
  *
- * // 处理冲突（后者覆盖前者）
+ * // Handling conflicts (latter overrides former)
  * cn('px-4 py-2', 'px-2') → 'px-2 py-2'
  *
- * // 实际使用场景：组件 props 合并
+ * // Real-world usage: component props merging
  * function Button({ className, ...props }) {
  *   return (
  *     <button
  *       className={cn(
- *         'px-4 py-2 bg-blue-500 rounded', // 基础样式
- *         props.disabled && 'opacity-50 cursor-not-allowed', // 条件样式
- *         className // 用户传入的自定义样式（可覆盖基础样式）
+ *         'px-4 py-2 bg-blue-500 rounded', // base styles
+ *         props.disabled && 'opacity-50 cursor-not-allowed', // conditional styles
+ *         className // user-provided custom styles (can override base styles)
  *       )}
  *       {...props}
  *     />
@@ -51,8 +51,8 @@ import { twMerge } from 'tailwind-merge';
  * }
  */
 export function cn(...inputs: ClassValue[]) {
-  // 执行流程：
-  // 1. clsx(inputs)：先处理各种格式的输入，将它们转换为标准的 className 字符串
-  // 2. twMerge(...)：然后解决 Tailwind 类名冲突，确保后面的类覆盖前面的冲突类
+  // Execution flow:
+  // 1. clsx(inputs): First process various format inputs and convert them to standard className strings
+  // 2. twMerge(...): Then resolve Tailwind class name conflicts, ensuring later classes override conflicting earlier ones
   return twMerge(clsx(inputs));
 }

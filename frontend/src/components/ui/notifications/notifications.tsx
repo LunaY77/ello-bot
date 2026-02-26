@@ -1,17 +1,17 @@
 /**
- * 通知容器组件
+ * Notification Container Component
  *
- * 功能说明：
- * 显示所有通知消息的容器，固定在页面右上角。
+ * Functionality:
+ * Displays all notification messages in a container fixed to the top-right of the page.
  */
 
 import { Notification } from './notification';
 import { useNotifications } from './notifications-store';
 
 /**
- * 通知容器组件
+ * Notification Container Component
  *
- * 使用 aria-live="assertive" 确保屏幕阅读器能够读取通知内容
+ * Uses aria-live="assertive" to ensure screen readers can read notification content
  */
 export const Notifications = () => {
   const { notifications, dismissNotification } = useNotifications();

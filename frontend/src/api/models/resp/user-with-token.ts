@@ -13,9 +13,9 @@ Inherits UserResponse and Token, contains complete user info and token.
  */
 export interface UserWithToken {
   /** JWT access token */
-  access_token: string;
+  accessToken: string;
   /** Token type */
-  token_type?: string;
+  tokenType?: string;
   /**
    * Username
    * @minLength 3
@@ -29,5 +29,5 @@ export interface UserWithToken {
   /** User role */
   role?: string;
   /** Is active */
-  is_active?: boolean;
+  isActive?: boolean;
 }
