@@ -103,10 +103,33 @@ class BusinessException(Exception):
         }
 
 
+class AuthException(Exception):
+    """Authentication/authorization exception with unified error code payload."""
+
+    def __init__(self, code: ErrorCode) -> None:
+        self.error_code = code.error_code
+        self.error_msg = code.error_msg
+        super().__init__(code.error_msg)
+
+    def to_dict(self) -> dict:
+        return {
+            "code": self.error_code,
+            "message": self.error_msg,
+        }
+
+
 def business_exception_handler(request: Request, exc: BusinessException):
     log.warning(f"Business exception: {exc.error_code} - {exc.error_msg} - {request.url.path}")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
+        content=Result.fail(code=exc.error_code, message=exc.error_msg).model_dump(by_alias=True),
+    )
+
+
+def auth_exception_handler(request: Request, exc: AuthException):
+    log.warning(f"Auth exception: {exc.error_code} - {exc.error_msg} - {request.url.path}")
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
         content=Result.fail(code=exc.error_code, message=exc.error_msg).model_dump(by_alias=True),
     )
 

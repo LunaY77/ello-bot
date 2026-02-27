@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 import { LoginRequestSchema } from '@/api/schemas';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ type LoginFormProps = {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const { t } = useTranslation('auth');
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo');
   const login = useLogin({
     onSuccess,
   });
@@ -54,7 +56,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       <div className="mt-4 text-center text-sm text-gray-600">
         {t('login.noAccount')}{' '}
         <Link
-          to={paths.auth.register.getHref()}
+          to={paths.auth.register.getHref(redirectTo)}
           className="font-medium text-blue-600 hover:text-blue-500"
         >
           {t('login.registerLink')}

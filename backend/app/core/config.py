@@ -7,7 +7,7 @@ Environment variable priority: .env file > system environment variables > defaul
 
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app import __app_name__, __version__
@@ -76,6 +76,23 @@ class Settings(BaseSettings):
     LOG_MAX_SIZE: int = Field(
         default=10 * 1024 * 1024, description="Maximum log file size in bytes, default 10MB"
     )
+
+    @model_validator(mode="after")
+    def validate_security_settings(self) -> "Settings":
+        """Validate security-sensitive settings.
+
+        Production mode requires a non-empty JWT key with a minimum 32-byte length.
+        """
+        if self.DEBUG:
+            return self
+
+        if not self.SECRET_KEY:
+            raise ValueError("SECRET_KEY must be set when DEBUG is False")
+
+        if len(self.SECRET_KEY.encode("utf-8")) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 bytes when DEBUG is False")
+
+        return self
 
 
 @lru_cache

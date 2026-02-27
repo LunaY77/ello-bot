@@ -1,5 +1,7 @@
 """Integration tests for user endpoints."""
 
+from app.utils.auth import create_access_token
+
 
 def test_get_current_user(client, test_user, auth_headers):
     response = client.get("/api/users/me", headers=auth_headers)
@@ -15,6 +17,15 @@ def test_get_current_user_unauthorized(client):
     assert response.status_code == 401
     data = response.json()
     assert data["success"] is False
+
+
+def test_get_current_user_invalid_sub_claim(client):
+    token = create_access_token({"sub": "invalid", "token_type": "access"})
+    response = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 401
+    data = response.json()
+    assert data["success"] is False
+    assert data["code"] == "A0009"
 
 
 def test_get_user_by_id(client, test_user, auth_headers):

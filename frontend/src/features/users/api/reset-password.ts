@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { ResetPasswordRequest } from '@/api/models/req';
 import { api } from '@/lib/api-client';
@@ -22,12 +22,14 @@ type UseResetPasswordOptions = {
 export const useResetPassword = ({
   mutationConfig,
 }: UseResetPasswordOptions) => {
+  const queryClient = useQueryClient();
   const { onSuccess, ...restConfig } = mutationConfig || {};
 
   return useMutation({
     ...restConfig,
     onSuccess: (...args) => {
       getUserStoreState().clearToken();
+      queryClient.setQueryData(['authenticated-user'], null);
       onSuccess?.(...args);
     },
     mutationFn: resetPassword,

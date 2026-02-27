@@ -118,14 +118,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    const isDisabled = Boolean(isLoading || props.disabled);
+
     // Determine whether to render <button> or <Slot> based on asChild prop
     const Comp = asChild ? Slot : 'button';
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          isDisabled && 'pointer-events-none',
+        )}
         ref={ref}
         {...props}
+        aria-busy={isLoading || undefined}
+        disabled={isDisabled}
       >
         {/* Loading spinner: only shown when isLoading is true */}
         {isLoading && <Spinner size="sm" className="text-current" />}

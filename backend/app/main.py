@@ -1,31 +1,26 @@
 import uuid as _uuid
 from contextlib import asynccontextmanager
-from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select, text
+from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
 
 from app.core import (
+    AuthException,
     BusinessException,
-    CommonErrorCode,
     Result,
     SessionLocal,
+    auth_exception_handler,
     business_exception_handler,
     general_exception_handler,
     log,
-    reset_current_user,
-    set_current_user,
     settings,
     validation_exception_handler,
 )
-from app.model import User
 from app.router import auth_router, user_router
-from app.utils import decode_access_token, extract_token
 
 
 @asynccontextmanager
@@ -60,8 +55,6 @@ app = FastAPI(
 
 # ============ Middleware ============
 
-PUBLIC_PATHS = ["/health", "/docs", "/openapi.json", "/redoc", "/favicon.ico", "/api/auth/"]
-
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Injects a unique X-Request-ID header into every response for tracing."""
@@ -73,60 +66,8 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         return response
 
 
-class AuthMiddleware(BaseHTTPMiddleware):
-    """Authentication middleware to validate JWT tokens
-
-    This middleware extracts the Bearer token from the Authorization header,
-    decodes and validates it, and attaches the current user information to the request state.
-
-    It raises RuntimeError with appropriate error codes for unauthorized access or invalid tokens.
-    """
-
-    async def dispatch(self, request: Request, call_next):
-        path = request.url.path
-        if request.method == "OPTIONS":
-            return await call_next(request)
-
-        if path in PUBLIC_PATHS or any(path.startswith(p) for p in PUBLIC_PATHS):
-            return await call_next(request)
-
-        try:
-            token = extract_token(request)
-            payload = decode_access_token(token)
-
-            user_id = int(payload["sub"])
-            with SessionLocal() as db:
-                user = db.scalar(select(User).where(User.id == user_id))
-
-            if not user or not user.is_active:
-                return JSONResponse(
-                    status_code=HTTPStatus.UNAUTHORIZED,
-                    content=Result.fail(
-                        code=CommonErrorCode.UNAUTHORIZED.error_code,
-                        message=CommonErrorCode.UNAUTHORIZED.error_msg,
-                    ).model_dump(by_alias=True),
-                )
-
-            ctx_token = set_current_user(user)
-            try:
-                return await call_next(request)
-            finally:
-                reset_current_user(ctx_token)
-
-        except RuntimeError as exc:
-            error_code = exc.args[0] if exc.args else CommonErrorCode.UNAUTHORIZED
-            return JSONResponse(
-                status_code=HTTPStatus.UNAUTHORIZED,
-                content=Result.fail(
-                    code=error_code.error_code,
-                    message=error_code.error_msg,
-                ).model_dump(by_alias=True),
-            )
-
-
 # ============= Configure Middleware =============
 
-app.add_middleware(AuthMiddleware)
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -155,6 +96,7 @@ async def health_check():
 # =============== Exception Handlers ===============
 
 app.add_exception_handler(BusinessException, business_exception_handler)  # type: ignore[arg-type]
+app.add_exception_handler(AuthException, auth_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(Exception, general_exception_handler)
 
@@ -171,7 +113,7 @@ def main():
         "app.main:app",
         host=settings.HOST,
         port=settings.PORT,
-        reload=True,
+        reload=settings.DEBUG,
     )
 
 

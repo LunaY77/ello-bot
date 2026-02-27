@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 
 import { RegisterRequestSchema } from '@/api/schemas';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ type RegisterFormProps = {
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const { t } = useTranslation('auth');
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo');
   const register = useRegister({ onSuccess });
 
   const registerFormSchema = RegisterRequestSchema.extend({
@@ -71,7 +74,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       <div className="mt-4 text-center text-sm text-gray-600">
         {t('register.hasAccount')}{' '}
         <Link
-          to={paths.auth.login.getHref()}
+          to={paths.auth.login.getHref(redirectTo)}
           className="font-medium text-blue-600 hover:text-blue-500"
         >
           {t('register.login')}

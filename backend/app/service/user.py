@@ -12,6 +12,7 @@ from enum import Enum, unique
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy.exc import IntegrityError
 
 from app.core import (
     BusinessException,
@@ -113,7 +114,11 @@ class UserService:
         # Create User
         hashed_password = hash_password(password)
 
-        new_user = self.user_repo.create(username=username, password=hashed_password)
+        try:
+            new_user = self.user_repo.create(username=username, password=hashed_password)
+        except IntegrityError as exc:
+            self.user_repo.db.rollback()
+            raise BusinessException(UserErrorCode.USERNAME_EXISTS) from exc
 
         log.info(f"User registered successfully: {username} (ID: {new_user.id})")
         return self.login(username, password)

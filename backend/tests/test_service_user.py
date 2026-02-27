@@ -1,6 +1,7 @@
 """Unit tests for UserService."""
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from app.core.exception import BusinessException
 from app.model.user import User
@@ -42,6 +43,18 @@ def test_register_success(user_service):
 def test_register_duplicate_username(user_service, existing_user):
     with pytest.raises(BusinessException) as exc_info:
         user_service.register("existing", "password123")
+    assert exc_info.value.error_code == UserErrorCode.USERNAME_EXISTS.error_code
+
+
+def test_register_integrity_error_maps_to_username_exists(user_service, monkeypatch):
+    def raise_integrity_error(*args, **kwargs):
+        raise IntegrityError("INSERT INTO users ...", {"username": "newuser"}, Exception("dup"))
+
+    monkeypatch.setattr(user_service.user_repo, "create", raise_integrity_error)
+
+    with pytest.raises(BusinessException) as exc_info:
+        user_service.register("newuser", "password123")
+
     assert exc_info.value.error_code == UserErrorCode.USERNAME_EXISTS.error_code
 
 

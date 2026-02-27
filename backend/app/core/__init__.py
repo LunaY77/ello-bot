@@ -1,9 +1,8 @@
 """Core Module"""
 
-from app.core.auth_ctx import (
-    get_current_user,
-    reset_current_user,
-    set_current_user,
+from app.core.auth import (
+    CurrentUserDep,
+    require_auth,
 )
 from app.core.config import settings
 from app.core.database import (
@@ -12,9 +11,11 @@ from app.core.database import (
     SessionLocal,
 )
 from app.core.exception import (
+    AuthException,
     BusinessException,
     CommonErrorCode,
     ErrorCode,
+    auth_exception_handler,
     business_exception_handler,
     general_exception_handler,
     validation_exception_handler,
@@ -28,7 +29,9 @@ __all__ = [
     "ErrorCode",
     "CommonErrorCode",
     "BusinessException",
+    "AuthException",
     "business_exception_handler",
+    "auth_exception_handler",
     "validation_exception_handler",
     "general_exception_handler",
     "DbSession",
@@ -36,7 +39,6 @@ __all__ = [
     "Base",
     "Result",
     "ApiModel",
-    "get_current_user",
-    "set_current_user",
-    "reset_current_user",
+    "require_auth",
+    "CurrentUserDep",
 ]
