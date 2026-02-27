@@ -32,10 +32,11 @@ def existing_user(db_session):
 
 def test_register_success(user_service):
     result = user_service.register("newuser", "password123")
-    assert result.username == "newuser"
-    assert result.id is not None
-    assert result.role == "user"
-    assert result.is_active is True
+    assert result.user.username == "newuser"
+    assert result.user.id is not None
+    assert result.user.role == "user"
+    assert result.user.is_active is True
+    assert result.token
 
 
 def test_register_duplicate_username(user_service, existing_user):
@@ -46,9 +47,8 @@ def test_register_duplicate_username(user_service, existing_user):
 
 def test_login_success(user_service, existing_user):
     result = user_service.login("existing", "password123")
-    assert result.username == "existing"
-    assert result.access_token is not None
-    assert result.token_type == "bearer"
+    assert result.user.username == "existing"
+    assert result.token
 
 
 def test_login_user_not_found(user_service):

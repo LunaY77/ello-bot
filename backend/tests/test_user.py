@@ -36,7 +36,7 @@ def test_get_user_by_id_not_found(client, auth_headers):
 
 def test_reset_password(client, test_user, auth_headers):
     response = client.post(
-        "/api/users/reset",
+        "/api/users/reset-password",
         json={"new_password": "newpassword123"},
         headers=auth_headers,
     )
@@ -47,7 +47,7 @@ def test_reset_password(client, test_user, auth_headers):
 
 def test_reset_password_too_short(client, auth_headers):
     response = client.post(
-        "/api/users/reset",
+        "/api/users/reset-password",
         json={"new_password": "12345"},
         headers=auth_headers,
     )
@@ -58,7 +58,7 @@ def test_reset_password_too_short(client, auth_headers):
 
 
 def test_reset_password_unauthorized(client):
-    response = client.post("/api/users/reset", json={"new_password": "newpassword123"})
+    response = client.post("/api/users/reset-password", json={"new_password": "newpassword123"})
     assert response.status_code == 401
 
 

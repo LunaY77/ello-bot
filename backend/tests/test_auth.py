@@ -10,10 +10,11 @@ def test_register_success(client):
     data = response.json()
     assert data["success"] is True
     assert data["code"] == "0"
-    assert data["data"]["username"] == "newuser"
-    assert data["data"]["role"] == "user"
-    assert data["data"]["is_active"] is True
-    assert "password" not in data["data"]
+    assert data["data"]["user"]["username"] == "newuser"
+    assert data["data"]["user"]["role"] == "user"
+    assert data["data"]["user"]["isActive"] is True
+    assert "password" not in data["data"]["user"]
+    assert data["data"]["token"]
 
 
 def test_register_duplicate_username(client, test_user):
@@ -58,9 +59,8 @@ def test_login_success(client, test_user):
     data = response.json()
     assert data["success"] is True
     assert data["code"] == "0"
-    assert data["data"]["username"] == "testuser"
-    assert "access_token" in data["data"]
-    assert data["data"]["token_type"] == "bearer"
+    assert data["data"]["user"]["username"] == "testuser"
+    assert data["data"]["token"]
 
 
 def test_login_wrong_password(client, test_user):
