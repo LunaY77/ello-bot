@@ -4,12 +4,12 @@ import { ChatInput } from './chat-input';
 import { ChatMessages } from './chat-messages';
 import { ChatSidebar } from './chat-sidebar';
 
-import { useUser } from '@/lib/auth';
+import { useCurrentUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';
 
 export const ChatLayout = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const user = useUser();
+  const user = useCurrentUser();
 
   return (
     <div className="flex h-screen max-h-[100dvh] flex-row text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900">

@@ -1,5 +1,6 @@
 import Axios, { type InternalAxiosRequestConfig } from 'axios';
 
+import type { Result } from '@/api/models/resp/result';
 import { useNotifications } from '@/components/ui/notifications';
 import { env } from '@/config/env';
 import { paths } from '@/config/paths';
@@ -31,7 +32,8 @@ api.interceptors.request.use(authRequestInterceptor);
 
 api.interceptors.response.use(
   (response) => {
-    return response.data;
+    const payload = response.data;
+    return isResult(payload) ? payload.data : payload;
   },
   (error) => {
     const message = error.response?.data?.message || error.message;
@@ -54,3 +56,10 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isResult<T = unknown>(x: any): x is Result<T> {
+  return (
+    x && typeof x === 'object' && 'code' in x && 'message' in x && 'data' in x
+  );
+}

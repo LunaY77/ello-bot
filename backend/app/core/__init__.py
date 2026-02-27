@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.database import (
     Base,
     DbSession,
+    SessionLocal,
 )
 from app.core.exception import (
     BusinessException,
@@ -19,7 +20,7 @@ from app.core.exception import (
     validation_exception_handler,
 )
 from app.core.logger import log
-from app.core.result import Result
+from app.core.schema import ApiModel, Result
 
 __all__ = [
     "settings",
@@ -31,8 +32,10 @@ __all__ = [
     "validation_exception_handler",
     "general_exception_handler",
     "DbSession",
+    "SessionLocal",
     "Base",
     "Result",
+    "ApiModel",
     "get_current_user",
     "set_current_user",
     "reset_current_user",

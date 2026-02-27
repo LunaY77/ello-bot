@@ -4,8 +4,8 @@
  * Provides layout structure for the main app interface
  */
 
-import { Home, PanelLeft, User2, Users } from 'lucide-react';
-import { useEffect, useState, type JSX } from 'react';
+import { Home, PanelLeft, User2, Users, type LucideIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useNavigation } from 'react-router';
 
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn';
 type SideNavigationItem = {
   name: string;
   to: string;
-  icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+  icon: LucideIcon;
 };
 
 const Logo = () => {

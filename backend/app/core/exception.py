@@ -22,7 +22,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.core.logger import log
-from app.core.result import Result
+from app.core.schema import Result
 
 
 class ErrorCode(Protocol):
@@ -107,7 +107,7 @@ def business_exception_handler(request: Request, exc: BusinessException):
     log.warning(f"Business exception: {exc.error_code} - {exc.error_msg} - {request.url.path}")
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content=Result.fail(code=exc.error_code, message=exc.error_msg).model_dump(),
+        content=Result.fail(code=exc.error_code, message=exc.error_msg).model_dump(by_alias=True),
     )
 
 
@@ -126,7 +126,7 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=Result.fail(
             code=CommonErrorCode.PARAM_ERROR.error_code, message=message
-        ).model_dump(),
+        ).model_dump(by_alias=True),
     )
 
 
@@ -155,5 +155,5 @@ def general_exception_handler(request: Request, exc: Exception):
         content=Result.fail(
             code=CommonErrorCode.SYSTEM_ERROR.error_code,
             message=CommonErrorCode.SYSTEM_ERROR.error_msg,
-        ).model_dump(),
+        ).model_dump(by_alias=True),
     )

@@ -78,38 +78,58 @@ async function removeTmpTargets() {
 }
 
 /**
- * Remove "-schema" from Zod schema file names and update barrel imports.
- * e.g. "user-create-schema.zod.ts" → "user-create.zod.ts"
+ * Normalize Zod schema file names and update barrel imports.
+ *
+ * Rules:
+ * 1) Remove "-schema" before extension:
+ *    "user-create-schema.zod.ts" -> "user-create.zod.ts"
+ * 2) Remove ".zod" marker:
+ *    "user-create.zod.ts" -> "user-create.ts"
  */
 async function renameSchemaFiles(dir) {
   if (!(await exists(dir))) return;
 
+  // 1) 先做重命名
   const entries = await fs.readdir(dir, { withFileTypes: true });
   const renames = [];
 
   for (const e of entries) {
     if (!e.isFile()) continue;
+
     const oldName = e.name;
-    const newName = oldName.replace(/-schema(\.zod\.ts)$/, '$1');
+
+    // remove "-schema" right before ".zod.ts"
+    let newName = oldName.replace(/-schema(?=\.zod\.ts$)/, '');
+    // remove ".zod" marker: "*.zod.ts" -> "*.ts"
+    newName = newName.replace(/\.zod\.ts$/, '.ts');
+
     if (newName !== oldName) {
       renames.push({ oldName, newName });
       await fs.rename(path.join(dir, oldName), path.join(dir, newName));
     }
   }
 
-  // Update barrel index if it exists
+  // 2) 没有重命名就结束
   if (renames.length === 0) return;
-  const indexFiles = entries.filter(
-    (e) => e.isFile() && e.name.startsWith('index'),
+
+  // 3) 重命名后重新读取目录，避免拿到旧文件名（比如 index.zod.ts）
+  const entriesAfter = await fs.readdir(dir, { withFileTypes: true });
+
+  // 只更新真实存在的 index*.ts
+  const indexFiles = entriesAfter.filter(
+    (e) => e.isFile() && /^index(\..+)?\.ts$/.test(e.name),
   );
+
   for (const idx of indexFiles) {
     const p = path.join(dir, idx.name);
     let src = await fs.readFile(p, 'utf8');
+
     for (const { oldName, newName } of renames) {
       const oldModule = oldName.replace(/\.ts$/, '');
       const newModule = newName.replace(/\.ts$/, '');
       src = src.replaceAll(oldModule, newModule);
     }
+
     await fs.writeFile(p, src, 'utf8');
   }
 }

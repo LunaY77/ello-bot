@@ -14,7 +14,9 @@ Used for API request and response data validation, includes:
 
 from typing import Annotated
 
-from pydantic import AnyUrl, BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints
+from pydantic import AnyUrl, BeforeValidator, ConfigDict, Field, StringConstraints
+
+from app.core import ApiModel
 
 # ============== Request Types ==============
 
@@ -34,21 +36,21 @@ AvatarUrl = Annotated[str, BeforeValidator(_parse_url)]
 # ============== Request Schemas ==============
 
 
-class RegisterRequest(BaseModel):
+class RegisterRequest(ApiModel):
     username: UserName = Field(..., description="Username", examples=["john_doe"])
     password: Password = Field(..., description="Password", examples=["password123"])
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(ApiModel):
     username: UserName = Field(..., description="Username", examples=["john_doe"])
     password: Password = Field(..., description="Password", examples=["password123"])
 
 
-class ResetPasswordRequest(BaseModel):
+class ResetPasswordRequest(ApiModel):
     new_password: Password = Field(..., description="New password", examples=["newpassword123"])
 
 
-class UploadAvatarRequest(BaseModel):
+class UploadAvatarRequest(ApiModel):
     avatar_url: AvatarUrl = Field(
         ..., description="Avatar URL", examples=["https://example.com/avatar.jpg"]
     )
@@ -57,7 +59,7 @@ class UploadAvatarRequest(BaseModel):
 # ============== Response Schemas ==============
 
 
-class UserInfoResponse(BaseModel):
+class UserInfoResponse(ApiModel):
     """User Info response schema (sanitized)
 
     User information returned to client, does not contain sensitive information.
@@ -80,7 +82,7 @@ class UserInfoResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class AuthResponse(BaseModel):
+class AuthResponse(ApiModel):
     """Authentication response schema
 
     Contains user information and token returned after successful login or registration.

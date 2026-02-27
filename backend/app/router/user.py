@@ -32,7 +32,7 @@ def get_user_info(user_id: int, user_service: UserServiceDep):
 
 
 @router.post(
-    "/reset",
+    "/reset-password",
     response_model=Result[None],
     summary="Reset Password",
     description="Reset the password for the currently authenticated user.",

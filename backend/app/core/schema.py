@@ -2,12 +2,23 @@
 
 from typing import TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 T = TypeVar("T")
 
 
-class Result[T](BaseModel):
+class ApiModel(BaseModel):
+    """Base model for API schemas with camelCase aliasing and extra fields forbidden."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        extra="forbid",
+    )
+
+
+class Result[T](ApiModel):
     """Result wrapper for service layer operations
 
     Encapsulates success/failure of an operation along with data or error information.

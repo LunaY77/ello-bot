@@ -1,0 +1,18 @@
+{
+  "sidebar.newChat": "New Chat",
+  "sidebar.searchChats": "Search chats...",
+  "sidebar.noChats": "No conversations yet",
+  "input.placeholder": "Send a message...",
+  "input.send": "Send",
+  "input.stop": "Stop",
+  "placeholder.greeting": "Hello, {{name}}",
+  "placeholder.subtitle": "How can I help you today?",
+  "placeholder.suggestion1": "Explain a concept",
+  "placeholder.suggestion2": "Help me write code",
+  "placeholder.suggestion3": "Brainstorm ideas",
+  "placeholder.suggestion4": "Summarize a topic",
+  "message.copy": "Copy",
+  "message.copied": "Copied!",
+  "message.you": "You",
+  "message.assistant": "Assistant"
+}

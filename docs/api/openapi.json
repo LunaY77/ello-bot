@@ -272,6 +272,7 @@
             "description": "JWT access token"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "user",
@@ -316,6 +317,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "username",
@@ -346,6 +348,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "username",
@@ -355,20 +358,21 @@
       },
       "ResetPasswordRequest": {
         "properties": {
-          "new_password": {
+          "newPassword": {
             "type": "string",
             "maxLength": 20,
             "minLength": 6,
-            "title": "New Password",
+            "title": "Newpassword",
             "description": "New password",
             "examples": [
               "newpassword123"
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "new_password"
+          "newPassword"
         ],
         "title": "ResetPasswordRequest"
       },
@@ -399,6 +403,7 @@
             "default": true
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "Result",
         "description": "Result wrapper for service layer operations\n\nEncapsulates success/failure of an operation along with data or error information.\n\nAttributes:\n    success: Indicates if the operation was successful\n    data: The result data if successful, otherwise None\n    code: Error code if failed, \"0\" if successful\n    message: Error message if failed, \"Success\" if successful"
@@ -431,6 +436,7 @@
             "default": true
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "Result[AuthResponse]"
       },
@@ -456,6 +462,7 @@
             "default": true
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "Result[NoneType]"
       },
@@ -487,23 +494,25 @@
             "default": true
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "Result[UserInfoResponse]"
       },
       "UploadAvatarRequest": {
         "properties": {
-          "avatar_url": {
+          "avatarUrl": {
             "type": "string",
-            "title": "Avatar Url",
+            "title": "Avatarurl",
             "description": "Avatar URL",
             "examples": [
               "https://example.com/avatar.jpg"
             ]
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "avatar_url"
+          "avatarUrl"
         ],
         "title": "UploadAvatarRequest"
       },
@@ -536,13 +545,14 @@
             "description": "User role",
             "default": "user"
           },
-          "is_active": {
+          "isActive": {
             "type": "boolean",
-            "title": "Is Active",
+            "title": "Isactive",
             "description": "Is active",
             "default": true
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",

@@ -1,0 +1,22 @@
+{
+  "profile.title": "个人资料",
+  "profile.userInfo": "用户信息",
+  "profile.username": "用户名",
+  "profile.role": "角色",
+  "profile.status": "状态",
+  "profile.active": "已激活",
+  "profile.inactive": "未激活",
+  "profile.roleAdmin": "管理员",
+  "profile.roleUser": "用户",
+  "profile.avatar": "头像",
+  "profile.changeAvatar": "更换头像",
+  "profile.avatarUrl": "头像链接",
+  "profile.uploadAvatar": "上传头像",
+  "profile.avatarUpdated": "头像更新成功",
+  "resetPassword.title": "重置密码",
+  "resetPassword.newPassword": "新密码",
+  "resetPassword.confirmPassword": "确认密码",
+  "resetPassword.submit": "重置密码",
+  "resetPassword.success": "密码重置成功",
+  "resetPassword.mismatch": "两次输入的密码不一致"
+}

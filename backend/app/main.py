@@ -13,6 +13,8 @@ from starlette.responses import JSONResponse
 from app.core import (
     BusinessException,
     CommonErrorCode,
+    Result,
+    SessionLocal,
     business_exception_handler,
     general_exception_handler,
     log,
@@ -21,9 +23,7 @@ from app.core import (
     settings,
     validation_exception_handler,
 )
-from app.core.database import SessionLocal
-from app.core.result import Result
-from app.model.user import User
+from app.model import User
 from app.router import auth_router, user_router
 from app.utils import decode_access_token, extract_token
 
@@ -84,6 +84,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         if path in PUBLIC_PATHS or any(path.startswith(p) for p in PUBLIC_PATHS):
             return await call_next(request)
 
@@ -101,7 +104,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     content=Result.fail(
                         code=CommonErrorCode.UNAUTHORIZED.error_code,
                         message=CommonErrorCode.UNAUTHORIZED.error_msg,
-                    ).model_dump(),
+                    ).model_dump(by_alias=True),
                 )
 
             ctx_token = set_current_user(user)
@@ -117,13 +120,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 content=Result.fail(
                     code=error_code.error_code,
                     message=error_code.error_msg,
-                ).model_dump(),
+                ).model_dump(by_alias=True),
             )
 
 
 # ============= Configure Middleware =============
 
-# Configure CORS
+app.add_middleware(AuthMiddleware)
+app.add_middleware(RequestIDMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -131,9 +135,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(AuthMiddleware)
-app.add_middleware(RequestIDMiddleware)
 
 
 # ============= Routes =============

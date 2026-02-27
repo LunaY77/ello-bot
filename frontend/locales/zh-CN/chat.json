@@ -1,0 +1,18 @@
+{
+  "sidebar.newChat": "新建对话",
+  "sidebar.searchChats": "搜索对话...",
+  "sidebar.noChats": "暂无对话",
+  "input.placeholder": "发送消息...",
+  "input.send": "发送",
+  "input.stop": "停止",
+  "placeholder.greeting": "你好，{{name}}",
+  "placeholder.subtitle": "今天有什么可以帮您的？",
+  "placeholder.suggestion1": "解释一个概念",
+  "placeholder.suggestion2": "帮我写代码",
+  "placeholder.suggestion3": "头脑风暴",
+  "placeholder.suggestion4": "总结一个主题",
+  "message.copy": "复制",
+  "message.copied": "已复制！",
+  "message.you": "你",
+  "message.assistant": "助手"
+}

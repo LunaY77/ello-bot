@@ -35,6 +35,8 @@ make docker-up
 ```bash
 cp backend/.env.example backend/.env
 # Edit backend/.env with your settings
+cp frontend/.env.example frontend/.env
+# Edit frontend/.env with your settings
 ```
 
 ### 4. Run Database Migrations
@@ -59,21 +61,21 @@ make frontend-dev
 
 Run `make help` or refer to the table below.
 
-| Command | Description |
-|---------|-------------|
-| `make setup` | Install all deps and git hooks |
-| `make docker-up` | Start PostgreSQL via Docker Compose |
-| `make docker-down` | Stop and remove containers |
-| `make backend-run` | Start FastAPI dev server (port 8000) |
-| `make backend-test` | Run backend tests |
-| `make backend-lint` | Lint fix + format backend code (ruff) |
-| `make backend-check` | Lint check backend code (ruff, no fix) |
-| `make frontend-dev` | Start frontend dev server |
-| `make frontend-build` | Build frontend for production |
-| `make db-upgrade` | Apply all pending migrations |
-| `make db-migration msg="..."` | Generate a new migration |
-| `make lint` | Lint fix + format both frontend and backend |
-| `make check` | Lint check both frontend and backend |
+| Command                       | Description                                 |
+| ----------------------------- | ------------------------------------------- |
+| `make setup`                  | Install all deps and git hooks              |
+| `make docker-up`              | Start PostgreSQL via Docker Compose         |
+| `make docker-down`            | Stop and remove containers                  |
+| `make backend-run`            | Start FastAPI dev server (port 8000)        |
+| `make backend-test`           | Run backend tests                           |
+| `make backend-lint`           | Lint fix + format backend code (ruff)       |
+| `make backend-check`          | Lint check backend code (ruff, no fix)      |
+| `make frontend-dev`           | Start frontend dev server                   |
+| `make frontend-build`         | Build frontend for production               |
+| `make db-upgrade`             | Apply all pending migrations                |
+| `make db-migration msg="..."` | Generate a new migration                    |
+| `make lint`                   | Lint fix + format both frontend and backend |
+| `make check`                  | Lint check both frontend and backend        |
 
 ## License
 

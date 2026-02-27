@@ -1,0 +1,13 @@
+{
+  "required": "此字段为必填项",
+  "string.min": "最少需要 {{min}} 个字符",
+  "string.max": "最多允许 {{max}} 个字符",
+  "string.url": "请输入有效的 URL",
+  "string.email": "请输入有效的电子邮件地址",
+  "string.nonempty": "此字段不能为空",
+  "number.min": "最小值为 {{min}}",
+  "number.max": "最大值为 {{max}}",
+  "number.int": "必须为整数",
+  "invalidType": "期望类型为 {{expected}}，实际收到 {{received}}",
+  "invalid": "无效的值"
+}

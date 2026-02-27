@@ -91,3 +91,18 @@ def test_upload_avatar_unauthorized(client):
         json={"avatar_url": "https://example.com/avatar.jpg"},
     )
     assert response.status_code == 401
+
+
+def test_upload_avatar_preflight_options(client):
+    response = client.options(
+        "/api/users/avatar",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") in (
+        "http://localhost:3000",
+        "*",
+    )

@@ -268,7 +268,8 @@ type FormProps<TFormValues extends FieldValues, Schema> = {
  * </Form>
  */
 const Form = <
-  Schema extends ZodType<unknown, unknown, unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Schema extends ZodType<any, any, any>,
   TFormValues extends FieldValues = z.infer<Schema>,
 >({
   onSubmit,
@@ -293,13 +294,13 @@ const Form = <
 };
 
 export {
-  useFormField,
   Form,
-  FormProvider,
-  FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
-  FormMessage,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormProvider,
+  useFormField,
 };
