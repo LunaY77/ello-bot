@@ -1,73 +1,125 @@
-# React + TypeScript + Vite
+# Ello Bot Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript frontend for Ello Bot.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework**: React 19 + React Router 7
+- **Build Tool**: Vite 6
+- **Language**: TypeScript (strict mode)
+- **Data Fetching**: TanStack Query + react-query-auth
+- **State Management**: Zustand
+- **Validation**: Zod + react-hook-form
+- **Styling**: Tailwind CSS
+- **i18n**: i18next + react-i18next
+- **API Types/Schema**: Orval (OpenAPI codegen)
 
-## React Compiler
+## Project Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── app/              # App shell, providers, and route tree
+├── api/              # OpenAPI-generated request/response models and schemas
+├── features/         # Feature modules (auth, users, chat)
+├── components/       # Shared UI and layout components
+├── lib/              # Infrastructure (api-client, auth, react-query, i18n)
+├── store/            # Client-only global state (e.g. auth token)
+├── config/           # App config (paths, env)
+└── locales/          # Default locale resources
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18+
+- pnpm 10+
+- Backend API running (default: `http://localhost:8000`)
+
+### Install Dependencies
+
+```bash
+cd frontend && pnpm install
 ```
+
+### Configure Environment
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp frontend/.env.example frontend/.env
+```
+
+Key variables:
+
+```env
+VITE_APP_API_URL=http://localhost:8000/api
+VITE_APP_ENABLE_API_MOCKING=false
+VITE_APP_MOCK_API_PORT=8080
+VITE_APP_URL=http://localhost:3000
+```
+
+### Start Development Server
+
+```bash
+make frontend-dev
+```
+
+or:
+
+```bash
+cd frontend && pnpm run dev
+```
+
+## Available Scripts
+
+| Command | Description |
+| --- | --- |
+| `pnpm run dev` | Start Vite dev server |
+| `pnpm run build` | Type-check and build production bundle |
+| `pnpm run preview` | Preview production build locally |
+| `pnpm run lint` | Run ESLint |
+| `pnpm run lint:fix` | Run ESLint with auto-fix |
+| `pnpm run format` | Format files with Prettier |
+| `pnpm run check-types` | Run TypeScript type check |
+| `pnpm run test` | Run Vitest |
+| `pnpm run test:coverage` | Run tests with coverage |
+| `pnpm run codegen:api` | Generate API models/schemas from OpenAPI |
+| `pnpm run i18n` | Run i18n workflow and format locale output |
+
+## API Contract Sync
+
+When backend API contracts change:
+
+```bash
+make sync-api
+```
+
+or run manually:
+
+```bash
+cd backend && uv run gen-openapi
+cd frontend && pnpm run codegen:api
+```
+
+## i18n Workflow
+
+1. Update default locale files in `src/locales/default/*.ts`
+2. Run:
+
+```bash
+cd frontend && pnpm run i18n
+```
+
+This generates locale JSON files under `frontend/locales/`.
+
+## Code Quality
+
+```bash
+make frontend-lint    # format + lint fix
+make frontend-check   # lint only
+```
+
+## Development Guidelines
+
+See [AGENTS.md](./AGENTS.md).
