@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { ChatInput } from './chat-input';
-import { ChatMessages } from './chat-messages';
-import { ChatSidebar } from './chat-sidebar';
+import { ChatInput } from './ChatInput';
+import { ChatMessages } from './ChatMessages';
+import { ChatSidebar } from './ChatSidebar';
 
 import { useCurrentUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';

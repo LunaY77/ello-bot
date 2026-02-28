@@ -5,7 +5,7 @@
  * Displays all notification messages in a container fixed to the top-right of the page.
  */
 
-import { Notification } from './notification';
+import { Notification } from './Notification';
 import { useNotifications } from './notifications-store';
 
 /**

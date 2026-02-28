@@ -1,5 +1,6 @@
 """Shared test fixtures and configuration."""
 
+import os
 from unittest.mock import patch
 
 import pytest
@@ -7,6 +8,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+# Ensure app settings can be initialized in CI even without a local .env.
+os.environ.setdefault("DEBUG", "true")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-for-ci-and-pytest-123456")
 
 from app.core.database import Base, get_db
 from app.main import app

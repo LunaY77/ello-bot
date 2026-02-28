@@ -115,12 +115,13 @@ export default tseslint.config(
 
       /**
        * 文件命名规则
-       * 强制使用 kebab-case 命名
+       * TS 文件使用 kebab-case，TSX 组件文件使用 PascalCase
        */
       'check-file/filename-naming-convention': [
         'error',
         {
-          '**/*.{ts,tsx}': 'KEBAB_CASE',
+          '**/*.ts': 'KEBAB_CASE',
+          '**/*.tsx': 'PASCAL_CASE',
         },
         {
           ignoreMiddleExtensions: true,

@@ -1,19 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 
-import { AuthLayout } from '@/components/layouts/auth-layout';
+import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { paths } from '@/config/paths';
-import { RegisterForm } from '@/features/auth/components/register-form';
+import { LoginForm } from '@/features/auth/components/LoginForm';
 
-const RegisterRoute = () => {
+const LoginRoute = () => {
   const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');
 
   return (
-    <AuthLayout title={t('register.title')}>
-      <RegisterForm
+    <AuthLayout title={t('login.title')}>
+      <LoginForm
         onSuccess={() => {
           navigate(
             `${redirectTo ? `${redirectTo}` : paths.app.dashboard.getHref()}`,
@@ -25,4 +25,4 @@ const RegisterRoute = () => {
   );
 };
 
-export default RegisterRoute;
+export default LoginRoute;

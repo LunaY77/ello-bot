@@ -29,7 +29,7 @@ import {
 } from 'react-hook-form';
 import { type ZodType, type z } from 'zod';
 
-import { Label } from './label';
+import { Label } from './Label';
 
 import { cn } from '@/utils/cn';
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { ChatMessageItem } from './chat-message-item';
-import { ChatPlaceholder } from './chat-placeholder';
+import { ChatMessageItem } from './ChatMessageItem';
+import { ChatPlaceholder } from './ChatPlaceholder';
 
 // Demo messages for UI skeleton
 const DEMO_MESSAGES = [

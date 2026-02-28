@@ -1,1 +1,1 @@
-export { ChatLayout } from './components/chat-layout';
+export { ChatLayout } from './components/ChatLayout';

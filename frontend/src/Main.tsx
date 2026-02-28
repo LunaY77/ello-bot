@@ -1,4 +1,4 @@
-// main.tsx — Application entry point
+// Main.tsx — Application entry point
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
