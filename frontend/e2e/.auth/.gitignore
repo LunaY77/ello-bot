@@ -1,0 +1,4 @@
+# Ignore authentication state files
+# These contain session tokens and should not be committed
+user.json
+*.json
