@@ -7,7 +7,7 @@ A personal LLM application platform, inspired by OpenClaw, for building and mana
 ```
 ello-bot/
 ├── backend/    # FastAPI backend service
-└── frontend/   # React frontend (in development)
+└── frontend/   # React frontend
 ```
 
 ## Quick Start

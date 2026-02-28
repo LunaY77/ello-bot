@@ -6,7 +6,7 @@ import { RouterProvider } from 'react-router/dom';
 import {
   default as AppRoot,
   ErrorBoundary as AppRootErrorBoundary,
-} from './routes/app/root';
+} from './routes/app/Root';
 
 import { paths } from '@/config/paths';
 import { ProtectedRoute } from '@/lib/auth';
@@ -30,15 +30,15 @@ export const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
       path: paths.home.path,
-      lazy: () => import('./routes/landing').then(convert(queryClient)),
+      lazy: () => import('./routes/Landing').then(convert(queryClient)),
     },
     {
       path: paths.auth.register.path,
-      lazy: () => import('./routes/auth/register').then(convert(queryClient)),
+      lazy: () => import('./routes/auth/Register').then(convert(queryClient)),
     },
     {
       path: paths.auth.login.path,
-      lazy: () => import('./routes/auth/login').then(convert(queryClient)),
+      lazy: () => import('./routes/auth/Login').then(convert(queryClient)),
     },
     {
       path: paths.app.root.path,
@@ -51,16 +51,16 @@ export const createAppRouter = (queryClient: QueryClient) =>
       children: [
         {
           path: paths.app.users.path,
-          lazy: () => import('./routes/app/users').then(convert(queryClient)),
+          lazy: () => import('./routes/app/Users').then(convert(queryClient)),
         },
         {
           path: paths.app.profile.path,
-          lazy: () => import('./routes/app/profile').then(convert(queryClient)),
+          lazy: () => import('./routes/app/Profile').then(convert(queryClient)),
         },
         {
           path: paths.app.dashboard.path,
           lazy: () =>
-            import('./routes/app/dashboard').then(convert(queryClient)),
+            import('./routes/app/Dashboard').then(convert(queryClient)),
         },
       ],
     },

@@ -7,7 +7,7 @@
 ```
 ello-bot/
 ├── backend/    # FastAPI 后端服务
-└── frontend/   # React 前端（开发中）
+└── frontend/   # React 前端
 ```
 
 ## 快速开始
@@ -53,19 +53,19 @@ make frontend-dev
 
 运行 `make help` 或参考下表。
 
-| 命令 | 描述 |
-|------|------|
-| `make docker-up` | 通过 Docker Compose 启动 PostgreSQL |
-| `make docker-down` | 停止并删除容器 |
-| `make backend-run` | 启动 FastAPI 开发服务器（端口 8000） |
-| `make backend-test` | 运行后端测试 |
-| `make backend-lint` | Lint 并格式化后端代码 |
-| `make frontend-dev` | 启动前端开发服务器 |
-| `make frontend-build` | 构建前端生产版本 |
-| `make db-upgrade` | 应用所有待执行的迁移 |
-| `make db-migration msg="..."` | 生成新的迁移文件 |
-| `make lint` | Lint 前后端代码 |
-| `make format` | 格式化前后端代码 |
+| 命令                          | 描述                                 |
+| ----------------------------- | ------------------------------------ |
+| `make docker-up`              | 通过 Docker Compose 启动 PostgreSQL  |
+| `make docker-down`            | 停止并删除容器                       |
+| `make backend-run`            | 启动 FastAPI 开发服务器（端口 8000） |
+| `make backend-test`           | 运行后端测试                         |
+| `make backend-lint`           | Lint 并格式化后端代码                |
+| `make frontend-dev`           | 启动前端开发服务器                   |
+| `make frontend-build`         | 构建前端生产版本                     |
+| `make db-upgrade`             | 应用所有待执行的迁移                 |
+| `make db-migration msg="..."` | 生成新的迁移文件                     |
+| `make lint`                   | Lint 前后端代码                      |
+| `make format`                 | 格式化前后端代码                     |
 
 ## License
 
