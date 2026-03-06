@@ -1,16 +1,16 @@
 """Core Module"""
 
-from app.core.auth import (
+from .auth import (
     CurrentUserDep,
     require_auth,
 )
-from app.core.config import settings
-from app.core.database import (
+from .config import settings
+from .database import (
     Base,
     DbSession,
     SessionLocal,
 )
-from app.core.exception import (
+from .exception import (
     AuthException,
     BusinessException,
     CommonErrorCode,
@@ -20,8 +20,8 @@ from app.core.exception import (
     general_exception_handler,
     validation_exception_handler,
 )
-from app.core.logger import log
-from app.core.schema import ApiModel, Result
+from .logger import log
+from .schema import ApiModel, Result
 
 __all__ = [
     "settings",

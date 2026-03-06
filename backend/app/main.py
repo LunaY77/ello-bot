@@ -20,7 +20,7 @@ from app.core import (
     settings,
     validation_exception_handler,
 )
-from app.router import auth_router, user_router
+from app.modules import auth_router, user_router
 
 
 @asynccontextmanager

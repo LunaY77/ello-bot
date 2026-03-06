@@ -21,8 +21,8 @@ from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.core.logger import log
-from app.core.schema import Result
+from .logger import log
+from .schema import Result
 
 
 class ErrorCode(Protocol):

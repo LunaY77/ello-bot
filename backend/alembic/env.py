@@ -10,7 +10,7 @@ from alembic import context
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import all models so Alembic can detect them
-import app.model.user  # noqa: F401
+import app.modules.users.model  # noqa: F401
 from app.core.config import settings
 from app.core.database import Base
 

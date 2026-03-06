@@ -1,12 +1,10 @@
-"""
-User Router
-"""
-
 from fastapi import APIRouter
 
 from app.core import CurrentUserDep, Result
-from app.schema import ResetPasswordRequest, UploadAvatarRequest, UserInfoResponse
-from app.service import UserServiceDep
+
+from .commands import UserCommandsDep
+from .queries import UserQueriesDep
+from .schemas import ResetPasswordRequest, UploadAvatarRequest, UserInfoResponse
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
@@ -27,8 +25,8 @@ def get_current_user_info(current_user: CurrentUserDep):
     summary="Get User Info",
     description="Get user information by user ID.",
 )
-def get_user_info(user_id: int, user_service: UserServiceDep):
-    return Result.ok(data=user_service.get_user_info(user_id))
+def get_user_info(user_id: int, queries: UserQueriesDep):
+    return Result.ok(data=queries.get_user_info(user_id))
 
 
 @router.post(
@@ -39,10 +37,10 @@ def get_user_info(user_id: int, user_service: UserServiceDep):
 )
 def reset_password(
     request: ResetPasswordRequest,
-    user_service: UserServiceDep,
+    commands: UserCommandsDep,
     current_user: CurrentUserDep,
 ):
-    user_service.reset_password(current_user.id, request.new_password)
+    commands.reset_password(current_user.id, request.new_password)
     return Result.ok()
 
 
@@ -54,8 +52,8 @@ def reset_password(
 )
 def upload_avatar(
     request: UploadAvatarRequest,
-    user_service: UserServiceDep,
+    commands: UserCommandsDep,
     current_user: CurrentUserDep,
 ):
-    user_service.upload_avatar(current_user.id, request.avatar_url)
+    commands.upload_avatar(current_user.id, request.avatar_url)
     return Result.ok()

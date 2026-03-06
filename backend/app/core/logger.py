@@ -13,7 +13,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from app.core.config import settings
+from .config import settings
 
 
 def setup_logger():

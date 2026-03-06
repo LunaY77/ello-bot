@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import Depends, Request
 from sqlalchemy import select
 
-from app.core.database import DbSession
-from app.core.exception import AuthException, CommonErrorCode, ErrorCode
-from app.model import User
-from app.utils.auth import decode_access_token, extract_token
+from app.utils import decode_access_token, extract_token
+
+from .database import DbSession
+from .exception import AuthException, CommonErrorCode, ErrorCode
+
+if TYPE_CHECKING:
+    from app.modules.users import User
 
 
 def require_auth(request: Request, db: DbSession) -> User:
     """Route dependency that validates access token and returns current user."""
+    from app.modules.users import User
+
     try:
         token = extract_token(request)
         payload = decode_access_token(token)
@@ -33,4 +38,4 @@ def require_auth(request: Request, db: DbSession) -> User:
     return user
 
 
-CurrentUserDep = Annotated[User, Depends(require_auth)]
+CurrentUserDep = Annotated["User", Depends(require_auth)]

@@ -1,15 +1,7 @@
 """
 Pydantic Data Models
 
-Used for API request and response data validation, includes:
-- UserBase: Base user information
-- UserCreate: User registration request
-- UserLogin: User login request
-- ResetPasswordRequest: Password reset request
-- UploadAvatarRequest: Avatar upload request
-- UserResponse: User response (sanitized)
-- Token: Token response
-- UserWithToken: User info and Token returned after successful login
+Used for user API request and response data validation.
 """
 
 from typing import Annotated

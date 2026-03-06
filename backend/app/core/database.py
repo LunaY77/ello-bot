@@ -9,7 +9,7 @@ from fastapi import Depends
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-from app.core.config import settings
+from .config import settings
 
 # Configure engine based on database type
 connect_args = {}
