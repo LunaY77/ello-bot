@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_ref:
+        description: "Git ref to deploy"
+        required: true
+        default: "main"
+        type: string
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+env:
+  GHCR_OWNER: lunay77
+  BACKEND_IMAGE: ghcr.io/lunay77/ello-bot-backend
+  FRONTEND_IMAGE: ghcr.io/lunay77/ello-bot-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: frontend/Dockerfile
+          build-args: |
+            VITE_APP_API_URL=/api
+            VITE_APP_URL=${{ vars.FRONTEND_APP_URL }}
+            VITE_APP_ENABLE_API_MOCKING=false
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+      - name: Configure SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf "%s" "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -lf ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.SERVER_PORT }}" "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh -p "${{ secrets.SERVER_PORT }}" "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" <<'EOF'
+            set -e
+            cd /opt/ello-bot
+            git fetch origin main
+            git reset --hard origin/main
+
+            docker compose -f docker-compose.prod.yaml pull
+            docker compose -f docker-compose.prod.yaml up -d postgres
+            docker compose -f docker-compose.prod.yaml run --rm backend uv run alembic upgrade head
+            docker compose -f docker-compose.prod.yaml up -d --remove-orphans
+          EOF

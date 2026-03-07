@@ -17,7 +17,8 @@ from app.core.database import Base
 config = context.config
 
 # Override sqlalchemy.url from app settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Use %% escaping to avoid ConfigParser issues if URL contains %
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -43,8 +44,12 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+        )
         with context.begin_transaction():
             context.run_migrations()
 

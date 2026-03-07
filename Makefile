@@ -12,7 +12,7 @@ SHELL := /bin/bash
 help:
 	@echo "Targets:"
 	@echo "  make setup                Install all deps and git hooks"
-	@echo "  make docker-up            Start postgres (docker compose)"
+	@echo "  make docker-up            Start local docker compose (only necessary containers for local dev)"
 	@echo "  make backend-run          Run FastAPI dev server"
 	@echo "  make backend-lint         Ruff lint (fix) + format"
 	@echo "  make backend-check        Ruff lint (check only)"
@@ -30,18 +30,18 @@ setup:
 
 # ---------- Docker  ----------
 docker-up:
-	docker compose up -d
+	docker compose -f docker-compose.local.yaml up -d
 
 docker-down:
-	docker compose down -v
+	docker compose -f docker-compose.local.yaml down -v
 
 docker-logs:
-	docker compose logs -f
+	docker compose -f docker-compose.local.yaml logs -f
 
 # Danger: wipes local postgres data volume
 docker-reset:
-	docker compose down -v
-	docker compose up -d
+	docker compose -f docker-compose.local.yaml down -v
+	docker compose -f docker-compose.local.yaml up -d
 
 # ---------- Backend (Python / uv) ----------
 backend-run:
