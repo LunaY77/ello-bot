@@ -1,12 +1,10 @@
-import uuid as _uuid
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core import (
     AuthException,
@@ -20,6 +18,9 @@ from app.core import (
     settings,
     validation_exception_handler,
 )
+from app.core.database import engine
+from app.core.observability import init_observability
+from app.core.redis import close_redis, redis_client
 from app.modules import auth_router, user_router
 
 
@@ -27,12 +28,8 @@ from app.modules import auth_router, user_router
 async def lifespan(_app: FastAPI):
     """Application lifecycle management
 
-    Contains startup and shutdown events:
-    - startup: Print startup info, initialize resources
-    - shutdown: Clean up resources, save state
-
-    Args:
-        app: FastAPI application instance
+    - startup: log info, verify Redis
+    - shutdown: close Redis connection
     """
     # ===== Startup =====
     log.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
@@ -42,6 +39,7 @@ async def lifespan(_app: FastAPI):
 
     # ===== Shutdown =====
     log.info("Shutting down application...")
+    close_redis()
     log.info("Application shut down")
 
 
@@ -53,22 +51,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ============ Middleware ============
+# ============ OpenTelemetry ============
 
-
-class RequestIDMiddleware(BaseHTTPMiddleware):
-    """Injects a unique X-Request-ID header into every response for tracing."""
-
-    async def dispatch(self, request: Request, call_next):
-        request_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())
-        response = await call_next(request)
-        response.headers["X-Request-ID"] = request_id
-        return response
-
+init_observability(app, engine)
 
 # ============= Configure Middleware =============
 
-app.add_middleware(RequestIDMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -90,7 +78,14 @@ async def health_check():
         db_ok = True
     except Exception:
         pass
-    return Result.ok(data={"db": db_ok})
+
+    redis_ok = False
+    try:
+        redis_ok = redis_client.ping()
+    except Exception:
+        pass
+
+    return Result.ok(data={"db": db_ok, "redis": redis_ok})
 
 
 # =============== Exception Handlers ===============
@@ -111,8 +106,8 @@ app.include_router(user_router)
 def main():
     uvicorn.run(
         "app.main:app",
-        host=settings.HOST,
-        port=settings.PORT,
+        host=settings.server.HOST,
+        port=settings.server.PORT,
         reload=settings.DEBUG,
     )
 

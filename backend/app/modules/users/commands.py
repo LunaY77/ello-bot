@@ -1,21 +1,23 @@
 from typing import Annotated
 
+import redis as _redis
 from fastapi import Depends
 from sqlalchemy import select
 
-from app.core import BusinessException, DbSession, log
+from app.core import BusinessException, DbSession, RedisDep, log
+from app.modules.auth.consts import AuthRedisKey
 from app.utils import hash_password
 
-from .errors import UserErrorCode
+from .consts import UserErrorCode
 from .model import User
 
 
 class UserCommands:
     """User Commands"""
 
-    def __init__(self, db: DbSession) -> None:
-        """Store the request-scoped SQLAlchemy session."""
+    def __init__(self, db: DbSession, redis: _redis.Redis) -> None:
         self.db = db
+        self.redis = redis
 
     def reset_password(self, user_id: int, password: str) -> None:
         """Reset user password
@@ -51,10 +53,20 @@ class UserCommands:
         user.avatar = avatar_url
         self.db.flush()
 
+    def logout(self, jti: str) -> None:
+        """Logout by removing the token from the active whitelist.
 
-def get_user_commands(db: DbSession) -> UserCommands:
+        Args:
+            jti: JWT token ID
+        """
+        key = AuthRedisKey.ACTIVE_TOKEN.key(jti)
+        self.redis.delete(key)
+        log.info(f"Token removed from whitelist: jti={jti}")
+
+
+def get_user_commands(db: DbSession, redis: RedisDep) -> UserCommands:
     """FastAPI dependency: construct commands with request-scoped session."""
-    return UserCommands(db)
+    return UserCommands(db, redis)
 
 
 UserCommandsDep = Annotated[UserCommands, Depends(get_user_commands)]

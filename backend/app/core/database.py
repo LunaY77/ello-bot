@@ -13,13 +13,13 @@ from .config import settings
 
 # Configure engine based on database type
 connect_args = {}
-if settings.DATABASE_URL.startswith("sqlite"):
+if settings.db.URL.startswith("sqlite"):
     # SQLite specific configuration: allow multi-threaded access
     connect_args = {"check_same_thread": False}
 
 # Create database engine
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.db.URL,
     connect_args=connect_args,
     echo=settings.DEBUG,  # SQL statement logging
     pool_pre_ping=True,  # Test connection before use

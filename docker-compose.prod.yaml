@@ -16,6 +16,20 @@ services:
       timeout: 3s
       retries: 20
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    env_file:
+      - ./redis.env
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   backend:
     image: ghcr.io/${GHCR_OWNER:-lunay77}/ello-bot-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -24,8 +38,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     expose:
       - "8000"
+    networks:
+      - default
+      - ello-observability-net
 
   frontend:
     image: ghcr.io/${GHCR_OWNER:-lunay77}/ello-bot-frontend:${IMAGE_TAG:-latest}
@@ -37,3 +56,9 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+
+networks:
+  ello-observability-net:
+    external: true
+    name: ello-observability-net

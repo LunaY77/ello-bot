@@ -82,6 +82,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
+            docker compose -f docker-compose.observability.yaml up -d
             docker compose -f docker-compose.prod.yaml pull
             docker compose -f docker-compose.prod.yaml up -d postgres
             docker compose -f docker-compose.prod.yaml run --rm backend uv run alembic upgrade head

@@ -21,6 +21,13 @@ from .exception import (
     validation_exception_handler,
 )
 from .logger import log
+from .observability import init_observability
+from .redis import (
+    RedisDep,
+    RedisKeyDef,
+    close_redis,
+    redis_client,
+)
 from .schema import ApiModel, Result
 
 __all__ = [
@@ -41,4 +48,9 @@ __all__ = [
     "ApiModel",
     "require_auth",
     "CurrentUserDep",
+    "redis_client",
+    "RedisKeyDef",
+    "RedisDep",
+    "close_redis",
+    "init_observability",
 ]

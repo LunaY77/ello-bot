@@ -1,0 +1,33 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: ello-jaeger
+    restart: unless-stopped
+    command:
+      - "--memory.max-traces=5000"
+    ports:
+      - "16686:16686"
+    mem_limit: 768m
+    networks:
+      - ello-observability-net
+
+  otel-collector:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.147.0
+    container_name: ello-otel-collector
+    restart: unless-stopped
+    command:
+      - "--config=/etc/otelcol/config.yaml"
+    depends_on:
+      - jaeger
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    mem_limit: 256m
+    volumes:
+      - ./docker/otel/collector.yaml:/etc/otelcol/config.yaml:ro
+    networks:
+      - ello-observability-net
+
+networks:
+  ello-observability-net:
+    name: ello-observability-net

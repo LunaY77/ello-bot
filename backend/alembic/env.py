@@ -17,8 +17,7 @@ from app.core.database import Base
 config = context.config
 
 # Override sqlalchemy.url from app settings
-# Use %% escaping to avoid ConfigParser issues if URL contains %
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
+config.set_main_option("sqlalchemy.url", settings.db.URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

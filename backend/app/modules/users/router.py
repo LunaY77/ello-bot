@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.core import CurrentUserDep, Result
+from app.utils import decode_access_token, extract_token
 
 from .commands import UserCommandsDep
 from .queries import UserQueriesDep
@@ -56,4 +57,21 @@ def upload_avatar(
     current_user: CurrentUserDep,
 ):
     commands.upload_avatar(current_user.id, request.avatar_url)
+    return Result.ok()
+
+
+@router.post(
+    "/logout",
+    response_model=Result[None],
+    summary="User Logout",
+    description="Logout the current user by removing the token from the active whitelist.",
+)
+def logout(
+    request: Request,
+    _current_user: CurrentUserDep,
+    commands: UserCommandsDep,
+):
+    token = extract_token(request)
+    payload = decode_access_token(token)
+    commands.logout(jti=payload["jti"])
     return Result.ok()

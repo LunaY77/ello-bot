@@ -1,4 +1,4 @@
-from .errors import UserErrorCode
+from .consts import UserErrorCode
 from .model import User
 from .schemas import (
     Password,

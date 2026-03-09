@@ -1,4 +1,4 @@
-"""Authentication context management using contextvars."""
+"""Authentication dependency with token whitelist check."""
 
 from __future__ import annotations
 
@@ -11,9 +11,17 @@ from app.utils import decode_access_token, extract_token
 
 from .database import DbSession
 from .exception import AuthException, CommonErrorCode, ErrorCode
+from .redis import redis_client
 
 if TYPE_CHECKING:
     from app.modules.users import User
+
+
+def _is_token_active(jti: str) -> bool:
+    """Check if a token jti exists in the Redis active whitelist."""
+    from app.modules.auth.consts import AuthRedisKey
+
+    return bool(redis_client.exists(AuthRedisKey.ACTIVE_TOKEN.key(jti)))
 
 
 def require_auth(request: Request, db: DbSession) -> User:
@@ -29,6 +37,11 @@ def require_auth(request: Request, db: DbSession) -> User:
         raise AuthException(code) from exc
     except (ValueError, TypeError, KeyError) as exc:
         raise AuthException(CommonErrorCode.TOKEN_INVALID) from exc
+
+    # Check token whitelist — reject if token was logged out or never registered
+    jti = payload.get("jti")
+    if jti and not _is_token_active(jti):
+        raise AuthException(CommonErrorCode.TOKEN_INVALID)
 
     user = db.scalar(select(User).where(User.id == user_id))
 

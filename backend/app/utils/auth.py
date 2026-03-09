@@ -28,18 +28,18 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     """Create a signed JWT access token."""
     to_encode = data.copy()
     now = datetime.now(UTC)
-    expire = now + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = now + (expires_delta or timedelta(minutes=settings.jwt.EXPIRE_MINUTES))
+    to_encode.setdefault("jti", str(uuid.uuid4()))
     to_encode.update(
         {
             "exp": expire,
-            "jti": str(uuid.uuid4()),
             "iat": now,
             "nbf": now,
-            "iss": settings.JWT_ISSUER,
-            "aud": settings.JWT_AUDIENCE,
+            "iss": settings.jwt.ISSUER,
+            "aud": settings.jwt.AUDIENCE,
         }
     )
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(to_encode, settings.jwt.SECRET_KEY, algorithm=settings.jwt.ALGORITHM)
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
@@ -47,10 +47,10 @@ def decode_access_token(token: str) -> dict[str, Any]:
     try:
         payload = jwt.decode(
             token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-            issuer=settings.JWT_ISSUER,
-            audience=settings.JWT_AUDIENCE,
+            settings.jwt.SECRET_KEY,
+            algorithms=[settings.jwt.ALGORITHM],
+            issuer=settings.jwt.ISSUER,
+            audience=settings.jwt.AUDIENCE,
             options={"require": ["exp", "sub", "jti", "iat", "token_type"]},
         )
         if payload.get("token_type") != "access":
