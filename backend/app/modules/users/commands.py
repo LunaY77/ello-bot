@@ -1,6 +1,6 @@
 from typing import Annotated
 
-import redis as _redis
+import redis.asyncio as aioredis
 from fastapi import Depends
 from sqlalchemy import select
 
@@ -15,11 +15,11 @@ from .model import User
 class UserCommands:
     """User Commands"""
 
-    def __init__(self, db: DbSession, redis: _redis.Redis) -> None:
+    def __init__(self, db: DbSession, redis: aioredis.Redis) -> None:
         self.db = db
         self.redis = redis
 
-    def reset_password(self, user_id: int, password: str) -> None:
+    async def reset_password(self, user_id: int, password: str) -> None:
         """Reset user password
 
         Args:
@@ -29,14 +29,14 @@ class UserCommands:
         log.debug(f"Attempting to reset password for user ID: {user_id}")
 
         # Check if user exists
-        user = self.db.scalar(select(User).where(User.id == user_id, User.is_active))
+        user = await self.db.scalar(select(User).where(User.id == user_id, User.is_active))
         if not user:
             raise BusinessException(UserErrorCode.USER_NOT_FOUND)
 
         user.password = hash_password(password)
-        self.db.flush()
+        await self.db.flush()
 
-    def upload_avatar(self, user_id: int, avatar_url: str) -> None:
+    async def upload_avatar(self, user_id: int, avatar_url: str) -> None:
         """Upload user avatar
 
         Args:
@@ -46,21 +46,21 @@ class UserCommands:
         log.debug(f"Uploading avatar for user ID: {user_id}")
 
         # Check if user exists
-        user = self.db.scalar(select(User).where(User.id == user_id, User.is_active))
+        user = await self.db.scalar(select(User).where(User.id == user_id, User.is_active))
         if not user:
             raise BusinessException(UserErrorCode.USER_NOT_FOUND)
 
         user.avatar = avatar_url
-        self.db.flush()
+        await self.db.flush()
 
-    def logout(self, jti: str) -> None:
+    async def logout(self, jti: str) -> None:
         """Logout by removing the token from the active whitelist.
 
         Args:
             jti: JWT token ID
         """
         key = AuthRedisKey.ACTIVE_TOKEN.key(jti)
-        self.redis.delete(key)
+        await self.redis.delete(key)
         log.info(f"Token removed from whitelist: jti={jti}")
 
 

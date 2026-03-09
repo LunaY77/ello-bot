@@ -45,7 +45,7 @@ services:
         condition: service_healthy
     environment:
       DEBUG: "true"
-      DB_URL: postgresql+psycopg2://ello:12345678@postgres:5432/ello
+      DB_URL: postgresql+asyncpg://ello:12345678@postgres:5432/ello
       JWT_SECRET_KEY: local-dev-secret-key-local-dev-secret
       JWT_ALGORITHM: HS256
       JWT_EXPIRE_MINUTES: "240"

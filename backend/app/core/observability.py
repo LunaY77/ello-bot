@@ -16,7 +16,7 @@ from .logger import log
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
-    from sqlalchemy.engine import Engine
+    from sqlalchemy import Engine
 
 
 def init_observability(
@@ -27,6 +27,10 @@ def init_observability(
 
     No-op when settings.otel.ENABLED is False.
     All heavy imports are deferred so disabled mode adds zero import cost.
+
+    Args:
+        app: The FastAPI application instance.
+        engine: The *sync* SQLAlchemy engine. For async setups pass ``async_engine.sync_engine``.
     """
     if not settings.otel.ENABLED:
         log.info("OpenTelemetry is disabled (OTEL_ENABLED=false)")

@@ -1,51 +1,46 @@
-"""
-Database Connection Configuration
-"""
+"""Database Connection Configuration"""
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy import MetaData
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base
 
 from .config import settings
 
-# Configure engine based on database type
-connect_args = {}
-if settings.db.URL.startswith("sqlite"):
-    # SQLite specific configuration: allow multi-threaded access
-    connect_args = {"check_same_thread": False}
-
-# Create database engine
-engine = create_engine(
+# Create async database engine
+engine = create_async_engine(
     settings.db.URL,
-    connect_args=connect_args,
-    echo=settings.DEBUG,  # SQL statement logging
-    pool_pre_ping=True,  # Test connection before use
+    echo=settings.DEBUG,
+    pool_pre_ping=True,
 )
 
-# Create session factory
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
+# Create async session factory
+SessionLocal = async_sessionmaker(
+    engine,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,
+)
 
 
-def get_db() -> Generator[Session, None, None]:
-    """Dependency function to get database session
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Dependency function to get async database session.
 
     Used for FastAPI's Depends injection, ensures session is closed after request.
 
     Yields:
-        Session: Database session
+        AsyncSession: Async database session
     """
-    db = SessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()  # Rollback on error
-        raise
-    finally:
-        db.close()
+    async with SessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 
 # SQLAlchemy Base class for model definitions
@@ -61,4 +56,4 @@ Base = declarative_base(
     )
 )
 
-DbSession = Annotated[Session, Depends(get_db)]
+DbSession = Annotated[AsyncSession, Depends(get_db)]

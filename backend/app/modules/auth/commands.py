@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 
-import redis as _redis
+import redis.asyncio as aioredis
 from fastapi import Depends
 from sqlalchemy import select
 
@@ -14,11 +14,11 @@ from .schemas import AuthResponse
 
 
 class AuthCommands:
-    def __init__(self, db: DbSession, redis: _redis.Redis) -> None:
+    def __init__(self, db: DbSession, redis: aioredis.Redis) -> None:
         self.db = db
         self.redis = redis
 
-    def login(self, username: str, password: str) -> AuthResponse:
+    async def login(self, username: str, password: str) -> AuthResponse:
         """Login a user with username and password.
 
         Args:
@@ -31,7 +31,7 @@ class AuthCommands:
         log.debug(f"Attempting login for username: {username}")
 
         # Get user
-        user = self.db.scalar(select(User).where(User.username == username, User.is_active))
+        user = await self.db.scalar(select(User).where(User.username == username, User.is_active))
         if not user:
             raise BusinessException(UserErrorCode.INVALID_PASSWORD)
 
@@ -52,14 +52,14 @@ class AuthCommands:
         # Save to whitelist (TTL synced with JWT expiration)
         key_def = AuthRedisKey.ACTIVE_TOKEN
         assert key_def.expire_seconds is not None
-        self.redis.setex(key_def.key(jti), key_def.expire_seconds, str(user.id))
+        await self.redis.setex(key_def.key(jti), key_def.expire_seconds, str(user.id))
 
         log.info(f"Login successful for username: {username}")
 
         user_response = UserInfoResponse.model_validate(user)
         return AuthResponse(user=user_response, token=access_token)
 
-    def register(self, username: str, password: str) -> AuthResponse:
+    async def register(self, username: str, password: str) -> AuthResponse:
         """Register a new user
 
         Args:
@@ -72,7 +72,7 @@ class AuthCommands:
         log.debug(f"Attempting to register username: {username}")
 
         # Check if username already exists
-        existing_user = self.db.scalar(select(User).where(User.username == username))
+        existing_user = await self.db.scalar(select(User).where(User.username == username))
         if existing_user:
             raise BusinessException(UserErrorCode.USERNAME_EXISTS)
 
@@ -81,10 +81,10 @@ class AuthCommands:
 
         new_user = User(username=username, password=hashed_password, role="user", is_active=True)
         self.db.add(new_user)
-        self.db.flush()  # Flush to get the new user's ID
+        await self.db.flush()  # Flush to get the new user's ID
 
         log.info(f"User registered successfully: {username} (ID: {new_user.id})")
-        return self.login(username, password)
+        return await self.login(username, password)
 
 
 def get_auth_commands(db: DbSession, redis: RedisDep) -> AuthCommands:

@@ -29,16 +29,17 @@ class DatabaseSettings(BaseSettings):
     """Database configuration — env prefix: DB_
 
     Supported dialects:
-    - SQLite:      sqlite:///./app.db
-    - MySQL:       mysql+pymysql://user:password@localhost/dbname
-    - PostgreSQL:  postgresql://user:password@localhost/dbname
+    - PostgreSQL (async): postgresql+asyncpg://user:password@localhost/dbname
     """
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", env_prefix="DB_", extra="ignore"
     )
 
-    URL: str = Field(default="sqlite:///./app.db", description="Database connection string")
+    URL: str = Field(
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/ello_bot",
+        description="Database connection string",
+    )
 
 
 class CacheSettings(BaseSettings):

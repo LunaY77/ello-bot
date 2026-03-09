@@ -17,14 +17,14 @@ if TYPE_CHECKING:
     from app.modules.users import User
 
 
-def _is_token_active(jti: str) -> bool:
+async def _is_token_active(jti: str) -> bool:
     """Check if a token jti exists in the Redis active whitelist."""
     from app.modules.auth.consts import AuthRedisKey
 
-    return bool(redis_client.exists(AuthRedisKey.ACTIVE_TOKEN.key(jti)))
+    return bool(await redis_client.exists(AuthRedisKey.ACTIVE_TOKEN.key(jti)))
 
 
-def require_auth(request: Request, db: DbSession) -> User:
+async def require_auth(request: Request, db: DbSession) -> User:
     """Route dependency that validates access token and returns current user."""
     from app.modules.users import User
 
@@ -40,10 +40,10 @@ def require_auth(request: Request, db: DbSession) -> User:
 
     # Check token whitelist — reject if token was logged out or never registered
     jti = payload.get("jti")
-    if jti and not _is_token_active(jti):
+    if jti and not await _is_token_active(jti):
         raise AuthException(CommonErrorCode.TOKEN_INVALID)
 
-    user = db.scalar(select(User).where(User.id == user_id))
+    user = await db.scalar(select(User).where(User.id == user_id))
 
     if not user or not user.is_active:
         raise AuthException(CommonErrorCode.UNAUTHORIZED)

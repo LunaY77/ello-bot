@@ -1,9 +1,8 @@
-"""
-Redis Client & Key Definition Framework
+"""Redis Client & Key Definition Framework
 
 Provides:
 - RedisKeyDef: Immutable key definition with pattern and optional TTL
-- redis_client: Global Redis connection instance
+- redis_client: Global async Redis connection instance
 - RedisDep: FastAPI dependency type alias for DI
 - close_redis: Shutdown cleanup
 """
@@ -11,7 +10,7 @@ Provides:
 from dataclasses import dataclass
 from typing import Annotated
 
-import redis as _redis
+import redis.asyncio as aioredis
 from fastapi import Depends
 
 from .config import settings
@@ -41,20 +40,20 @@ class RedisKeyDef:
         return self.pattern.format(*args)
 
 
-redis_client: _redis.Redis = _redis.from_url(
+redis_client: aioredis.Redis = aioredis.from_url(
     settings.cache.URL,
     decode_responses=True,
 )
 
 
-def get_redis() -> _redis.Redis:
+def get_redis() -> aioredis.Redis:
     """Factory function for FastAPI DI."""
     return redis_client
 
 
-def close_redis() -> None:
+async def close_redis() -> None:
     """Close the Redis connection (call during app shutdown)."""
-    redis_client.close()
+    await redis_client.aclose()
 
 
-RedisDep = Annotated[_redis.Redis, Depends(get_redis)]
+RedisDep = Annotated[aioredis.Redis, Depends(get_redis)]

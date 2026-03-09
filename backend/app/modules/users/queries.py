@@ -17,7 +17,7 @@ class UserQueries:
         """Store the request-scoped SQLAlchemy session."""
         self.db = db
 
-    def get_user_info(self, user_id: int) -> UserInfoResponse:
+    async def get_user_info(self, user_id: int) -> UserInfoResponse:
         """Get user information by user ID.
 
         Args:
@@ -26,7 +26,7 @@ class UserQueries:
         Returns:
             UserInfoResponse: Sanitized user information
         """
-        user = self.db.scalar(select(User).where(User.id == user_id, User.is_active))
+        user = await self.db.scalar(select(User).where(User.id == user_id, User.is_active))
         # check if user exists and is active
         if not user:
             raise BusinessException(UserErrorCode.USER_NOT_FOUND)

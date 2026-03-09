@@ -28,8 +28,8 @@ from app.modules import auth_router, user_router
 async def lifespan(_app: FastAPI):
     """Application lifecycle management
 
-    - startup: log info, verify Redis
-    - shutdown: close Redis connection
+    - startup: log info
+    - shutdown: close Redis connection, dispose DB engine
     """
     # ===== Startup =====
     log.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
@@ -39,7 +39,8 @@ async def lifespan(_app: FastAPI):
 
     # ===== Shutdown =====
     log.info("Shutting down application...")
-    close_redis()
+    await close_redis()
+    await engine.dispose()
     log.info("Application shut down")
 
 
@@ -53,7 +54,7 @@ app = FastAPI(
 
 # ============ OpenTelemetry ============
 
-init_observability(app, engine)
+init_observability(app, engine.sync_engine)
 
 # ============= Configure Middleware =============
 
@@ -73,15 +74,15 @@ app.add_middleware(
 async def health_check():
     db_ok = False
     try:
-        with SessionLocal() as db:
-            db.execute(text("SELECT 1"))
+        async with SessionLocal() as db:
+            await db.execute(text("SELECT 1"))
         db_ok = True
     except Exception:
         pass
 
     redis_ok = False
     try:
-        redis_ok = redis_client.ping()
+        redis_ok = await redis_client.ping()  # type: ignore[misc]
     except Exception:
         pass
 
