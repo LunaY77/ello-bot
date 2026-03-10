@@ -10,7 +10,7 @@ from alembic import context
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import app.modules.users.model  # noqa: F401
+import app.modules.iam.model  # noqa: F401
 from app.core.config import settings
 from app.core.database import Base
 
@@ -24,7 +24,6 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode (no DB connection required)."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -37,25 +36,19 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection) -> None:
-    """Configure alembic context and run migrations with the given connection."""
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()
 
 
 async def run_async_migrations() -> None:
-    """Run migrations in 'online' mode using an async engine."""
-    connectable = create_async_engine(
-        settings.db.URL,
-        poolclass=NullPool,
-    )
+    connectable = create_async_engine(settings.db.URL, poolclass=NullPool)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
 
 
 def run_migrations_online() -> None:
-    """Entry point for online migration mode."""
     asyncio.run(run_async_migrations())
 
 

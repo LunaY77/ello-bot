@@ -1,7 +1,8 @@
 """Core Module"""
 
 from .auth import (
-    CurrentUserDep,
+    AuthContext,
+    CurrentAuthDep,
     require_auth,
 )
 from .config import settings
@@ -47,7 +48,8 @@ __all__ = [
     "Result",
     "ApiModel",
     "require_auth",
-    "CurrentUserDep",
+    "AuthContext",
+    "CurrentAuthDep",
     "redis_client",
     "RedisKeyDef",
     "RedisDep",

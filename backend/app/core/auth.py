@@ -1,54 +1,79 @@
-"""Authentication dependency with token whitelist check."""
+"""Authentication dependency: opaque token → Redis session → AuthContext."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from fastapi import Depends, Request
-from sqlalchemy import select
+from pydantic import Field
 
-from app.utils import decode_access_token, extract_token
+from app.core.schema import ApiModel
+from app.utils import extract_token, hash_token
 
-from .database import DbSession
 from .exception import AuthException, CommonErrorCode, ErrorCode
 from .redis import redis_client
 
-if TYPE_CHECKING:
-    from app.modules.users import User
+# ── Auth context (decoded from Redis access session) ───────────────────────────
 
 
-async def _is_token_active(jti: str) -> bool:
-    """Check if a token jti exists in the Redis active whitelist."""
-    from app.modules.auth.consts import AuthRedisKey
+class AuthContext(ApiModel):
+    """Lightweight auth context populated from the Redis access session.
 
-    return bool(await redis_client.exists(AuthRedisKey.ACTIVE_TOKEN.key(jti)))
+    This is what every protected route receives — no DB lookup required.
+    """
+
+    session_id: int = Field(..., description="auth_sessions.id")
+    principal_id: int = Field(..., description="principals.id")
+    tenant_id: int = Field(..., description="Active tenant id")
+    principal_type: str = Field(..., description="user / agent / service_account")
+    session_version: int = Field(..., description="principals.session_version at login time")
+    authz_version: int = Field(..., description="principals.authz_version at login time")
 
 
-async def require_auth(request: Request, db: DbSession) -> User:
-    """Route dependency that validates access token and returns current user."""
-    from app.modules.users import User
+# ── Auth dependency ────────────────────────────────────────────────────────────
+
+
+def _access_session_key(token_hash: str) -> str:
+    from app.modules.iam.consts import IamRedisKey
+
+    return IamRedisKey.ACCESS_SESSION.key(token_hash)
+
+
+async def require_auth(request: Request) -> AuthContext:
+    """Route dependency: validate opaque access token, return AuthContext.
+
+    Flow:
+        1. Extract Bearer token from Authorization header
+        2. SHA-256 hash → Redis lookup
+        3. Parse AccessSessionPayload → AuthContext
+        4. 401 on any failure
+    """
+    from app.modules.iam.schemas import AccessSessionPayload
 
     try:
         token = extract_token(request)
-        payload = decode_access_token(token)
-        user_id = int(payload["sub"])
     except RuntimeError as exc:
         code: ErrorCode = exc.args[0] if exc.args else CommonErrorCode.UNAUTHORIZED
         raise AuthException(code) from exc
-    except (ValueError, TypeError, KeyError) as exc:
-        raise AuthException(CommonErrorCode.TOKEN_INVALID) from exc
 
-    # Check token whitelist — reject if token was logged out or never registered
-    jti = payload.get("jti")
-    if jti and not await _is_token_active(jti):
+    token_hash = hash_token(token)
+    raw = await redis_client.get(_access_session_key(token_hash))
+    if not raw:
         raise AuthException(CommonErrorCode.TOKEN_INVALID)
 
-    user = await db.scalar(select(User).where(User.id == user_id))
+    try:
+        payload: AccessSessionPayload = AccessSessionPayload.model_validate_json(raw)
+    except Exception as exc:
+        raise AuthException(CommonErrorCode.TOKEN_INVALID) from exc
 
-    if not user or not user.is_active:
-        raise AuthException(CommonErrorCode.UNAUTHORIZED)
+    return AuthContext(
+        session_id=payload.session_id,
+        principal_id=payload.principal_id,
+        tenant_id=payload.tenant_id,
+        principal_type=payload.principal_type,
+        session_version=payload.session_version,
+        authz_version=payload.authz_version,
+    )
 
-    return user
 
-
-CurrentUserDep = Annotated["User", Depends(require_auth)]
+CurrentAuthDep = Annotated[AuthContext, Depends(require_auth)]

@@ -1,15 +1,14 @@
 from app.utils.auth import (
-    create_access_token,
-    decode_access_token,
     extract_token,
     hash_password,
     verify_password,
 )
+from app.utils.security import generate_opaque_token, hash_token
 
 __all__ = [
     "hash_password",
     "verify_password",
-    "create_access_token",
-    "decode_access_token",
     "extract_token",
+    "generate_opaque_token",
+    "hash_token",
 ]

@@ -1,16 +1,8 @@
-"""
-Auth utility functions for password hashing and JWT token operations.
-"""
-
-import uuid
-from datetime import UTC, datetime, timedelta
-from typing import Any
+"""Auth utility functions for password hashing and token extraction."""
 
 import bcrypt
-import jwt
 from fastapi import Request
 
-from app.core.config import settings
 from app.core.exception import CommonErrorCode
 
 
@@ -22,44 +14,6 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain-text password against a bcrypt hash."""
     return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
-
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """Create a signed JWT access token."""
-    to_encode = data.copy()
-    now = datetime.now(UTC)
-    expire = now + (expires_delta or timedelta(minutes=settings.jwt.EXPIRE_MINUTES))
-    to_encode.setdefault("jti", str(uuid.uuid4()))
-    to_encode.update(
-        {
-            "exp": expire,
-            "iat": now,
-            "nbf": now,
-            "iss": settings.jwt.ISSUER,
-            "aud": settings.jwt.AUDIENCE,
-        }
-    )
-    return jwt.encode(to_encode, settings.jwt.SECRET_KEY, algorithm=settings.jwt.ALGORITHM)
-
-
-def decode_access_token(token: str) -> dict[str, Any]:
-    """Decode and validate a JWT access token. Raises RuntimeError on failure."""
-    try:
-        payload = jwt.decode(
-            token,
-            settings.jwt.SECRET_KEY,
-            algorithms=[settings.jwt.ALGORITHM],
-            issuer=settings.jwt.ISSUER,
-            audience=settings.jwt.AUDIENCE,
-            options={"require": ["exp", "sub", "jti", "iat", "token_type"]},
-        )
-        if payload.get("token_type") != "access":
-            raise RuntimeError(CommonErrorCode.TOKEN_INVALID)
-        return payload
-    except jwt.ExpiredSignatureError as err:
-        raise RuntimeError(CommonErrorCode.TOKEN_EXPIRED) from err
-    except jwt.InvalidTokenError as err:
-        raise RuntimeError(CommonErrorCode.TOKEN_INVALID) from err
 
 
 def extract_token(request: Request) -> str:

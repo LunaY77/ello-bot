@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
 from app.core import (
@@ -21,30 +22,62 @@ from app.core import (
 from app.core.database import engine
 from app.core.observability import init_observability
 from app.core.redis import close_redis, redis_client
-from app.modules import auth_router, user_router
+from app.modules import iam_router
+
+
+async def _bootstrap_iam_state() -> None:
+    """Initialize the default tenant, built-in IAM data, and bootstrap admin account.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    if not settings.bootstrap.ENABLED:
+        log.info("IAM bootstrap is disabled; skipping startup bootstrap")
+        return
+
+    from app.modules.iam.commands import IamCommands
+
+    async with SessionLocal() as db:
+        iam = IamCommands(db, redis_client)
+        try:
+            # Startup bootstrap is idempotent and keeps the initial tenant/admin recoverable.
+            # The command layer owns the actual data repair logic so startup stays thin.
+            await iam.bootstrap_application(
+                tenant_slug=settings.bootstrap.TENANT_SLUG,
+                tenant_name=settings.bootstrap.TENANT_NAME,
+                admin_username=settings.bootstrap.ADMIN_USERNAME,
+                admin_password=settings.bootstrap.resolved_admin_password(debug=settings.DEBUG),
+                admin_display_name=settings.bootstrap.ADMIN_DISPLAY_NAME,
+            )
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            raise
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Application lifecycle management
+    """Manage application startup and shutdown resources.
 
-    - startup: log info
-    - shutdown: close Redis connection, dispose DB engine
+    Args:
+        _app: The FastAPI application instance provided by the lifespan protocol.
+
+    Returns:
+        An async context manager that wraps application startup and shutdown.
     """
-    # ===== Startup =====
     log.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     log.info(f"Debug mode: {settings.DEBUG}")
-
+    await _bootstrap_iam_state()
     yield
-
-    # ===== Shutdown =====
     log.info("Shutting down application...")
     await close_redis()
     await engine.dispose()
     log.info("Application shut down")
 
 
-# Create FastAPI application
 app = FastAPI(
     title=settings.APP_NAME,
     description="Ello Bot Backend API",
@@ -52,11 +85,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ============ OpenTelemetry ============
-
 init_observability(app, engine.sync_engine)
-
-# ============= Configure Middleware =============
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,12 +95,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ============= Routes =============
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.get("/health", response_model=Result)
 async def health_check():
+    """Report basic database and Redis health information.
+
+    Args:
+        None
+
+    Returns:
+        A result payload that reports whether PostgreSQL and Redis are reachable.
+    """
     db_ok = False
     try:
         async with SessionLocal() as db:
@@ -89,22 +125,23 @@ async def health_check():
     return Result.ok(data={"db": db_ok, "redis": redis_ok})
 
 
-# =============== Exception Handlers ===============
-
 app.add_exception_handler(BusinessException, business_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(AuthException, auth_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(Exception, general_exception_handler)
 
-# =============== Include Routers ===============
-
-app.include_router(auth_router)
-app.include_router(user_router)
-
-# =============== Main Entry Point ===============
+app.include_router(iam_router)
 
 
 def main():
+    """Run the FastAPI application with Uvicorn.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     uvicorn.run(
         "app.main:app",
         host=settings.server.HOST,

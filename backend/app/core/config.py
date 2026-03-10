@@ -95,6 +95,44 @@ class OtelSettings(BaseSettings):
     ENVIRONMENT: str = Field(default="dev", description="Deployment environment tag")
 
 
+class BootstrapSettings(BaseSettings):
+    """IAM bootstrap configuration — env prefix: BOOTSTRAP_."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", env_prefix="BOOTSTRAP_", extra="ignore"
+    )
+
+    ENABLED: bool = Field(default=True, description="Enable automatic IAM bootstrap")
+    TENANT_SLUG: str = Field(default="personal", description="Initial tenant slug")
+    TENANT_NAME: str = Field(default="Personal", description="Initial tenant display name")
+    ADMIN_USERNAME: str = Field(default="admin", description="Bootstrap administrator username")
+    ADMIN_PASSWORD: str = Field(
+        default="",
+        description="Bootstrap administrator password; must be set outside debug mode",
+    )
+    ADMIN_DISPLAY_NAME: str = Field(
+        default="System Admin",
+        description="Bootstrap administrator display name",
+    )
+
+    def resolved_admin_password(self, *, debug: bool) -> str:
+        """Resolve the bootstrap administrator password.
+
+        Args:
+            debug: Whether the application is currently running in debug mode.
+
+        Returns:
+            The configured bootstrap administrator password, or a debug-only fallback value.
+        """
+        if self.ADMIN_PASSWORD:
+            return self.ADMIN_PASSWORD
+        if debug:
+            return "DevOnly_Admin_12345678"
+        raise ValueError(
+            "BOOTSTRAP_ADMIN_PASSWORD must be set when DEBUG is False and bootstrap is enabled"
+        )
+
+
 class Settings(BaseSettings):
     """Top-level application configuration — aggregates all sub-settings.
 
@@ -122,31 +160,46 @@ class Settings(BaseSettings):
     jwt: JwtSettings = Field(default_factory=JwtSettings)
     log: LogSettings = Field(default_factory=LogSettings)
     otel: OtelSettings = Field(default_factory=OtelSettings)
+    bootstrap: BootstrapSettings = Field(default_factory=BootstrapSettings)
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":
-        """Validate security-sensitive settings.
+        """Validate security-sensitive settings after loading configuration.
 
-        Production mode requires a non-empty JWT key with a minimum 32-byte length.
+        Args:
+            None
+
+        Returns:
+            The validated settings object.
         """
         if self.DEBUG:
             return self
 
+        # Production configuration must always use an explicit strong JWT signing key.
         if not self.jwt.SECRET_KEY:
             raise ValueError("JWT_SECRET_KEY must be set when DEBUG is False")
 
         if len(self.jwt.SECRET_KEY.encode("utf-8")) < 32:
             raise ValueError("JWT_SECRET_KEY must be at least 32 bytes when DEBUG is False")
 
+        # Bootstrap is allowed in production, but only when the initial admin password is explicit.
+        if self.bootstrap.ENABLED and not self.bootstrap.ADMIN_PASSWORD:
+            raise ValueError(
+                "BOOTSTRAP_ADMIN_PASSWORD must be set when DEBUG is False and bootstrap is enabled"
+            )
+
         return self
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """Get configuration singleton
+    """Return the cached application settings singleton.
+
+    Args:
+        None
 
     Returns:
-        Settings: Configuration instance
+        Settings: The cached configuration object for the current process.
     """
     return Settings()
 
