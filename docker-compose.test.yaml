@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ello-test-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ello_test
+      POSTGRES_USER: ello
+      POSTGRES_PASSWORD: 12345678
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ello -d ello_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: ello-test-redis
+    restart: unless-stopped
+    command: redis-server --requirepass 12345678
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a 12345678 ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend-test:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DEBUG: "true"
+      DB_URL: postgresql+asyncpg://ello:12345678@postgres:5432/ello_test
+      REDIS_URL: redis://:12345678@redis:6379/0
+      JWT_SECRET_KEY: d95614d2f1b49e0f7facb0cd51df84a404ff23ea68bf51a0e5f0306c933c66d3
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRE_MINUTES: "240"
+      JWT_ISSUER: app
+      JWT_AUDIENCE: app
+      OTEL_ENABLED: "false"
+      BOOTSTRAP_ENABLED: "true"
+      BOOTSTRAP_TENANT_SLUG: personal
+      BOOTSTRAP_TENANT_NAME: Personal
+      BOOTSTRAP_ADMIN_USERNAME: admin
+      BOOTSTRAP_ADMIN_PASSWORD: BootstrapAdmin_123456
+      BOOTSTRAP_ADMIN_DISPLAY_NAME: Bootstrap Admin
+      UV_LINK_MODE: copy
+    command: ["sh", "-lc", "uv sync --locked && uv run pytest -q tests/unit tests/integration"]
+
+volumes:
+  postgres_test_data:
+  redis_test_data:

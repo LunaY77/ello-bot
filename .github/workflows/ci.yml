@@ -11,9 +11,6 @@ jobs:
   backend:
     name: Backend lint & test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
 
     steps:
       - uses: actions/checkout@v4
@@ -21,14 +18,16 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Install dependencies
+      - name: Install backend dependencies for lint
+        working-directory: backend
         run: uv sync
 
       - name: Lint check
+        working-directory: backend
         run: uv run check
 
-      - name: Test
-        run: uv run pytest -q
+      - name: Run backend test container
+        run: make backend-test
 
   frontend:
     name: Frontend lint & build

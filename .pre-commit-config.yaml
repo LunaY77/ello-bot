@@ -1,10 +1,12 @@
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.10
+  - repo: local
     hooks:
-      - id: ruff
-      - id: ruff-format
-        args: [--check]
+      - id: backend-ruff-check
+        name: backend ruff check
+        entry: bash -lc 'cd backend && uv run check'
+        language: system
+        pass_filenames: false
+        files: ^backend/.*\.(py|pyi)$|^backend/(pyproject\.toml|uv\.lock)$
 
   - repo: local
     hooks:

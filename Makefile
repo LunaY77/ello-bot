@@ -38,7 +38,7 @@ help:
 	@echo "  [Docker — Production]"
 	@echo "  make docker-prod-up       Start production stack"
 	@echo "  make docker-prod-down     Stop production stack"
-	@echo "  make docker-prod-logs     Tail production logs"
+	@echo "  make docker-prod-logs     Tail production stack logs"
 	@echo ""
 	@echo "  [Docker — Combined]"
 	@echo "  make docker-dev-obs-up    Start dev infra + observability (native dev with tracing)"
@@ -48,6 +48,7 @@ help:
 	@echo "  make backend-run          Run FastAPI dev server"
 	@echo "  make backend-lint         Ruff lint (fix) + format"
 	@echo "  make backend-check        Ruff lint (check only)"
+	@echo "  make backend-test         Build test image, run backend unit+integration tests, then destroy test infra"
 	@echo ""
 	@echo "  [Frontend]"
 	@echo "  make frontend-lint        Prettier format + ESLint fix"
@@ -137,7 +138,9 @@ backend-lint:
 	cd backend && uv run lint
 
 backend-test:
-	cd backend && uv run pytest -q
+	@set -euo pipefail; \
+	trap 'docker compose -f docker-compose.test.yaml down -v --remove-orphans' EXIT; \
+	docker compose -f docker-compose.test.yaml up --build --abort-on-container-exit --exit-code-from backend-test backend-test
 
 # ---------- Database Migrations (Alembic) ----------
 db-migration:
