@@ -12,6 +12,7 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app import __app_name__, __version__
+from app.infra.ai.config import AISettings
 
 
 class ServerSettings(BaseSettings):
@@ -122,6 +123,7 @@ class Settings(BaseSettings):
     jwt: JwtSettings = Field(default_factory=JwtSettings)
     log: LogSettings = Field(default_factory=LogSettings)
     otel: OtelSettings = Field(default_factory=OtelSettings)
+    ai: AISettings = Field(default_factory=AISettings)
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":

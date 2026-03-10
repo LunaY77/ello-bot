@@ -21,6 +21,7 @@ from app.core import (
 from app.core.database import engine
 from app.core.observability import init_observability
 from app.core.redis import close_redis, redis_client
+from app.infra.ai import close_ai_client
 from app.modules import auth_router, user_router
 
 
@@ -39,6 +40,7 @@ async def lifespan(_app: FastAPI):
 
     # ===== Shutdown =====
     log.info("Shutting down application...")
+    await close_ai_client()
     await close_redis()
     await engine.dispose()
     log.info("Application shut down")

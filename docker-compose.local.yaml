@@ -62,6 +62,18 @@ services:
       OTEL_SERVICE_NAME: ello-bot-backend
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_ENVIRONMENT: local
+      AI_RECORD_CONTENT: "false"
+      AI_CONTENT_PREVIEW_CHARS: "500"
+      AI_DEFAULT_TIMEOUT_MS: "60000"
+      AI_TECHNICAL_RETRY_COUNT: "1"
+      AI_TECHNICAL_RETRY_BACKOFF_MS: "250"
+      AI_OPENAI__API_KEY: ""
+      AI_OPENAI__BASE_URL: https://api.openai.com/v1
+      AI_ANTHROPIC__API_KEY: ""
+      AI_ANTHROPIC__BASE_URL: https://api.anthropic.com/v1
+      AI_ANTHROPIC__API_VERSION: "2023-06-01"
+      AI_GEMINI__API_KEY: ""
+      AI_GEMINI__BASE_URL: https://generativelanguage.googleapis.com/v1beta
     ports:
       - "8000:8000"
 
