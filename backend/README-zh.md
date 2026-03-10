@@ -49,8 +49,8 @@ cp backend/.env.example backend/.env
 关键配置项：
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost/ello_bot
-SECRET_KEY=your-secret-key-here
+DB_URL=postgresql+asyncpg://user:password@localhost/ello_bot
+JWT_SECRET_KEY=your-secret-key-here
 DEBUG=false
 ```
 
@@ -59,6 +59,8 @@ DEBUG=false
 ```bash
 make db-upgrade
 ```
+
+`make backend-run` 现在也会在启动开发服务器前自动应用待执行迁移。
 
 ### 启动开发服务器
 

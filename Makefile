@@ -45,7 +45,7 @@ help:
 	@echo "  make docker-dev-obs-down  Stop dev infra + observability"
 	@echo ""
 	@echo "  [Backend]"
-	@echo "  make backend-run          Run FastAPI dev server"
+	@echo "  make backend-run          Apply migrations and run FastAPI dev server"
 	@echo "  make backend-lint         Ruff lint (fix) + format"
 	@echo "  make backend-check        Ruff lint (check only)"
 	@echo "  make backend-test         Build test image, run backend unit+integration tests, then destroy test infra"
@@ -129,6 +129,7 @@ docker-dev-obs-down:
 
 # ---------- Backend (Python / uv) ----------
 backend-run:
+	cd backend && uv run alembic upgrade head
 	cd backend && uv run ello-server
 
 backend-check:

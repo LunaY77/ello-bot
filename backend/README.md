@@ -49,8 +49,8 @@ cp backend/.env.example backend/.env
 Key settings:
 
 ```env
-DATABASE_URL=postgresql://user:password@localhost/ello_bot
-SECRET_KEY=your-secret-key-here
+DB_URL=postgresql+asyncpg://user:password@localhost/ello_bot
+JWT_SECRET_KEY=your-secret-key-here
 DEBUG=false
 ```
 
@@ -59,6 +59,8 @@ DEBUG=false
 ```bash
 make db-upgrade
 ```
+
+`make backend-run` also applies pending migrations automatically before starting the dev server.
 
 ### Start Development Server
 
@@ -84,4 +86,3 @@ make backend-check   # lint only (no fix)
 ## Development Guidelines
 
 See [CLAUDE.md](./CLAUDE.md).
-
