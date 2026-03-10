@@ -23,6 +23,7 @@ from app.core import (
 from app.core.database import engine
 from app.core.observability import init_observability
 from app.core.redis import close_redis, redis_client
+from app.infra.ai import close_ai_client
 from app.modules import iam_router
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -76,6 +77,7 @@ async def lifespan(_app: FastAPI):
     await _bootstrap_iam_state()
     yield
     log.info("Shutting down application...")
+    await close_ai_client()
     await close_redis()
     await engine.dispose()
     log.info("Application shut down")
