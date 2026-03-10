@@ -1,16 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import type { UploadAvatarRequest } from '@/api/models/req';
+import type { UpdateAvatarRequest } from '@/api/models/req';
+import type { UserAccountResponse } from '@/api/models/resp';
 import { useNotifications } from '@/components/ui/notifications';
 import { api } from '@/lib/api-client';
+import { AUTHENTICATED_USER_QUERY_KEY } from '@/lib/auth';
 import type { MutationConfig } from '@/lib/react-query';
 
 /**
- * Upload user avatar. API: POST /users/avatar
+ * Update user avatar. API: PUT /iam/users/me/avatar
  */
-export const uploadAvatar = (data: UploadAvatarRequest): Promise<void> => {
-  return api.post('/users/avatar', data);
+export const uploadAvatar = (
+  data: UpdateAvatarRequest,
+): Promise<UserAccountResponse> => {
+  return api.put('/iam/users/me/avatar', data);
 };
 
 type UseUploadAvatarOptions = {
@@ -30,7 +34,7 @@ export const useUploadAvatar = ({ mutationConfig }: UseUploadAvatarOptions) => {
     ...restConfig,
     mutationFn: uploadAvatar,
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ['authenticated-user'] });
+      queryClient.invalidateQueries({ queryKey: AUTHENTICATED_USER_QUERY_KEY });
       addNotification({
         type: 'success',
         title: t('profile.avatarUpdated'),

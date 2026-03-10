@@ -4,7 +4,7 @@ import { ChatInput } from './ChatInput';
 import { ChatMessages } from './ChatMessages';
 import { ChatSidebar } from './ChatSidebar';
 
-import { useCurrentUser } from '@/lib/auth';
+import { getViewerDisplayName, useCurrentUser } from '@/lib/auth';
 import { cn } from '@/utils/cn';
 
 export const ChatLayout = () => {
@@ -51,7 +51,7 @@ export const ChatLayout = () => {
 
         {/* Messages area */}
         <div className="flex-1 overflow-y-auto">
-          <ChatMessages username={user.data?.username} />
+          <ChatMessages username={getViewerDisplayName(user.data)} />
         </div>
 
         {/* Input area */}

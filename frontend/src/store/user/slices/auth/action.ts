@@ -7,7 +7,7 @@ type Setter = StoreSetter<UserStore>;
 
 /**
  * Authentication actions implementation using class-based pattern.
- * Manages JWT token state via private zustand setter.
+ * Manages auth session tokens via private zustand setter.
  */
 export class UserAuthActionImpl {
   readonly #set: Setter;
@@ -18,14 +18,20 @@ export class UserAuthActionImpl {
     this.#set = set;
   }
 
-  /** Store JWT token after successful login/register */
-  setToken = (token: string): void => {
-    this.#set({ token });
+  /** Persist the current auth session after login, register, refresh, or tenant switch. */
+  setSession = ({
+    accessToken,
+    refreshToken,
+  }: {
+    accessToken: string;
+    refreshToken: string;
+  }): void => {
+    this.#set({ accessToken, refreshToken });
   };
 
-  /** Clear JWT token on logout or 401 unauthorized */
-  clearToken = (): void => {
-    this.#set({ token: null });
+  /** Clear the current auth session on logout or terminal auth failure. */
+  clearSession = (): void => {
+    this.#set({ accessToken: null, refreshToken: null });
   };
 }
 

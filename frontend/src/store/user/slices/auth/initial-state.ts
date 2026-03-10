@@ -2,10 +2,13 @@
  * Authentication slice state definition.
  */
 export interface UserAuthState {
-  /** JWT access token, null when not authenticated */
-  token: string | null;
+  /** Opaque access token, null when not authenticated */
+  accessToken: string | null;
+  /** Opaque refresh token, null when not authenticated */
+  refreshToken: string | null;
 }
 
 export const initialAuthState: UserAuthState = {
-  token: null,
+  accessToken: null,
+  refreshToken: null,
 };

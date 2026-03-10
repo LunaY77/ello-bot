@@ -104,6 +104,14 @@ export const paths = {
     },
 
     /**
+     * IAM console page
+     */
+    iam: {
+      path: 'iam',
+      getHref: () => '/app/iam',
+    },
+
+    /**
      * User detail page
      * @param id - User's unique identifier
      */

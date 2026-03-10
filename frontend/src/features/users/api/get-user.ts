@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import type { UserInfoResponse } from '@/api/models/resp';
+import type { UserAccountResponse } from '@/api/models/resp';
 import { api } from '@/lib/api-client';
 import type { QueryConfig } from '@/lib/react-query';
 
@@ -11,8 +11,8 @@ export const getUser = ({
   userId,
 }: {
   userId: string;
-}): Promise<UserInfoResponse> => {
-  return api.get(`/users/${userId}`);
+}): Promise<UserAccountResponse> => {
+  return api.get(`/iam/users/${userId}`);
 };
 
 /**

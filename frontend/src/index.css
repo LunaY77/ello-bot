@@ -10,45 +10,35 @@
  */
 @layer base {
   :root {
-    /* Background and foreground colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 33 35% 96%;
+    --foreground: 26 24% 14%;
 
-    /* Card colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 26 24% 14%;
 
-    /* Popover colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 26 24% 14%;
 
-    /* Primary color - used for primary buttons, links, etc. */
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 21 64% 28%;
+    --primary-foreground: 40 33% 98%;
 
-    /* Secondary color - used for secondary buttons, etc. */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 32 38% 90%;
+    --secondary-foreground: 26 24% 14%;
 
-    /* Muted color - used for disabled states, etc. */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 35 28% 92%;
+    --muted-foreground: 26 10% 44%;
 
-    /* Accent color */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 35 42% 88%;
+    --accent-foreground: 26 24% 14%;
 
-    /* Destructive color - used for deletion, warnings, etc. */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 47%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Border and input colors */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 30 22% 82%;
+    --input: 30 22% 82%;
+    --ring: 21 64% 28%;
 
-    /* Border radius size */
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 
   /* Dark mode */
@@ -95,10 +85,23 @@
 body {
   margin: 0;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    'Avenir Next', 'Segoe UI Variable Text', 'SF Pro Text', 'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(191, 160, 109, 0.18), transparent 30%),
+    linear-gradient(180deg, #faf7f2 0%, #f3ece3 100%);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family:
+    'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  letter-spacing: -0.03em;
 }
 
 code {

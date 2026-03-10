@@ -36,22 +36,31 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     >
       {({ register, formState }) => (
         <>
+          <p className="text-sm leading-6 text-stone-600">
+            {t('resetPassword.helper')}
+          </p>
           <Input
             type="password"
             label={t('resetPassword.newPassword')}
             error={formState.errors.newPassword}
             registration={register('newPassword')}
+            placeholder={t('resetPassword.passwordPlaceholder')}
+            autoComplete="new-password"
+            className="h-11 rounded-2xl border-stone-300 bg-white"
           />
           <Input
             type="password"
             label={t('resetPassword.confirmPassword')}
             error={formState.errors.confirmPassword}
             registration={register('confirmPassword')}
+            placeholder={t('resetPassword.confirmPasswordPlaceholder')}
+            autoComplete="new-password"
+            className="h-11 rounded-2xl border-stone-300 bg-white"
           />
           <div className="mt-6">
             <Button
               type="submit"
-              className="w-full"
+              className="h-11 w-full rounded-2xl"
               isLoading={resetPasswordMutation.isPending}
             >
               {t('resetPassword.submit')}

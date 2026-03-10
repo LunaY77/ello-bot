@@ -19,14 +19,17 @@ const createStore: StateCreator<UserStore> = (...parameters) => ({
 });
 
 /**
- * User store hook with persist (token → localStorage) and shallow equality.
+ * User store hook with persisted auth session tokens and shallow equality.
  * Use `useUserStore(selector)` in React components.
  */
 export const useUserStore = createWithEqualityFn<UserStore>()(
   subscribeWithSelector(
     persist(createStore, {
-      name: 'ELLO_AUTH_TOKEN',
-      partialize: (state) => ({ token: state.token }),
+      name: 'ELLO_AUTH_SESSION',
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+      }),
     }),
   ),
   shallow,

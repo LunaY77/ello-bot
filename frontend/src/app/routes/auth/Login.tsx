@@ -12,7 +12,7 @@ const LoginRoute = () => {
   const redirectTo = searchParams.get('redirectTo');
 
   return (
-    <AuthLayout title={t('login.title')}>
+    <AuthLayout title={t('login.title')} description={t('login.subtitle')}>
       <LoginForm
         onSuccess={() => {
           navigate(

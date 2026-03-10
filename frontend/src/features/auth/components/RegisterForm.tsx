@@ -32,6 +32,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           register.mutate({
             username: values.username,
             password: values.password,
+            displayName: values.displayName?.trim() || null,
           });
         }}
         schema={registerFormSchema}
@@ -43,26 +44,44 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           <>
             <Input
               type="text"
+              label={t('register.displayName')}
+              error={formState.errors.displayName}
+              registration={formRegister('displayName')}
+              placeholder={t('register.displayNamePlaceholder')}
+              autoComplete="nickname"
+              className="h-11 rounded-2xl border-stone-300 bg-white"
+            />
+            <Input
+              type="text"
               label={t('register.username')}
               error={formState.errors.username}
               registration={formRegister('username')}
+              placeholder={t('register.usernamePlaceholder')}
+              autoComplete="username"
+              className="h-11 rounded-2xl border-stone-300 bg-white"
             />
             <Input
               type="password"
               label={t('register.password')}
               error={formState.errors.password}
               registration={formRegister('password')}
+              placeholder={t('register.passwordPlaceholder')}
+              autoComplete="new-password"
+              className="h-11 rounded-2xl border-stone-300 bg-white"
             />
             <Input
               type="password"
               label={t('register.confirmPassword')}
               error={formState.errors.confirmPassword}
               registration={formRegister('confirmPassword')}
+              placeholder={t('register.confirmPasswordPlaceholder')}
+              autoComplete="new-password"
+              className="h-11 rounded-2xl border-stone-300 bg-white"
             />
             <div className="mt-6">
               <Button
                 type="submit"
-                className="w-full"
+                className="h-11 w-full rounded-2xl"
                 isLoading={register.isPending}
               >
                 {t('register.submit')}
@@ -75,7 +94,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         {t('register.hasAccount')}{' '}
         <Link
           to={paths.auth.login.getHref(redirectTo)}
-          className="font-medium text-blue-600 hover:text-blue-500"
+          className="font-medium text-stone-900 underline decoration-stone-300 underline-offset-4 hover:text-stone-700"
         >
           {t('register.login')}
         </Link>

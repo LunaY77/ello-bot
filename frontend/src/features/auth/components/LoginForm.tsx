@@ -34,17 +34,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               label={t('login.username')}
               error={formState.errors.username}
               registration={register('username')}
+              placeholder={t('login.usernamePlaceholder')}
+              autoComplete="username"
+              className="h-11 rounded-2xl border-stone-300 bg-white"
             />
             <Input
               type="password"
               label={t('login.password')}
               error={formState.errors.password}
               registration={register('password')}
+              placeholder={t('login.passwordPlaceholder')}
+              autoComplete="current-password"
+              className="h-11 rounded-2xl border-stone-300 bg-white"
             />
             <div className="mt-6">
               <Button
                 type="submit"
-                className="w-full"
+                className="h-11 w-full rounded-2xl"
                 isLoading={login.isPending}
               >
                 {t('login.submit')}
@@ -57,9 +63,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         {t('login.noAccount')}{' '}
         <Link
           to={paths.auth.register.getHref(redirectTo)}
-          className="font-medium text-blue-600 hover:text-blue-500"
+          className="font-medium text-stone-900 underline decoration-stone-300 underline-offset-4 hover:text-stone-700"
         >
-          {t('login.registerLink')}
+          {t('login.register')}
         </Link>
       </div>
     </div>
