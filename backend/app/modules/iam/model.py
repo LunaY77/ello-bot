@@ -32,7 +32,12 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import Base
-from app.modules.iam.consts import AclEffect, MembershipStatus
+from app.modules.iam.consts import (
+    DEFAULT_AGENT_AVATAR_URL,
+    DEFAULT_USER_AVATAR_URL,
+    AclEffect,
+    MembershipStatus,
+)
 
 
 class _IdMixin:
@@ -181,7 +186,11 @@ class UserAccount(Base, _IdMixin, _TimestampMixin):
     )
     username: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    avatar_url: Mapped[str] = mapped_column(String(512), nullable=False, server_default="")
+    avatar_url: Mapped[str] = mapped_column(
+        String(512),
+        nullable=False,
+        server_default=DEFAULT_USER_AVATAR_URL,
+    )
     bio: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     gender: Mapped[str | None] = mapped_column(String(32), nullable=True)
     date_of_birth: Mapped[date | None] = mapped_column(Date, nullable=True)
@@ -209,7 +218,11 @@ class AgentAccount(Base, _IdMixin, _TimestampMixin):
         nullable=True,
     )
     code: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
-    avatar_url: Mapped[str] = mapped_column(String(512), nullable=False, server_default="")
+    avatar_url: Mapped[str] = mapped_column(
+        String(512),
+        nullable=False,
+        server_default=DEFAULT_AGENT_AVATAR_URL,
+    )
     description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
     principal: Mapped[Principal] = relationship(

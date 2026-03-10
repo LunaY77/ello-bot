@@ -250,6 +250,9 @@ class IamCommands:
         else:
             principal = user_account.principal
 
+        if not user_account.avatar_url:
+            user_account.avatar_url = DEFAULT_USER_AVATAR_URL
+
         if not principal.is_active:
             principal.is_active = True
 
@@ -1815,7 +1818,7 @@ class IamCommands:
         return UserAccountResponse(
             principal_id=user_account.principal_id,
             username=user_account.username,
-            avatar_url=user_account.avatar_url,
+            avatar_url=user_account.avatar_url or DEFAULT_USER_AVATAR_URL,
             bio=user_account.bio,
             gender=user_account.gender,
             date_of_birth=user_account.date_of_birth,
@@ -1846,7 +1849,7 @@ class IamCommands:
             principal_id=agent_account.principal_id,
             owner_principal_id=agent_account.owner_principal_id,
             code=agent_account.code,
-            avatar_url=agent_account.avatar_url,
+            avatar_url=agent_account.avatar_url or DEFAULT_AGENT_AVATAR_URL,
             description=agent_account.description,
             display_name=resolved_principal.display_name,
             is_active=resolved_principal.is_active,
