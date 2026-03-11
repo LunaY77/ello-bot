@@ -71,7 +71,7 @@ export const ChatInput = () => {
               <button
                 onClick={handleSubmit}
                 disabled={!message.trim()}
-                className="rounded-full bg-black p-1.5 text-white transition hover:bg-gray-800 disabled:opacity-30 dark:bg-surface-2 dark:text-black dark:hover:bg-gray-200"
+                className="rounded-full bg-black p-1.5 text-white transition hover:bg-gray-800 disabled:opacity-30 dark:bg-accent dark:text-accent-foreground dark:hover:bg-accent-hover"
               >
                 <svg
                   className="size-5"

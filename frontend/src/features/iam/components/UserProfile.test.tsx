@@ -15,15 +15,14 @@ vi.mock('../api/update-profile', () => ({
   useUpdateProfile: vi.fn(),
 }));
 
-vi.mock('@/lib/auth', async () => {
-  const actual =
-    await vi.importActual<typeof import('@/lib/auth')>('@/lib/auth');
-
-  return {
-    ...actual,
-    useCurrentUser: vi.fn(),
-  };
-});
+vi.mock('@/lib/auth', () => ({
+  useCurrentUser: vi.fn(),
+  getViewerDisplayName: (viewer: AuthMeResponse | null | undefined) =>
+    viewer?.principal.displayName ??
+    viewer?.user?.displayName ??
+    viewer?.agent?.displayName ??
+    'Ello',
+}));
 
 const createViewer = (overrides: Partial<AuthMeResponse> = {}) =>
   ({

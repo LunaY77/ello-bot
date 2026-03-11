@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { cn } from '@/utils/cn';
 
@@ -15,7 +16,7 @@ export const AccessCard = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) => (
   <section
@@ -37,7 +38,7 @@ export const AccessSectionHeader = ({
   eyebrow?: string;
   title: string;
   description?: string;
-  actions?: React.ReactNode;
+  actions?: ReactNode;
 }) => (
   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div className="max-w-2xl">
@@ -90,7 +91,7 @@ export const AccessBadge = ({
   children,
   tone = 'neutral',
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'danger';
 }) => {
   const toneClassName = {
@@ -118,7 +119,7 @@ export const AccessField = ({
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) => (
   <label className="block">
     <span className="mb-2 block text-micro font-semibold uppercase tracking-[0.22em] text-tertiary">
@@ -132,7 +133,7 @@ export const AccessEmptyState = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) => (
   <div
