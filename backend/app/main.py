@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
@@ -23,6 +24,8 @@ from app.core.database import engine
 from app.core.observability import init_observability
 from app.core.redis import close_redis, redis_client
 from app.modules import iam_router
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 async def _bootstrap_iam_state() -> None:
@@ -95,7 +98,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/health", response_model=Result)

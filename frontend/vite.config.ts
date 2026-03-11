@@ -2,8 +2,22 @@
 /// <reference types="vite/client" />
 
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
+
+const DEFAULT_BACKEND_ORIGIN = 'http://localhost:8000';
+
+const resolveProxyTarget = (apiUrl?: string) => {
+  if (!apiUrl || apiUrl.startsWith('/')) {
+    return DEFAULT_BACKEND_ORIGIN;
+  }
+
+  try {
+    return new URL(apiUrl).origin;
+  } catch {
+    return DEFAULT_BACKEND_ORIGIN;
+  }
+};
 
 /**
  * Vite 配置文件
@@ -13,73 +27,88 @@ import viteTsconfigPaths from 'vite-tsconfig-paths';
  * - 热更新（HMR）速度快
  * - 生产构建使用 Rollup，输出优化
  */
-export default defineConfig({
-  /**
-   * 基础路径
-   * './' 表示相对路径，用于部署到子目录的情况
-   */
-  base: './',
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_APP_');
+  const proxyTarget = resolveProxyTarget(env.VITE_APP_API_URL);
 
-  /**
-   * 插件配置
-   */
-  plugins: [
+  return {
     /**
-     * React 插件
-     * 提供 Fast Refresh 和 JSX 支持
+     * 基础路径
+     * './' 表示相对路径，用于部署到子目录的情况
      */
-    react(),
+    base: './',
 
     /**
-     * TypeScript 路径映射插件
-     * 允许使用 @/* 别名，如 '@/components/Button'
+     * 插件配置
      */
-    viteTsconfigPaths(),
-  ],
+    plugins: [
+      /**
+       * React 插件
+       * 提供 Fast Refresh 和 JSX 支持
+       */
+      react(),
 
-  /**
-   * 开发服务器配置
-   */
-  server: {
-    port: 3000,
-  },
+      /**
+       * TypeScript 路径映射插件
+       * 允许使用 @/* 别名，如 '@/components/Button'
+       */
+      viteTsconfigPaths(),
+    ],
 
-  /**
-   * 预览服务器配置
-   */
-  preview: {
-    port: 3000,
-  },
-
-  /**
-   * 测试配置（Vitest）
-   */
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/testing/setup-tests.ts',
-    exclude: ['**/node_modules/**', '**/e2e/**'],
-    coverage: {
-      include: ['src/**'],
-    },
-  },
-
-  /**
-   * 依赖优化配置
-   */
-  optimizeDeps: {
-    exclude: ['fsevents'],
-  },
-
-  /**
-   * 生产构建配置
-   */
-  build: {
-    rollupOptions: {
-      external: ['fs/promises'],
-      output: {
-        experimentalMinChunkSize: 3500,
+    /**
+     * 开发服务器配置
+     */
+    server: {
+      port: 3000,
+      proxy: {
+        '/api': {
+          target: proxyTarget,
+          changeOrigin: true,
+        },
+        '/static': {
+          target: proxyTarget,
+          changeOrigin: true,
+        },
       },
     },
-  },
+
+    /**
+     * 预览服务器配置
+     */
+    preview: {
+      port: 3000,
+    },
+
+    /**
+     * 测试配置（Vitest）
+     */
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/testing/setup-tests.ts',
+      exclude: ['**/node_modules/**', '**/e2e/**'],
+      coverage: {
+        include: ['src/**'],
+      },
+    },
+
+    /**
+     * 依赖优化配置
+     */
+    optimizeDeps: {
+      exclude: ['fsevents'],
+    },
+
+    /**
+     * 生产构建配置
+     */
+    build: {
+      rollupOptions: {
+        external: ['fs/promises'],
+        output: {
+          experimentalMinChunkSize: 3500,
+        },
+      },
+    },
+  };
 });

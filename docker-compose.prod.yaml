@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     env_file:
-      - ./redis.env
+      - ./deploy/redis.env
     command: sh -c "redis-server --requirepass $$REDIS_PASSWORD"
     volumes:
       - redis_data:/data
