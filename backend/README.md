@@ -4,85 +4,136 @@ FastAPI backend service for Ello Bot, a personal LLM application platform.
 
 ## Tech Stack
 
-- **Framework**: FastAPI
-- **ORM**: SQLAlchemy 2.x (sync)
-- **Migrations**: Alembic
-- **Validation**: Pydantic v2
-- **Auth**: JWT (PyJWT + bcrypt)
-- **Logging**: Loguru
-- **Package Manager**: uv
-
-## Project Structure
-
-```
-app/
-├── core/          # Infrastructure (config, database, exceptions, logging, Result)
-├── model/         # SQLAlchemy ORM models
-├── schema/        # Pydantic request/response schemas
-├── repository/    # Data access layer (CRUD)
-├── service/       # Business logic layer
-├── router/        # HTTP routing layer
-└── utils/         # Utilities (JWT, password hashing)
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.12+
+- Python 3.12
+- FastAPI
+- SQLAlchemy 2.x async ORM
+- PostgreSQL
+- Redis
+- Alembic
+- Pydantic v2 + pydantic-settings
+- Loguru
 - uv
 
-### Install Dependencies
+## Project Layout
 
-```bash
-cd backend && uv sync
+```text
+app/
+├── main.py              # FastAPI app, lifespan, bootstrap, health check
+├── core/                # config, db, redis, auth, exceptions, logging, Result
+├── modules/iam/         # auth, tenants, RBAC, ACL, agent management
+├── infra/               # infrastructure
+├── static/              # default avatars and other static assets
+├── tools/scripts.py     # lint/check/gen-openapi
+└── utils/               # auth helpers and security utilities
 ```
 
-### Configure Environment
+## Quick Start
 
-Copy `.env.example` to `.env` and fill in the values:
+### 1. Prerequisites
+
+- Python 3.12+
+- `uv`
+- Docker Desktop or a compatible Docker runtime
+
+### 2. Start local PostgreSQL and Redis
+
+From the repository root:
 
 ```bash
-cp backend/.env.example backend/.env
+make docker-dev-up
 ```
 
-Key settings:
+This starts:
+
+- PostgreSQL on `localhost:5432`
+- Redis on `localhost:6379` with password `12345678`
+
+### 3. Install Python dependencies
+
+```bash
+cd backend
+uv sync
+```
+
+### 4. Create `.env`
+
+```bash
+cp .env.example .env
+```
+
+If you use `make docker-dev-up`, update the connection settings to match the dev compose stack:
 
 ```env
-DB_URL=postgresql+asyncpg://user:password@localhost/ello_bot
-JWT_SECRET_KEY=your-secret-key-here
-DEBUG=false
+DEBUG=true
+DB_URL=postgresql+asyncpg://ello:12345678@localhost:5432/ello
+REDIS_URL=redis://:12345678@localhost:6379/0
+JWT_SECRET_KEY=change-this-to-a-32-byte-minimum-secret-key
+BOOTSTRAP_ENABLED=true
+BOOTSTRAP_ADMIN_PASSWORD=change-this-bootstrap-password
 ```
 
-### Run Database Migrations
+Important notes:
 
-```bash
-make db-upgrade
-```
+- When `DEBUG=false`, `JWT_SECRET_KEY` must be set and be at least 32 bytes.
+- When bootstrap is enabled outside debug mode, `BOOTSTRAP_ADMIN_PASSWORD` must be set.
 
-`make backend-run` also applies pending migrations automatically before starting the dev server.
+### 5. Apply migrations and run the server
 
-### Start Development Server
+From the repository root:
 
 ```bash
 make backend-run
 ```
 
-Visit `http://localhost:8000/docs` for the interactive API docs.
+`make backend-run` automatically runs `alembic upgrade head` before starting Uvicorn.
 
-## Running Tests
+### 6. Useful endpoints
+
+- API docs: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+- Static assets: `http://localhost:8000/static/...`
+
+## Common Commands
+
+From the repository root:
 
 ```bash
+make backend-run
+make backend-lint
+make backend-check
 make backend-test
+make db-upgrade
+make db-downgrade
 ```
 
-## Code Quality
+Generate the OpenAPI document:
 
 ```bash
-make backend-lint    # lint + format
-make backend-check   # lint only (no fix)
+cd backend
+uv run gen-openapi
 ```
 
-## Development Guidelines
+The generated file is written to `docs/api/openapi.json` at the repository root.
 
-See [CLAUDE.md](./CLAUDE.md).
+## Testing
+
+`make backend-test` uses `docker-compose.test.yaml` and runs:
+
+- `tests/unit`
+- `tests/integration`
+
+Integration tests use a dedicated PostgreSQL database on host port `5433` and a dedicated Redis instance on host port `6380`. The shared fixtures in `tests/conftest.py` handle migrations, app lifespan, and state cleanup.
+
+## Backend Conventions
+
+- Keep routers thin. HTTP handlers should delegate to `workflow.py`, `commands.py`, or `queries.py`.
+- Use `DbSession`, `RedisDep`, and `CurrentAuthDep` for dependency injection.
+- Return `Result[T]` from APIs and raise `BusinessException` / `AuthException` for failures.
+- Avoid lazy loading. IAM relationships are configured with `lazy="raise"`, so queries must preload the graph they need.
+- Treat `backend/AGENTS.md` as the source of truth for AI-assisted backend changes.
+
+## Related Docs
+
+- `backend/AGENTS.md`
+- `backend/docs/`
+- `docs/api/openapi.json` after running `uv run gen-openapi`

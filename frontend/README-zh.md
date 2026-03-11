@@ -1,125 +1,180 @@
 # Ello Bot 前端
 
-Ello Bot 的 React + TypeScript 前端应用。
+Ello Bot 的前端使用 React 19 + TypeScript 构建。当前应用是一个基于 Vite 的 SPA，包含公开的落地页与认证页，以及受保护的 `/app` 路由，覆盖 dashboard、users、profile 和 IAM 管理界面。
 
 ## 技术栈
 
-- **框架**：React 19 + React Router 7
-- **构建工具**：Vite 6
-- **语言**：TypeScript（strict 模式）
-- **数据请求**：TanStack Query + react-query-auth
-- **状态管理**：Zustand
-- **校验**：Zod + react-hook-form
-- **样式**：Tailwind CSS
-- **国际化**：i18next + react-i18next
-- **API 类型/Schema**：Orval（OpenAPI 代码生成）
+- React 19
+- React Router 7
+- TypeScript 严格模式
+- Vite 6
+- TanStack Query + `react-query-auth`
+- Zustand
+- Axios
+- Tailwind CSS
+- Zod + `react-hook-form`
+- i18next + `react-i18next`
+- Orval OpenAPI 代码生成
+- Vitest、Playwright、Storybook
 
-## 项目结构
+## 目录结构
 
-```
+```text
 src/
-├── app/              # 应用壳、Provider、路由树
-├── api/              # OpenAPI 生成的请求/响应模型与 schema
-├── features/         # 业务模块（auth、users、chat）
-├── components/       # 通用 UI 与布局组件
-├── lib/              # 基础设施（api-client、auth、react-query、i18n）
-├── store/            # 仅客户端全局状态（如 auth token）
-├── config/           # 配置（paths、env）
-└── locales/          # 默认语言资源
+├── app/                  # 应用壳、Provider、route module
+├── api/                  # OpenAPI 生成的模型与 schema
+├── features/             # auth、users、iam、chat
+├── components/           # 通用 UI、布局、通知、错误边界
+├── lib/                  # api-client、auth、react-query、i18n
+├── store/                # 持久化的认证会话状态
+├── config/               # 环境变量与路由配置
+├── testing/              # Vitest 测试辅助与 Provider 包装
+└── locales/              # 默认语言资源
 ```
+
+`src/` 之外还需要关注：
+
+- `e2e/`：Playwright 用例
+- `.storybook/`：Storybook 配置
+- `locales/`：i18n 工作流生成的 JSON 产物
 
 ## 快速开始
 
-### 环境要求
+### 1. 环境要求
 
 - Node.js 18+
 - pnpm 10+
-- 后端 API 已启动（默认：`http://localhost:8000`）
+- 本地可访问的后端 API
 
-### 安装依赖
-
-```bash
-cd frontend && pnpm install
-```
-
-### 配置环境变量
-
-复制 `.env.example` 为 `.env`：
+### 2. 安装依赖
 
 ```bash
-cp frontend/.env.example frontend/.env
+cd frontend
+pnpm install
 ```
 
-关键配置项：
+### 3. 创建 `.env`
+
+```bash
+cp .env.example .env
+```
+
+默认配置为：
 
 ```env
 VITE_APP_API_URL=http://localhost:8000/api
-VITE_APP_ENABLE_API_MOCKING=false
-VITE_APP_MOCK_API_PORT=8080
 VITE_APP_URL=http://localhost:3000
 ```
 
-### 启动开发服务
+### 4. 启动开发服务器
+
+在仓库根目录执行：
 
 ```bash
 make frontend-dev
 ```
 
-或：
+或直接执行：
 
 ```bash
-cd frontend && pnpm run dev
+cd frontend
+pnpm run dev
 ```
 
-## 常用脚本
+Vite 开发服务器默认运行在 `http://localhost:3000`，并把 `/api`、`/static` 代理到 `VITE_APP_API_URL` 对应的后端 origin。
 
-| 命令 | 说明 |
-| --- | --- |
-| `pnpm run dev` | 启动 Vite 开发服务器 |
-| `pnpm run build` | 类型检查并构建生产包 |
-| `pnpm run preview` | 本地预览生产构建 |
-| `pnpm run lint` | 执行 ESLint |
-| `pnpm run lint:fix` | 执行 ESLint 并自动修复 |
-| `pnpm run format` | 使用 Prettier 格式化代码 |
-| `pnpm run check-types` | 执行 TypeScript 类型检查 |
-| `pnpm run test` | 运行 Vitest |
-| `pnpm run test:coverage` | 运行测试并生成覆盖率 |
-| `pnpm run codegen:api` | 根据 OpenAPI 生成 API 模型/schema |
-| `pnpm run i18n` | 执行 i18n 工作流并格式化产物 |
+## 常用命令
+
+在仓库根目录执行：
+
+```bash
+make frontend-dev
+make frontend-build
+make frontend-check
+make frontend-lint
+make frontend-test-unit
+make frontend-test-e2e
+```
+
+在 `frontend/` 目录执行：
+
+```bash
+pnpm run dev
+pnpm run build
+pnpm run preview
+pnpm run lint
+pnpm run lint:fix
+pnpm run format
+pnpm run check-types
+pnpm run test
+pnpm run test:unit
+pnpm run test:e2e
+pnpm run test:e2e:ui
+pnpm run storybook
+pnpm run build-storybook
+pnpm run codegen:api
+pnpm run i18n
+```
+
+## 认证与数据流
+
+- 客户端通过 Zustand 持久化 `accessToken` 和 `refreshToken`，存储 key 为 `ELLO_AUTH_SESSION`。
+- `src/lib/api-client.ts` 会自动附加 access token。
+- 遇到 401 时会尝试使用 refresh token 刷新一次会话。
+- 刷新失败后会清空本地会话并跳转登录页。
+- viewer 这类服务端数据由 React Query 和 `react-query-auth` 管理，不整体塞进 Zustand。
 
 ## API 契约同步
 
-后端接口契约变更后执行：
+后端接口变更后执行：
 
 ```bash
 make sync-api
 ```
 
-或手动执行：
+手动流程：
 
 ```bash
 cd backend && uv run gen-openapi
 cd frontend && pnpm run codegen:api
 ```
 
-## 国际化流程
+不要手动修改 `src/api/models/` 和 `src/api/schemas/` 下的生成文件。
 
-1. 修改 `src/locales/default/*.ts` 默认语言文件
+## 测试策略
+
+### Vitest
+
+- 使用 `jsdom`
+- `src/testing/setup-tests.ts` 会主动禁止网络访问
+- 适合组件、hook、store 和纯 UI 行为测试
+
+### Playwright
+
+- 负责依赖真实 HTTP 和真实后端的流程
+- `make frontend-test-e2e` 会先通过 `docker-compose.test.yaml` 启动后端 E2E 测试栈
+- 前端测试服务器运行在 `3000` 端口
+- 后端 E2E API 暴露在 `http://localhost:8001/api`
+
+### Storybook
+
+- 本地启动：`pnpm run storybook`
+- 构建静态文档：`pnpm run build-storybook`
+
+## i18n 流程
+
+1. 修改 `src/locales/default/` 下的默认文案
 2. 执行：
 
 ```bash
-cd frontend && pnpm run i18n
+cd frontend
+pnpm run i18n
 ```
 
-命令会在 `frontend/locales/` 下生成对应语言 JSON 文件。
+生成的语言 JSON 会写入 `frontend/locales/`。
 
-## 代码质量
+## 前端协作约定
 
-```bash
-make frontend-lint    # 格式化 + lint 修复
-make frontend-check   # 仅 lint 检查
-```
-
-## 开发规范
-
-参见 [AGENTS.md](./AGENTS.md)。
+- route module 保持轻量，业务逻辑尽量下沉到 feature hook 或组件中。
+- 路由跳转统一使用 `src/config/paths.ts`。
+- 进行 AI 辅助开发时，以 `frontend/AGENTS.md` 作为前端约束的准绳。

@@ -1,138 +1,192 @@
 # Backend 开发规范
 
-本文档为 Ello Bot 后端开发的 AI 辅助编码规范，适用于所有 Claude 辅助开发场景。
+本文档为 Ello Bot 后端的 AI 辅助编码规范，适用于 `backend/` 下所有 Claude 协作场景。
+
+如何启动、测试、部署、配置环境变量，请看 `backend/README.md` 与 `backend/README-zh.md`；本文件只讨论项目规范。
 
 ---
 
 ## 1. 项目结构
 
-```
+```text
 backend/
 ├── app/
 │   ├── __init__.py              # __app_name__, __version__
-│   ├── main.py                  # FastAPI 入口、lifespan、middleware、routes
-│   ├── core/                    # 框架层：配置、数据库、Redis、OTel、认证、异常、日志
-│   │   ├── config.py            # Settings（多子配置类：ServerSettings, DatabaseSettings, ...）
-│   │   ├── database.py          # SQLAlchemy engine、SessionLocal、Base
+│   ├── main.py                  # FastAPI 入口、lifespan、自举、异常注册、健康检查
+│   ├── core/                    # 框架层：配置、数据库、Redis、认证、异常、日志、Result
+│   │   ├── config.py            # Settings（多子配置类）
+│   │   ├── database.py          # Async engine、SessionLocal、DbSession、Base
 │   │   ├── redis.py             # Redis 客户端、RedisKeyDef、RedisDep
-│   │   ├── observability.py     # OpenTelemetry 初始化（TracerProvider + instrument）
-│   │   ├── logger.py            # Loguru 配置 + OTel trace_id/span_id 注入
-│   │   ├── auth.py              # require_auth 依赖 + token 白名单校验
-│   │   ├── exception.py         # ErrorCode、CommonErrorCode、BusinessException、全局异常处理器
-│   │   ├── schema.py            # Result[T]、ApiModel 基类
+│   │   ├── auth.py              # require_auth / CurrentAuthDep
+│   │   ├── exception.py         # CommonErrorCode、BusinessException、AuthException
+│   │   ├── schema.py            # ApiModel、Result[T]
+│   │   ├── logger.py            # Loguru 配置
+│   │   ├── observability.py     # OpenTelemetry 初始化
 │   │   └── __init__.py          # 公共导出
-│   ├── modules/                 # 业务模块
-│   │   ├── auth/                # 认证模块（login、register）
-│   │   │   ├── consts.py        # AuthRedisKey
-│   │   │   ├── commands.py      # AuthCommands（业务逻辑）
-│   │   │   ├── schemas.py       # AuthResponse、LoginRequest、RegisterRequest
-│   │   │   └── router.py        # /api/auth/*
-│   │   └── users/               # 用户模块（用户信息、密码、头像、登出）
-│   │       ├── consts.py        # UserErrorCode
-│   │       ├── model.py         # User ORM 模型
-│   │       ├── commands.py      # UserCommands（写操作）
-│   │       ├── queries.py       # UserQueries（读操作）
-│   │       ├── schemas.py       # UserInfoResponse、请求 Schema
-│   │       ├── router.py        # /api/users/*
-│   │       └── __init__.py      # 公共导出
-│   └── utils/                   # 工具函数（密码哈希、JWT 编解码）
+│   ├── modules/
+│   │   └── iam/                 # 当前唯一完整业务模块：认证、租户、RBAC、ACL、Agent
+│   │       ├── consts.py        # 业务常量、Redis key、内建角色/权限
+│   │       ├── errors.py        # IamErrorCode
+│   │       ├── model.py         # ORM 模型
+│   │       ├── schemas.py       # 请求/响应 Schema
+│   │       ├── commands.py      # 写操作
+│   │       ├── queries.py       # 读操作
+│   │       ├── workflow.py      # 跨领域编排
+│   │       ├── router.py        # /api/iam/*
+│   │       └── __init__.py      # 模块公共导出
+│   ├── infra/                   # 外部集成预留命名空间
+│   ├── tools/                   # 脚本入口（lint/check/gen-openapi）
+│   ├── utils/                   # token、密码哈希等工具函数
+│   └── static/                  # 默认头像等静态资源
 ├── alembic/                     # 数据库迁移
-├── tests/                       # 测试
-└── pyproject.toml               # 依赖、脚本、工具配置
+├── tests/
+│   ├── unit/                    # 单元测试
+│   ├── integration/             # 真实 PostgreSQL + Redis 集成测试
+│   ├── conftest.py              # 测试夹具与环境初始化
+│   └── factories.py             # 测试辅助方法
+└── pyproject.toml               # 依赖、pytest、ruff 配置
 ```
 
 ### 模块文件约定
 
-每个业务模块（`modules/{name}/`）应包含：
+新增业务模块时，优先沿用当前 `iam` 模块的拆分方式：
 
 | 文件 | 职责 |
-|------|------|
-| `consts.py` | 常量：ErrorCode 枚举、RedisKey 定义 |
+| ---- | ---- |
+| `consts.py` | 常量、RedisKey、内建配置 |
+| `errors.py` | 业务错误码定义 |
 | `model.py` | SQLAlchemy ORM 模型 |
 | `schemas.py` | Pydantic 请求/响应 Schema |
-| `commands.py` | 写操作业务逻辑（注入 DbSession + RedisDep） |
-| `queries.py` | 读操作业务逻辑（注入 DbSession） |
-| `router.py` | FastAPI Router，只做请求解析和 Result 包装 |
-| `__init__.py` | 对外公共导出 + `__all__` |
+| `commands.py` | 写操作业务逻辑 |
+| `queries.py` | 读操作业务逻辑 |
+| `workflow.py` | 跨流程编排，按需存在 |
+| `router.py` | FastAPI Router，只处理 HTTP 层 |
+| `__init__.py` | 公共导出 + `__all__` |
+
+禁止回退到旧的 `service/repository` 分层命名。
 
 ---
 
 ## 2. 分层架构
 
-```
-Router → Commands/Queries → Model
+```text
+Router -> Workflow / Commands / Queries -> Model / Redis
 ```
 
 ### 规则
 
-- **Router 层**：只负责 HTTP 层面的事情，不写业务逻辑，直接返回 `Result.ok(data=...)`
-- **Commands/Queries 层**：所有业务逻辑在此层，通过构造器注入 `DbSession`、`RedisDep` 等依赖
-- **Model 层**：只定义表结构，不含任何业务逻辑
+- **Router 层**：只负责请求解析、依赖注入、权限入口检查、`Result` 包装，不写业务逻辑，不直接拼 SQL。
+- **Workflow 层**：处理跨领域编排，适用于注册、登录、刷新令牌、聚合 `/auth/me` 这类流程。
+- **Commands 层**：只负责写操作与状态变更。
+- **Queries 层**：只负责读操作与显式预加载查询。
+- **Model 层**：只定义表结构和关系，不承载业务逻辑。
 
 ```python
-# ✅ 正确：Router 调用 Commands，返回 Result
-@router.post("/register")
-def register(request: RegisterRequest, commands: AuthCommandsDep):
-    return Result.ok(data=commands.register(request.username, request.password))
+# ✅ 正确：Router 调用 workflow / commands
+@router.post("/auth/login")
+async def login(request: LoginRequest, workflow: IamWorkflowDep):
+    return Result.ok(data=await workflow.login(request.username, request.password))
 
-# ❌ 错误：Router 直接操作数据库
-@router.post("/register")
-def register(request: RegisterRequest, db: DbSession):
-    user = db.query(User).filter(...).first()
+# ❌ 错误：Router 直接查库写业务
+@router.post("/auth/login")
+async def login(request: LoginRequest, db: DbSession):
+    user = await db.scalar(select(UserAccount).where(UserAccount.username == request.username))
 ```
 
 ---
 
-## 3. 错误码最佳实践
+## 3. 数据库与 ORM 规范
+
+### 异步优先
+
+- 数据库统一使用 `AsyncSession`。
+- 请求作用域内统一通过 `DbSession` 注入。
+- 业务代码禁止引入同步 SQLAlchemy Session。
+
+### 事务边界
+
+- 标准请求路径通过 `get_db()` 自动提交或回滚事务。
+- 因此 `router.py`、`commands.py`、`queries.py`、`workflow.py` 中不要无理由显式 `commit()`。
+- 只有脱离请求生命周期的逻辑才直接使用 `SessionLocal()`，例如 `app/main.py` 的启动自举。
+
+### ORM 关系与查询
+
+- `app/modules/iam/model.py` 中大量关系显式设置了 `lazy="raise"`。
+- 任何需要访问关系对象的查询，必须通过 `joinedload()` / `selectinload()` 预加载。
+- 序列化阶段如果触发懒加载报错，应修正查询，而不是放宽模型约束。
+
+```python
+# ✅ 正确：查询时预加载
+stmt = select(UserAccount).options(joinedload(UserAccount.principal))
+
+# ❌ 错误：依赖序列化阶段临时懒加载
+user = await db.scalar(select(UserAccount).where(UserAccount.id == user_id))
+return UserAccountResponse.model_validate(user)
+```
+
+---
+
+## 4. Redis 与鉴权规范
+
+### RedisKeyDef
+
+所有 Redis key 必须通过 `RedisKeyDef` 定义，禁止在业务代码中硬编码字符串 key。
+
+定义位置：
+
+- 框架公共定义在 `app/core/redis.py`
+- 模块私有 key 定义在各模块 `consts.py`
+
+命名约定：
+
+- 根前缀统一为 `ello:`
+- 建议结构：`ello:{module}:{domain}:{pattern}`
+
+### Redis 使用规则
+
+- `commands.py` / `queries.py` 通过构造器注入 `RedisDep`。
+- 业务代码不要直接导入全局 `redis_client`。
+- 唯一例外是框架级依赖或进程级初始化逻辑，例如 `core/auth.py` 与启动自举。
+
+### 鉴权规则
+
+- Access token 是不透明 token，不是把 JWT 直接拿来做路由鉴权。
+- 路由鉴权统一走 `require_auth()` / `CurrentAuthDep`。
+- 受保护接口不要重复手动解析 `Authorization` 请求头。
+- Access session 的真实来源是 Redis 中的会话快照。
+
+---
+
+## 5. 错误码与异常规范
 
 ### 错误码格式
 
-- **5 位字符**：来源码（1位）+ 编号（4位）
-- **来源码**：
-    - `A`：基础/框架层（`CommonErrorCode`）
-    - `B`：业务层（各业务模块）
-    - `C`：第三方/外部系统
+- 固定 5 位字符：来源码 + 4 位编号
+- `A`：框架/通用错误
+- `B`：业务错误
+- `C`：第三方或外部系统错误
 
-### 编号规则
+当前后端约定：
 
-- 范围：`0001-9999`
-- 步长：**100**（预留扩展空间）
-- 示例：`B0001`, `B0101`, `B0201`
+- 通用错误码定义在 `app/core/exception.py` 的 `CommonErrorCode`
+- 业务错误码定义在模块 `errors.py`
+- 当前 `iam` 模块使用 `IamErrorCode`
 
-### 业务域号段分配
+### 号段建议
 
-按业务域以 100 为间隔划分号段：
+- `B01xx`：认证/用户基础操作
+- `B02xx`：租户、RBAC、ACL、Agent 等 IAM 管理操作
+- 新增业务域时，优先申请新的百位号段，不要把新语义塞进已混乱的区间
 
-| 号段    | 业务域       |
-| ------- | ------------ |
-| `B01xx` | 用户基础操作 |
-| `B02xx` | 用户高级操作 |
-| `B03xx` | 用户权限     |
-| `B11xx` | 订单基础操作 |
-| `B12xx` | 订单支付操作 |
+### 抛错规则
 
-> 新增业务域时，选择未被占用的百位号段，并在此表中登记。
-
-### ⚠️ 错误码操作必须使用 `/errorcode` Skill
-
-**凡涉及错误码的任何操作（查询、新增、分配号段），必须调用 `/errorcode` skill，禁止直接修改文件或凭记忆操作。**
-
-```
-/errorcode list                        # 查看所有错误码
-/errorcode check "描述"                # 新增前先检查是否可复用
-/errorcode allocate <domain>           # 为新业务域分配号段
-/errorcode add <domain> <code> <name> <message>  # 添加新错误码
-```
-
-### 定义位置
-
-- **通用错误码**：定义在 `app/core/exception.py` 的 `CommonErrorCode` 中
-- **业务错误码**：定义在对应模块的 `consts.py` 中（如 `modules/users/consts.py`）
-- 抛出异常统一使用 `BusinessException`，不要直接抛出 `HTTPException`
+- 业务失败统一抛 `BusinessException`
+- 鉴权失败统一抛 `AuthException`
+- 禁止在业务代码中直接抛 `HTTPException`
 
 ```python
 # ✅ 正确
-raise BusinessException(UserErrorCode.USER_NOT_FOUND)
+raise BusinessException(IamErrorCode.USER_NOT_FOUND)
 
 # ❌ 错误
 raise HTTPException(status_code=404, detail="User not found")
@@ -140,233 +194,154 @@ raise HTTPException(status_code=404, detail="User not found")
 
 ---
 
-## 4. Redis 最佳实践
+## 6. Schema 与 API 响应规范
 
-### RedisKeyDef 框架
+### Schema 规范
 
-所有 Redis key 使用 `RedisKeyDef`（定义在 `app/core/redis.py`）声明，禁止在业务代码中硬编码 key 字符串。
+- 所有请求/响应 Schema 统一放在模块 `schemas.py`
+- 公共 API schema 继承 `ApiModel`
+- `ApiModel` 已统一提供：
+  - camelCase alias
+  - `populate_by_name=True`
+  - `extra="forbid"`
 
-```python
-from dataclasses import dataclass
+### 请求/响应模型
 
-@dataclass(frozen=True, slots=True)
-class RedisKeyDef:
-    pattern: str                    # 含 {} 占位符的 key 模板
-    expire_seconds: int | None      # TTL（秒），None 表示不过期
-    description: str = ""           # 用途说明
+- 请求模型和响应模型分开定义，命名清晰。
+- 简单字段约束优先使用 Pydantic v2 类型约束、`Annotated`、`Field`。
+- 能不用自定义校验器时，尽量不要写 `@field_validator`。
 
-    def key(self, *args) -> str:    # 格式化得到完整 key
-        return self.pattern.format(*args)
-```
+### ORM 转换
 
-### Key 命名规范
+- 响应模型如需从 ORM 转换，应开启 `from_attributes=True`。
+- 统一使用 `Model.model_validate(orm_obj)`，不要重复手写字段拷贝。
 
-- 根前缀：`ello:`
-- 结构：`ello:{module}:{domain}:{pattern}`
-- 示例：`ello:auth:token:active:{jti}`
+### 统一响应
 
-### 定义位置
-
-每个模块在 `consts.py` 中定义自己的 RedisKey class：
-
-```python
-# modules/auth/consts.py
-from app.core.config import settings
-from app.core.redis import RedisKeyDef
-
-class AuthRedisKey:
-    """ello:auth:* key namespace."""
-
-    ACTIVE_TOKEN = RedisKeyDef(
-        "ello:auth:token:active:{}",
-        expire_seconds=settings.jwt.EXPIRE_MINUTES * 60,
-        description="Active JWT token whitelist (synced with JWT TTL)",
-    )
-```
-
-### 使用方式
-
-```python
-# 写入
-key_def = AuthRedisKey.ACTIVE_TOKEN
-assert key_def.expire_seconds is not None
-self.redis.setex(key_def.key(jti), key_def.expire_seconds, str(user.id))
-
-# 读取
-exists = self.redis.exists(AuthRedisKey.ACTIVE_TOKEN.key(jti))
-
-# 删除（如 logout）
-self.redis.delete(AuthRedisKey.ACTIVE_TOKEN.key(jti))
-```
-
-### Redis 依赖注入
-
-Commands/Queries 通过构造器注入 `RedisDep`，**不要在业务代码中直接 import `redis_client`**：
-
-```python
-import redis as _redis
-from app.core.redis import RedisDep
-
-class UserCommands:
-    def __init__(self, db: DbSession, redis: _redis.Redis) -> None:
-        self.db = db
-        self.redis = redis
-
-def get_user_commands(db: DbSession, redis: RedisDep) -> UserCommands:
-    return UserCommands(db, redis)
-
-UserCommandsDep = Annotated[UserCommands, Depends(get_user_commands)]
-```
-
-> 例外：`core/auth.py` 中的 `require_auth` 是框架级依赖，可以直接使用 `redis_client`。
+- 所有接口统一返回 `Result[T]`
+- 成功返回：`Result.ok(data=...)`
+- 失败返回：通过异常处理器统一转换，不在路由里手写失败 JSON
 
 ---
 
-## 5. 配置最佳实践
+## 7. 依赖注入规范
 
-### 多子配置类结构
+### 命名规则
 
-配置按职责拆分为多个 `BaseSettings` 子类，每个子类通过 `env_prefix` 映射对应的环境变量：
+- 依赖工厂函数统一命名为 `get_xxx`
+- 依赖类型别名统一命名为 `XxxDep`
+
+```python
+def get_iam_queries(db: DbSession, redis: RedisDep) -> IamQueries:
+    return IamQueries(db, redis)
+
+IamQueriesDep = Annotated[IamQueries, Depends(get_iam_queries)]
+```
+
+### 注入边界
+
+- Router 优先注入 `IamCommandsDep`、`IamQueriesDep`、`IamWorkflowDep`、`CurrentAuthDep`
+- 不要在业务 Router 中直接注入底层 `SessionLocal` 或全局 `redis_client`
+- `commands.py` / `queries.py` / `workflow.py` 使用构造器注入依赖，而不是在方法内部到处 import 全局对象
+
+---
+
+## 8. 配置规范
+
+### Settings 结构
+
+配置通过 `pydantic-settings` 分层管理，当前已拆分为：
 
 | 子配置类 | env_prefix | 访问方式 |
-|---------|-----------|---------|
+| -------- | ---------- | -------- |
 | `ServerSettings` | `SERVER_` | `settings.server.HOST` |
 | `DatabaseSettings` | `DB_` | `settings.db.URL` |
 | `CacheSettings` | `REDIS_` | `settings.cache.URL` |
 | `JwtSettings` | `JWT_` | `settings.jwt.SECRET_KEY` |
 | `LogSettings` | `LOG_` | `settings.log.LEVEL` |
 | `OtelSettings` | `OTEL_` | `settings.otel.ENABLED` |
-| `Settings`（顶层） | 无 | `settings.DEBUG`, `settings.APP_NAME` |
-
-新增配置项时，归入对应的子配置类，或新建子类。
-
----
-
-## 6. Pydantic 最佳实践
-
-### Schema 定义规范
-
-- 所有 Schema 定义在模块的 `schemas.py` 中
-- 请求 Schema 和响应 Schema 分开定义，命名清晰
-- 使用 `Field(...)` 添加描述和示例和简单的校验
-- 优先使用 pydantic v2 内置的约束类型（如 `HttpUrl`、`EmailStr` 等）进行字段约束
-- 若 pydantic v2 内置的约束类型无法满足需求，再使用自定义约束, 使用 `Annotated` + `StringConstraints`，**不使用 `@field_validator`**
-
-```python
-from typing import Annotated
-from pydantic import StringConstraints
-
-UserName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=50)]
-Password = Annotated[str, StringConstraints(min_length=6, max_length=100)]
-
-class UserCreate(UserBase):
-    password: Password = Field(..., description="Password", examples=["password123"])
-```
-
-### ORM 模型转换
-
-- 响应 Schema 需要设置 `model_config = ConfigDict(from_attributes=True)` 以支持从 ORM 对象创建
-- 使用 `Model.model_validate(orm_obj)` 进行转换，不要手动构造
-
-### 泛型响应
-
-- 所有 API 响应统一使用 `Result[T]` 包装
-- 成功：`Result.ok(data=...)`
-- 失败：通过 `BusinessException` 触发，由全局异常处理器返回 `Result.fail(...)`
-
----
-
-## 7. 依赖注入最佳实践
-
-### 依赖定义规范
-
-每个可注入的依赖都应提供一个 `Annotated` 类型别名，命名以 `Dep` 结尾：
-
-```python
-def get_user_commands(db: DbSession, redis: RedisDep) -> UserCommands:
-    return UserCommands(db, redis)
-
-UserCommandsDep = Annotated[UserCommands, Depends(get_user_commands)]
-```
-
-### 依赖链
-
-```
-DbSession (get_db)
-RedisDep (get_redis)
-  └── UserCommandsDep (get_user_commands)
-        └── 注入到 Router
-```
+| `BootstrapSettings` | `BOOTSTRAP_` | `settings.bootstrap.ENABLED` |
+| `Settings` | 无 | `settings.DEBUG` |
 
 ### 规则
 
-- **不要在 Commands/Queries 中直接导入 `SessionLocal` 或 `redis_client`**，通过构造器注入
-- **不要在 Router 中直接注入 `DbSession` 或 `RedisDep`**，通过 Commands/Queries 层间接使用
-- 依赖工厂函数命名为 `get_xxx`，类型别名命名为 `XxxDep`
+- 新增配置项时，优先归入已有子配置类。
+- 业务代码统一通过 `settings` 读取配置，不要散落读取 `os.environ`。
+- 安全相关约束尽量写进 `Settings` 校验逻辑，不要只靠 README 提醒。
 
 ---
 
-## 8. 导入规范
+## 9. 导入规范
 
-### 同一 package 内部：使用相对导入
+### 同 package 内：相对导入
 
-同一 package（如 `app/core/`、`app/modules/users/`）内的模块间导入，使用相对导入：
-
-```python
-# ✅ 正确：app/core/auth.py 导入同 package 下的模块
-from .database import DbSession
-from .exception import AuthException, CommonErrorCode
-from .redis import redis_client
-
-# ✅ 正确：app/modules/users/commands.py 导入同 package 下的模块
-from .consts import UserErrorCode
-from .model import User
-
-# ❌ 错误：同 package 内使用绝对导入
-from app.core.database import DbSession
-from app.modules.users.consts import UserErrorCode
-```
-
-### 跨 package 导入：通过 `__init__.py` 公共接口
-
-跨 package 导入时，**必须通过目标 package 的 `__init__.py` 暴露的接口**导入：
+同一 package 内部模块互相导入时，使用相对导入：
 
 ```python
-# ✅ 正确：通过 app.core 的 __init__.py 导入
-from app.core import BusinessException, Result, log, settings
+# ✅ 正确
+from .consts import IamRedisKey
+from .model import UserAccount
 
-# ✅ 正确：通过 app.modules.users 的 __init__.py 导入
-from app.modules.users import User, UserErrorCode
-
-# ❌ 错误：绕过 __init__.py 直接导入内部模块
-from app.core.exception import BusinessException
-from app.modules.users.model import User
+# ❌ 错误
+from app.modules.iam.consts import IamRedisKey
+from app.modules.iam.model import UserAccount
 ```
 
-### 例外情况
+### 跨 package：优先公共接口
 
-1. **避免循环依赖**时，允许跨 package 直接导入内部模块（需用 `TYPE_CHECKING` 或函数内延迟导入）：
+跨 package 导入时，优先通过目标 package 的公共导出：
 
 ```python
-# core/auth.py 需要引用 modules 中的类型，用 TYPE_CHECKING 避免循环
-if TYPE_CHECKING:
-    from app.modules.users import User
+# ✅ 正确
+from app.core import BusinessException, Result, settings
+from app.modules import iam_router
 
-def require_auth(...) -> User:
-    from app.modules.users import User  # 延迟导入
+# 谨慎使用：只有在公共接口未导出或需要规避循环依赖时
+from app.modules.iam.errors import IamErrorCode
 ```
-
-2. **core 内部子模块互相引用**时（如 `auth.py` → `redis.py`），使用相对导入即可，不经过 `__init__.py`。
 
 ### `__init__.py` 维护
 
-每个 package 的 `__init__.py` 必须显式声明 `__all__`，只暴露对外的公共接口：
+- 各 package 的 `__init__.py` 需要显式维护 `__all__`
+- 对外暴露的公共符号通过 `__init__.py` 统一出口管理
 
-```python
-# app/modules/users/__init__.py
-from .consts import UserErrorCode
-from .model import User
-from .schemas import UserInfoResponse, UserName, Password
+---
 
-__all__ = ["UserErrorCode", "User", "UserInfoResponse", "UserName", "Password"]
-```
+## 10. 测试规范
+
+### 测试分层
+
+- 单元测试放 `tests/unit/`
+- 集成测试放 `tests/integration/`
+- 集成测试必须显式标记 `@pytest.mark.integration`
+
+### 测试约束
+
+- 新增核心业务时，至少补：
+  - 一个单元测试，覆盖纯逻辑分支
+  - 一个集成测试，覆盖真实 HTTP / DB / Redis 路径
+- 集成测试优先复用 `tests/conftest.py` 中的：
+  - `client`
+  - `db_session`
+  - `redis_for_assertions`
+- 不要假设测试环境里已有预置数据；集成测试会在前后清理数据库与 Redis。
+
+### 鉴权与权限测试
+
+- 涉及 IAM 改动时，除了 happy path，还要覆盖：
+  - 未登录
+  - 权限不足
+  - 租户 scope 不匹配
+  - 会话失效或被撤销
+
+---
+
+## 11. 文档同步规范
+
+- **项目规范变更**：同步更新
+  - `backend/AGENTS.md`
+  - `backend/CLAUDE.md`
+- **启动方式、环境变量、测试命令变更**：同步更新
+  - `backend/README.md`
+  - `backend/README-zh.md`
+- 不要让 `AGENTS.md`、`CLAUDE.md`、`README*` 长期描述不同的后端结构。
