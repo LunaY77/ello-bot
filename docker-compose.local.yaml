@@ -46,11 +46,6 @@ services:
     environment:
       DEBUG: "true"
       DB_URL: postgresql+asyncpg://ello:12345678@postgres:5432/ello
-      JWT_SECRET_KEY: local-dev-secret-key-local-dev-secret
-      JWT_ALGORITHM: HS256
-      JWT_EXPIRE_MINUTES: "240"
-      JWT_ISSUER: app
-      JWT_AUDIENCE: app
       SERVER_HOST: "0.0.0.0"
       SERVER_PORT: "8000"
       CORS_ORIGINS: '["http://localhost:3000"]'
@@ -62,6 +57,12 @@ services:
       OTEL_SERVICE_NAME: ello-bot-backend
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_ENVIRONMENT: local
+      BOOTSTRAP_ENABLED: true
+      BOOTSTRAP_TENANT_SLUG: personal
+      BOOTSTRAP_TENANT_NAME: Personal
+      BOOTSTRAP_ADMIN_USERNAME: admin
+      BOOTSTRAP_ADMIN_PASSWORD: admin123456
+      BOOTSTRAP_ADMIN_DISPLAY_NAME: System Admin
       AI_RECORD_CONTENT: "false"
       AI_CONTENT_PREVIEW_CHARS: "500"
       AI_DEFAULT_TIMEOUT_MS: "60000"

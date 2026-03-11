@@ -70,8 +70,8 @@ setup:
 # ---------- Docker: Local full stack (all services in containers) ----------
 docker-local-up:
 	docker compose -f docker-compose.local.yaml up -d postgres redis
-	docker compose -f docker-compose.local.yaml run --rm backend uv run alembic upgrade head
-	docker compose -f docker-compose.local.yaml up -d
+	docker compose -f docker-compose.local.yaml run --rm --build backend uv run alembic upgrade head
+	docker compose -f docker-compose.local.yaml up -d --build
 
 docker-local-down:
 	docker compose -f docker-compose.local.yaml down -v
@@ -83,8 +83,8 @@ docker-local-logs:
 docker-local-reset:
 	docker compose -f docker-compose.local.yaml down -v
 	docker compose -f docker-compose.local.yaml up -d postgres redis
-	docker compose -f docker-compose.local.yaml run --rm backend uv run alembic upgrade head
-	docker compose -f docker-compose.local.yaml up -d
+	docker compose -f docker-compose.local.yaml run --rm --build backend uv run alembic upgrade head
+	docker compose -f docker-compose.local.yaml up -d --build
 
 # ---------- Docker: Dev infra (postgres + redis, run backend/frontend natively) ----------
 docker-dev-up:

@@ -67,14 +67,12 @@ If you use `make docker-dev-up`, update the connection settings to match the dev
 DEBUG=true
 DB_URL=postgresql+asyncpg://ello:12345678@localhost:5432/ello
 REDIS_URL=redis://:12345678@localhost:6379/0
-JWT_SECRET_KEY=change-this-to-a-32-byte-minimum-secret-key
 BOOTSTRAP_ENABLED=true
 BOOTSTRAP_ADMIN_PASSWORD=change-this-bootstrap-password
 ```
 
 Important notes:
 
-- When `DEBUG=false`, `JWT_SECRET_KEY` must be set and be at least 32 bytes.
 - When bootstrap is enabled outside debug mode, `BOOTSTRAP_ADMIN_PASSWORD` must be set.
 
 ### 5. Apply migrations and run the server

@@ -24,11 +24,11 @@ class RedisKeyDef:
     Use str.format() placeholders ({}, {0}, {name}) in the pattern.
 
     Example:
-        >>> kd = RedisKeyDef("ello:auth:token:blacklist:{}", 86400, "JWT blacklist")
+        >>> kd = RedisKeyDef("ello:iam:session:access:{}", 1800, "Access session snapshot")
         >>> kd.key("abc123")
-        'ello:auth:token:blacklist:abc123'
+        'ello:iam:session:access:abc123'
         >>> kd.expire_seconds
-        86400
+        1800
     """
 
     pattern: str

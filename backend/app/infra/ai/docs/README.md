@@ -43,7 +43,8 @@ Only provider credentials, base URLs, telemetry options, and technical retry kno
 Business code must pass an explicit `provider` and `model`.
 
 ```python
-from app.infra.ai import TextGenerateRequest, TextMessage, get_ai_client
+from app.infra.ai.client import get_ai_client
+from app.infra.ai.requests import TextGenerateRequest, TextMessage
 
 client = get_ai_client()
 
@@ -80,7 +81,8 @@ The response includes normalized metadata such as:
 The SDK always returns structured stream events instead of provider-native chunks.
 
 ```python
-from app.infra.ai import TextGenerateRequest, TextMessage, get_ai_client
+from app.infra.ai.client import get_ai_client
+from app.infra.ai.requests import TextGenerateRequest, TextMessage
 
 client = get_ai_client()
 
@@ -112,7 +114,8 @@ If a stream fails after partial output is visible, the SDK preserves `partial_te
 ## Embedding / Image / Audio
 
 ```python
-from app.infra.ai import EmbeddingRequest, ImageGenerateRequest, AudioGenerateRequest, get_ai_client
+from app.infra.ai.client import get_ai_client
+from app.infra.ai.requests import AudioGenerateRequest, EmbeddingRequest, ImageGenerateRequest
 
 client = get_ai_client()
 
@@ -147,7 +150,8 @@ audio = await client.audio.generate(
 ```python
 from fastapi import APIRouter
 
-from app.infra.ai import AIClientDep, TextGenerateRequest, TextMessage
+from app.infra.ai.client import AIClientDep
+from app.infra.ai.requests import TextGenerateRequest, TextMessage
 
 router = APIRouter()
 
@@ -170,7 +174,7 @@ The default registry only wires provider runtime config. If you want stricter ca
 
 ```python
 from app.core import settings
-from app.infra.ai import AICapability
+from app.infra.ai.types import AICapability
 from app.infra.ai.registry import build_default_registry
 from app.infra.ai.types import AIModality, ModelSpec
 
@@ -196,7 +200,8 @@ This keeps model selection in business code while still letting infra enforce ca
 For scripts and one-off tools, the SDK also exposes a sync wrapper:
 
 ```python
-from app.infra.ai import TextGenerateRequest, TextMessage, get_ai_client_sync
+from app.infra.ai.client_sync import get_ai_client_sync
+from app.infra.ai.requests import TextGenerateRequest, TextMessage
 
 client = get_ai_client_sync()
 response = client.text.generate(

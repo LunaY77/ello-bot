@@ -9,11 +9,12 @@ from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import BusinessException, DbSession, RedisDep, log
-from app.modules.iam.commands import IamCommands
-from app.modules.iam.errors import IamErrorCode
-from app.modules.iam.queries import IamQueries
-from app.modules.iam.schemas import AuthMeResponse, AuthTokenResponse, PrincipalResponse
 from app.utils import verify_password
+
+from .commands import IamCommands
+from .errors import IamErrorCode
+from .queries import IamQueries
+from .schemas import AuthMeResponse, AuthTokenResponse, PrincipalResponse
 
 
 class IamWorkflow:

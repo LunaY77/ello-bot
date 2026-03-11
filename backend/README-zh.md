@@ -67,14 +67,12 @@ cp .env.example .env
 DEBUG=true
 DB_URL=postgresql+asyncpg://ello:12345678@localhost:5432/ello
 REDIS_URL=redis://:12345678@localhost:6379/0
-JWT_SECRET_KEY=替换成至少 32 字节的密钥
 BOOTSTRAP_ENABLED=true
 BOOTSTRAP_ADMIN_PASSWORD=替换成管理员初始密码
 ```
 
 注意：
 
-- 当 `DEBUG=false` 时，`JWT_SECRET_KEY` 必填，且长度至少 32 字节。
 - 当关闭调试模式且仍启用 bootstrap 时，`BOOTSTRAP_ADMIN_PASSWORD` 也必须显式配置。
 
 ### 5. 执行迁移并启动服务

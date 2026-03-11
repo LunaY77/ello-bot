@@ -64,7 +64,7 @@ make docker-dev-up
 
 ```bash
 cp backend/.env.example backend/.env
-# Edit backend/.env with your settings (DB_URL, JWT_SECRET_KEY, etc.)
+# Edit backend/.env with your settings (DB_URL, REDIS_URL, BOOTSTRAP_ADMIN_PASSWORD, etc.)
 ```
 
 ### 3. Run database migrations

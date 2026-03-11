@@ -5,9 +5,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Query, Request
 
 from app.core import AuthException, CommonErrorCode, CurrentAuthDep, Result
-from app.modules.iam.commands import IamCommandsDep
-from app.modules.iam.queries import IamQueriesDep
-from app.modules.iam.schemas import (
+from app.utils import extract_token, hash_token
+
+from .commands import IamCommandsDep
+from .consts import PermissionCode
+from .queries import IamQueriesDep
+from .schemas import (
     AclEntryResponse,
     AgentAccountResponse,
     AuthMeResponse,
@@ -45,10 +48,7 @@ from app.modules.iam.schemas import (
     UpdateUserProfileRequest,
     UserAccountResponse,
 )
-from app.modules.iam.workflow import IamWorkflowDep
-from app.utils import extract_token, hash_token
-
-from .consts import PermissionCode
+from .workflow import IamWorkflowDep
 
 router = APIRouter(prefix="/api/iam", tags=["IAM"])
 

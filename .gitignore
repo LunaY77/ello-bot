@@ -316,6 +316,8 @@ cypress/screenshots
 
 # ai
 .claude/
+.codex/
+.gemini/
 
 # testing
 coverage

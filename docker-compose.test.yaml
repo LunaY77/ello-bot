@@ -4,11 +4,6 @@ x-backend-test-env: &backend-test-env
   DEBUG: "true"
   DB_URL: postgresql+asyncpg://ello:12345678@postgres:5432/ello_test
   REDIS_URL: redis://:12345678@redis:6379/0
-  JWT_SECRET_KEY: d95614d2f1b49e0f7facb0cd51df84a404ff23ea68bf51a0e5f0306c933c66d3
-  JWT_ALGORITHM: HS256
-  JWT_EXPIRE_MINUTES: "240"
-  JWT_ISSUER: app
-  JWT_AUDIENCE: app
   OTEL_ENABLED: "false"
   BOOTSTRAP_ENABLED: "true"
   BOOTSTRAP_TENANT_SLUG: personal

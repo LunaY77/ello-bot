@@ -257,7 +257,6 @@ IamQueriesDep = Annotated[IamQueries, Depends(get_iam_queries)]
 | `ServerSettings` | `SERVER_` | `settings.server.HOST` |
 | `DatabaseSettings` | `DB_` | `settings.db.URL` |
 | `CacheSettings` | `REDIS_` | `settings.cache.URL` |
-| `JwtSettings` | `JWT_` | `settings.jwt.SECRET_KEY` |
 | `LogSettings` | `LOG_` | `settings.log.LEVEL` |
 | `OtelSettings` | `OTEL_` | `settings.otel.ENABLED` |
 | `BootstrapSettings` | `BOOTSTRAP_` | `settings.bootstrap.ENABLED` |

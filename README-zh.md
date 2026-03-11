@@ -64,7 +64,7 @@ make docker-dev-up
 
 ```bash
 cp backend/.env.example backend/.env
-# 编辑 backend/.env，填写 DB_URL、JWT_SECRET_KEY 等配置
+# 编辑 backend/.env，填写 DB_URL、REDIS_URL、BOOTSTRAP_ADMIN_PASSWORD 等配置
 ```
 
 ### 3. 执行数据库迁移

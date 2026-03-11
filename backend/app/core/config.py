@@ -53,20 +53,6 @@ class CacheSettings(BaseSettings):
     URL: str = Field(default="redis://localhost:6379/0", description="Redis connection URL")
 
 
-class JwtSettings(BaseSettings):
-    """JWT authentication configuration — env prefix: JWT_"""
-
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="JWT_", extra="ignore"
-    )
-
-    SECRET_KEY: str = Field(default="", description="JWT secret key, MUST be set in production")
-    ALGORITHM: str = Field(default="HS256", description="JWT algorithm")
-    EXPIRE_MINUTES: int = Field(default=30, description="Token expiration time in minutes")
-    ISSUER: str = Field(default="app", description="JWT issuer")
-    AUDIENCE: str = Field(default="app", description="JWT audience")
-
-
 class LogSettings(BaseSettings):
     """Logging configuration — env prefix: LOG_"""
 
@@ -158,7 +144,6 @@ class Settings(BaseSettings):
     server: ServerSettings = Field(default_factory=ServerSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     cache: CacheSettings = Field(default_factory=CacheSettings)
-    jwt: JwtSettings = Field(default_factory=JwtSettings)
     log: LogSettings = Field(default_factory=LogSettings)
     otel: OtelSettings = Field(default_factory=OtelSettings)
     bootstrap: BootstrapSettings = Field(default_factory=BootstrapSettings)
@@ -176,13 +161,6 @@ class Settings(BaseSettings):
         """
         if self.DEBUG:
             return self
-
-        # Production configuration must always use an explicit strong JWT signing key.
-        if not self.jwt.SECRET_KEY:
-            raise ValueError("JWT_SECRET_KEY must be set when DEBUG is False")
-
-        if len(self.jwt.SECRET_KEY.encode("utf-8")) < 32:
-            raise ValueError("JWT_SECRET_KEY must be at least 32 bytes when DEBUG is False")
 
         # Bootstrap is allowed in production, but only when the initial admin password is explicit.
         if self.bootstrap.ENABLED and not self.bootstrap.ADMIN_PASSWORD:

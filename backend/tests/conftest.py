@@ -19,13 +19,6 @@ from alembic import command
 os.environ.setdefault("DEBUG", "true")
 os.environ.setdefault("DB_URL", "postgresql+asyncpg://ello:12345678@localhost:5433/ello_test")
 os.environ.setdefault("REDIS_URL", "redis://:12345678@localhost:6380/0")
-os.environ.setdefault(
-    "JWT_SECRET_KEY", "d95614d2f1b49e0f7facb0cd51df84a404ff23ea68bf51a0e5f0306c933c66d3"
-)
-os.environ.setdefault("JWT_ALGORITHM", "HS256")
-os.environ.setdefault("JWT_EXPIRE_MINUTES", "240")
-os.environ.setdefault("JWT_ISSUER", "app")
-os.environ.setdefault("JWT_AUDIENCE", "app")
 os.environ.setdefault("OTEL_ENABLED", "false")
 os.environ.setdefault("BOOTSTRAP_ENABLED", "true")
 os.environ.setdefault("BOOTSTRAP_TENANT_SLUG", "personal")
