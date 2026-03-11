@@ -12,6 +12,7 @@
  */
 
 import { Helmet, HelmetData } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Props type for Head component
@@ -40,11 +41,14 @@ const helmetData = new HelmetData({});
  * // Rendered result: <title>Login | ello</title>
  */
 export const Head = ({ title = '', description = '' }: HeadProps = {}) => {
+  const { t } = useTranslation('common');
+  const productLabel = t('shell.product');
+
   return (
     <Helmet
       helmetData={helmetData}
-      title={title ? `${title} | Ello` : undefined}
-      defaultTitle="Ello"
+      title={title ? `${title} | ${productLabel}` : undefined}
+      defaultTitle={productLabel}
     >
       <meta name="description" content={description} />
     </Helmet>

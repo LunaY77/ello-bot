@@ -33,28 +33,6 @@ export const useVisibleTenants = (
     ...queryConfig,
   });
 
-export const getTenant = (tenantId: number): Promise<TenantSummaryResponse> => {
-  return api.get(`/iam/tenants/${tenantId}`);
-};
-
-export const getTenantQueryOptions = (tenantId: number) =>
-  queryOptions({
-    queryKey: iamQueryKeys.tenant(tenantId),
-    queryFn: () => getTenant(tenantId),
-    enabled: Boolean(tenantId),
-  });
-
-type UseTenantOptions = {
-  tenantId: number;
-  queryConfig?: QueryConfig<typeof getTenantQueryOptions>;
-};
-
-export const useTenant = ({ tenantId, queryConfig }: UseTenantOptions) =>
-  useQuery({
-    ...getTenantQueryOptions(tenantId),
-    ...queryConfig,
-  });
-
 export const createTenant = (
   payload: CreateTenantRequest,
 ): Promise<TenantSummaryResponse> => {

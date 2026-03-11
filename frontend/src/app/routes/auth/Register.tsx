@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { paths } from '@/config/paths';
-import { RegisterForm } from '@/features/auth/components/RegisterForm';
+import { RegisterForm } from '@/features/iam';
 
 const RegisterRoute = () => {
   const { t } = useTranslation('auth');

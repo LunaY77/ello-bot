@@ -7,6 +7,9 @@ export const iamQueryKeys = {
   memberships: () => [...iamQueryKeys.all(), 'memberships'] as const,
   tenantMemberships: (tenantId: number) =>
     [...iamQueryKeys.memberships(), tenantId] as const,
+  users: () => [...iamQueryKeys.all(), 'users'] as const,
+  userList: (tenantId?: number | null) =>
+    [...iamQueryKeys.users(), tenantId ?? 'current'] as const,
   roles: () => [...iamQueryKeys.all(), 'roles'] as const,
   tenantRoles: (tenantId: number) =>
     [...iamQueryKeys.roles(), tenantId] as const,

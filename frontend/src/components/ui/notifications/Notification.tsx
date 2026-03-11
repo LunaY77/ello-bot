@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 /**
  * Individual Notification Component
  *
@@ -96,9 +98,11 @@ export const Notification = ({
   notification: { id, type, title, message },
   onDismiss,
 }: NotificationProps) => {
+  const { t } = useTranslation('common');
+
   return (
     <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
-      <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5">
+      <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg border border-border-default bg-surface-2 shadow-2">
         <div className="p-4" role="alert" aria-label={title}>
           <div className="flex items-start">
             {/* Icon */}
@@ -106,19 +110,19 @@ export const Notification = ({
 
             {/* Content */}
             <div className="ml-3 w-0 flex-1 pt-0.5">
-              <p className="text-sm font-medium text-gray-900">{title}</p>
+              <p className="text-sm font-medium text-primary">{title}</p>
               {message && (
-                <p className="mt-1 text-sm text-gray-500">{message}</p>
+                <p className="mt-1 text-sm text-secondary">{message}</p>
               )}
             </div>
 
             {/* Close button */}
             <div className="ml-4 flex shrink-0">
               <button
-                className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                className="inline-flex rounded-md bg-surface-2 text-tertiary transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface-2"
                 onClick={() => onDismiss(id)}
               >
-                <span className="sr-only">Close</span>
+                <span className="sr-only">{t('close')}</span>
                 <svg
                   className="size-5"
                   fill="none"

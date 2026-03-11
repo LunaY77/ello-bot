@@ -27,7 +27,7 @@ export const ChatMessageItem = ({
           className={cn(
             'flex size-8 items-center justify-center rounded-full text-xs font-bold',
             role === 'assistant'
-              ? 'bg-black text-white dark:bg-white dark:text-black'
+              ? 'bg-black text-white dark:bg-surface-2 dark:text-black'
               : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
           )}
         >

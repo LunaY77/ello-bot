@@ -37,6 +37,24 @@ export default {
   'users.description': 'Visible user accounts inside {{tenant}}.',
   'users.timezone': 'Timezone',
   'users.gender': 'Gender',
+  'users.directoryTitle': 'Operator directory',
+  'users.directoryHint':
+    'Select a human operator to review workspace access, role assignments, and effective permissions.',
+  'users.directoryCount': '{{shown}} of {{total}} users',
+  'users.membershipTitle': 'Workspace access',
+  'users.membershipHint':
+    'Membership state is the first trust boundary before role bundles and overrides apply.',
+  'users.roleAssignmentsTitle': 'Assigned role sets',
+  'users.effectivePermissionsTitle': 'Effective permissions',
+  'users.permissionsHint':
+    'Permission scope is derived from role sets and targeted overrides in the current workspace.',
+  'users.noPermissions':
+    'No effective permissions were returned for this user.',
+  'users.noMembership':
+    'No workspace membership was returned for this user. Grant access to place them inside this workspace.',
+  'users.noMembershipState': 'No workspace access',
+  'users.addAccess': 'Grant access',
+  'users.memberSince': 'Visible inside the current workspace scope.',
   'users.emptyValue': 'Not set',
   'users.emptyBio': 'No biography yet.',
   'users.emptyTitle': 'No people to show',

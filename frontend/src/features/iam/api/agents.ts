@@ -12,7 +12,6 @@ import type {
   CreateAgentRequest,
   SetActiveRequest,
   UpdateAgentRequest,
-  UpdateAvatarRequest,
 } from '@/api/models/req';
 import type {
   AgentAccountResponse,
@@ -66,30 +65,6 @@ export const useAgents = ({ tenantId, queryConfig }: UseAgentsOptions = {}) =>
     ...queryConfig,
   });
 
-export const getAgent = (
-  principalId: number,
-): Promise<AgentAccountResponse> => {
-  return api.get(`/iam/agents/${principalId}`);
-};
-
-export const getAgentQueryOptions = (principalId: number) =>
-  queryOptions({
-    queryKey: iamQueryKeys.agent(principalId),
-    queryFn: () => getAgent(principalId),
-    enabled: Boolean(principalId),
-  });
-
-type UseAgentOptions = {
-  principalId: number;
-  queryConfig?: QueryConfig<typeof getAgentQueryOptions>;
-};
-
-export const useAgent = ({ principalId, queryConfig }: UseAgentOptions) =>
-  useQuery({
-    ...getAgentQueryOptions(principalId),
-    ...queryConfig,
-  });
-
 export const createAgent = (
   payload: CreateAgentRequest,
 ): Promise<AgentAccountResponse> => {
@@ -104,16 +79,6 @@ export const updateAgent = ({
   payload: UpdateAgentRequest;
 }): Promise<AgentAccountResponse> => {
   return api.patch(`/iam/agents/${principalId}`, payload);
-};
-
-export const updateAgentAvatar = ({
-  principalId,
-  payload,
-}: {
-  principalId: number;
-  payload: UpdateAvatarRequest;
-}): Promise<AgentAccountResponse> => {
-  return api.put(`/iam/agents/${principalId}/avatar`, payload);
 };
 
 export const changeAgentOwner = ({
@@ -184,32 +149,6 @@ export const useUpdateAgent = ({
   return useMutation({
     ...restConfig,
     mutationFn: updateAgent,
-    onSuccess: async (...args) => {
-      const [, { principalId }] = args;
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: iamQueryKeys.agents(),
-        }),
-        invalidatePrincipalAgentScope(queryClient, principalId),
-      ]);
-      await onSuccess?.(...args);
-    },
-  });
-};
-
-type UseUpdateAgentAvatarOptions = {
-  mutationConfig?: MutationConfig<typeof updateAgentAvatar>;
-};
-
-export const useUpdateAgentAvatar = ({
-  mutationConfig,
-}: UseUpdateAgentAvatarOptions = {}) => {
-  const queryClient = useQueryClient();
-  const { onSuccess, ...restConfig } = mutationConfig || {};
-
-  return useMutation({
-    ...restConfig,
-    mutationFn: updateAgentAvatar,
     onSuccess: async (...args) => {
       const [, { principalId }] = args;
       await Promise.all([

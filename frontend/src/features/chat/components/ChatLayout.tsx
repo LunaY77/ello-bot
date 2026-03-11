@@ -12,7 +12,7 @@ export const ChatLayout = () => {
   const user = useCurrentUser();
 
   return (
-    <div className="flex h-screen max-h-[100dvh] flex-row text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-900">
+    <div className="flex h-screen max-h-[100dvh] flex-row text-gray-700 dark:text-gray-100 bg-surface-2 dark:bg-gray-900">
       {/* Sidebar */}
       <ChatSidebar
         open={sidebarOpen}

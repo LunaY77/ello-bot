@@ -33,33 +33,6 @@ export const usePermissions = (
     ...queryConfig,
   });
 
-export const getPermission = (
-  permissionId: number,
-): Promise<PermissionResponse> => {
-  return api.get(`/iam/permissions/${permissionId}`);
-};
-
-export const getPermissionQueryOptions = (permissionId: number) =>
-  queryOptions({
-    queryKey: iamQueryKeys.permission(permissionId),
-    queryFn: () => getPermission(permissionId),
-    enabled: Boolean(permissionId),
-  });
-
-type UsePermissionOptions = {
-  permissionId: number;
-  queryConfig?: QueryConfig<typeof getPermissionQueryOptions>;
-};
-
-export const usePermission = ({
-  permissionId,
-  queryConfig,
-}: UsePermissionOptions) =>
-  useQuery({
-    ...getPermissionQueryOptions(permissionId),
-    ...queryConfig,
-  });
-
 export const createPermission = (
   payload: CreatePermissionRequest,
 ): Promise<PermissionResponse> => {

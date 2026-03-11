@@ -28,6 +28,7 @@ const invalidatePrincipalScope = async (
   queryClient: ReturnType<typeof useQueryClient>,
   principalId: number,
 ) => {
+  // Principal-focused panels aggregate memberships, roles, and effective permissions from multiple endpoints.
   await Promise.all([
     queryClient.invalidateQueries({
       queryKey: iamQueryKeys.principal(principalId),
@@ -203,34 +204,6 @@ export const replaceTenantRolePermissions = ({
   );
 };
 
-export const addTenantRolePermission = async ({
-  tenantId,
-  roleId,
-  permissionId,
-}: {
-  tenantId: number;
-  roleId: number;
-  permissionId: number;
-}): Promise<void> => {
-  await api.post(
-    `/iam/tenants/${tenantId}/roles/${roleId}/permissions/${permissionId}`,
-  );
-};
-
-export const removeTenantRolePermission = async ({
-  tenantId,
-  roleId,
-  permissionId,
-}: {
-  tenantId: number;
-  roleId: number;
-  permissionId: number;
-}): Promise<void> => {
-  await api.delete(
-    `/iam/tenants/${tenantId}/roles/${roleId}/permissions/${permissionId}`,
-  );
-};
-
 type TenantAclFilters = {
   resourceType?: string | null;
   resourceId?: number | null;
@@ -244,6 +217,7 @@ export const listTenantAclEntries = ({
   tenantId: number;
   filters?: TenantAclFilters;
 }): Promise<AclEntryResponse[]> => {
+  // Keep ACL filtering server-backed so large override registries do not require client-side full scans.
   return api.get(`/iam/tenants/${tenantId}/acl`, {
     params: {
       resource_type: filters?.resourceType ?? undefined,
@@ -541,62 +515,6 @@ export const useReplaceTenantRolePermissions = ({
   return useMutation({
     ...restConfig,
     mutationFn: replaceTenantRolePermissions,
-    onSuccess: async (...args) => {
-      const [, { tenantId }] = args;
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: iamQueryKeys.tenantRoles(tenantId),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: iamQueryKeys.principals(),
-        }),
-      ]);
-      await onSuccess?.(...args);
-    },
-  });
-};
-
-type UseAddTenantRolePermissionOptions = {
-  mutationConfig?: MutationConfig<typeof addTenantRolePermission>;
-};
-
-export const useAddTenantRolePermission = ({
-  mutationConfig,
-}: UseAddTenantRolePermissionOptions = {}) => {
-  const queryClient = useQueryClient();
-  const { onSuccess, ...restConfig } = mutationConfig || {};
-
-  return useMutation({
-    ...restConfig,
-    mutationFn: addTenantRolePermission,
-    onSuccess: async (...args) => {
-      const [, { tenantId }] = args;
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: iamQueryKeys.tenantRoles(tenantId),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: iamQueryKeys.principals(),
-        }),
-      ]);
-      await onSuccess?.(...args);
-    },
-  });
-};
-
-type UseRemoveTenantRolePermissionOptions = {
-  mutationConfig?: MutationConfig<typeof removeTenantRolePermission>;
-};
-
-export const useRemoveTenantRolePermission = ({
-  mutationConfig,
-}: UseRemoveTenantRolePermissionOptions = {}) => {
-  const queryClient = useQueryClient();
-  const { onSuccess, ...restConfig } = mutationConfig || {};
-
-  return useMutation({
-    ...restConfig,
-    mutationFn: removeTenantRolePermission,
     onSuccess: async (...args) => {
       const [, { tenantId }] = args;
       await Promise.all([

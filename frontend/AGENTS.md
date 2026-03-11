@@ -19,7 +19,7 @@ frontend/
 │   │   ├── models/              # Orval 生成的请求/响应模型
 │   │   ├── schemas/             # Orval 生成的 Zod Schema
 │   │   └── internal/            # codegen 后处理脚本与转换逻辑
-│   ├── features/                # auth、users、iam、chat 等业务模块
+│   ├── features/                # iam、chat 等业务模块
 │   ├── components/              # 通用 UI、布局、错误边界、SEO、通知
 │   ├── lib/                     # api-client、auth、react-query、i18n 等基础设施
 │   ├── store/                   # Zustand 客户端状态
@@ -34,15 +34,15 @@ frontend/
 
 ### 目录职责
 
-| 目录 | 职责 |
-| ---- | ---- |
-| `src/app/` | 应用壳、Provider、路由树、route module |
-| `src/features/` | 业务组件、业务 API hooks、业务交互逻辑 |
-| `src/components/` | 无业务归属的共享 UI 与布局 |
-| `src/lib/` | 跨业务基础设施能力 |
-| `src/store/` | 仅存放客户端状态，不存放整块服务端实体数据 |
-| `src/api/` | OpenAPI 生成物与生成辅助逻辑 |
-| `src/testing/` | Vitest 测试辅助 |
+| 目录              | 职责                                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| `src/app/`        | 应用壳、Provider、路由树、route module                                                                |
+| `src/features/`   | 业务组件、业务 API hooks、业务交互逻辑；当前认证、用户、角色、权限、会话、workspace 都归入 `iam` 领域 |
+| `src/components/` | 无业务归属的共享 UI 与布局                                                                            |
+| `src/lib/`        | 跨业务基础设施能力                                                                                    |
+| `src/store/`      | 仅存放客户端状态，不存放整块服务端实体数据                                                            |
+| `src/api/`        | OpenAPI 生成物与生成辅助逻辑                                                                          |
+| `src/testing/`    | Vitest 测试辅助                                                                                       |
 
 ---
 
@@ -105,6 +105,13 @@ import IamRoute from '@/app/routes/app/Iam';
   - `src/app/AppRouter.tsx`
   - 对应 route module 与 feature 暴露
 
+### 路由目录分层
+
+- `src/app/routes/app/assistant/` 只放 Assistant 主工作区页面。
+- `src/app/routes/app/admin/` 只放后台管理页，例如 users、sessions、roles、permissions、agents。
+- `src/app/routes/app/settings/` 放偏好与个人设置页，例如 profile、workspaces。
+- `src/app/routes/app/legacy/` 只放兼容跳转或废弃入口，不再承载真实业务页面。
+
 ---
 
 ## 4. API 契约与 HTTP 规范
@@ -127,6 +134,7 @@ import IamRoute from '@/app/routes/app/Iam';
 - 所有业务 HTTP 请求统一通过 `src/lib/api-client.ts` 的 `api` 实例。
 - 不要在 feature 内随意创建新的 axios 实例。
 - `rawApi` 只用于 `api-client` 内部的 refresh 场景，业务代码不要直接复用。
+- workspace / tenant CRUD 与列表能力统一收敛在 `src/features/iam/api/tenants.ts`，不要在 auth feature 内复制一套 tenant hooks。
 
 ### `api-client` 责任边界
 
@@ -161,6 +169,7 @@ import IamRoute from '@/app/routes/app/Iam';
 - 当前登录用户 key 固定为：`['authenticated-user']`
 - IAM 相关 key 统一走 `src/features/iam/api/query-keys.ts`
 - 不要在各组件中散落手写重复的 query key
+- 登录态 mutation 如果会影响 admin/settings 数据面，应优先失效整个 `['iam']` 命名空间，而不是额外造一套 tenant query key。
 
 ---
 
@@ -209,12 +218,26 @@ import IamRoute from '@/app/routes/app/Iam';
 - 所有用户可见文案必须走 i18n
 - 默认文案源维护在 `src/locales/default/*.ts`
 - 文案变更后，同步生成 `frontend/locales/` 产物
+- 生成默认英文产物优先使用 `bash -lc 'pnpm run workflow:i18n'`
+- 如果同时修改了 `zh-CN` 文案，补完后再运行 `prettier --write "locales/**"`
 
 ### 共享 UI
 
 - 组件进入 `src/components/` 的前提是可跨 feature 复用
 - 只被单一 feature 使用的 UI，优先留在该 feature 内
 - 共享 UI 若已有 Storybook 覆盖，修改行为或视觉时要同步更新 stories
+- 跨多个 admin 页面复用的目录/详情页 primitives 统一放在 `src/components/admin/`
+- 当前 admin 共享 primitives 在 `src/components/admin/AccessPrimitives.tsx`
+
+### Admin 页面约定
+
+- Users、Sessions、Roles、Permissions、Agents 这类后台页优先使用 `左侧目录 + 右侧详情` 的 master-detail 结构。
+- 创建动作应进入右侧详情面板，不要把长列表压到页面下方。
+- 次级数据集要拆成独立工作区，例如 permission registry 与 ACL overrides 分上下两个区块。
+- 左侧目录默认使用固定高度并在卡片内部滚动，避免长列表把右侧详情面板挤出可视区。
+- 不要在一个页面里混入多个独立领域的 CRUD；如果 agent、permission、inspector 已经是不同任务，应拆成独立页面。
+- 侧边导航只保留真实存在且有后端能力支持的页面，禁止保留死链或占位入口。
+- Agents 是独立 admin 页面，Workspaces 是独立 settings 页面；不要再把它们塞回 permissions 或 dashboard 杂糅区域。
 
 ---
 

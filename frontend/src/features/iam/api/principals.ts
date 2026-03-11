@@ -5,7 +5,6 @@ import { iamQueryKeys } from './query-keys';
 import type {
   MembershipResponse,
   PrincipalPermissionSnapshotResponse,
-  PrincipalResponse,
   RoleResponse,
   TenantSummaryResponse,
 } from '@/api/models/resp';
@@ -20,60 +19,6 @@ export type PrincipalMembershipResponse = {
 export type PrincipalRoleAssignmentResponse = {
   role: RoleResponse;
 };
-
-export const getPrincipal = (
-  principalId: number,
-): Promise<PrincipalResponse> => {
-  return api.get(`/iam/principals/${principalId}`);
-};
-
-export const getPrincipalQueryOptions = (principalId: number) =>
-  queryOptions({
-    queryKey: iamQueryKeys.principal(principalId),
-    queryFn: () => getPrincipal(principalId),
-    enabled: Boolean(principalId),
-  });
-
-type UsePrincipalOptions = {
-  principalId: number;
-  queryConfig?: QueryConfig<typeof getPrincipalQueryOptions>;
-};
-
-export const usePrincipal = ({
-  principalId,
-  queryConfig,
-}: UsePrincipalOptions) =>
-  useQuery({
-    ...getPrincipalQueryOptions(principalId),
-    ...queryConfig,
-  });
-
-export const getPrincipalMemberships = (
-  principalId: number,
-): Promise<PrincipalMembershipResponse[]> => {
-  return api.get(`/iam/principals/${principalId}/memberships`);
-};
-
-export const getPrincipalMembershipsQueryOptions = (principalId: number) =>
-  queryOptions({
-    queryKey: iamQueryKeys.principalMemberships(principalId),
-    queryFn: () => getPrincipalMemberships(principalId),
-    enabled: Boolean(principalId),
-  });
-
-type UsePrincipalMembershipsOptions = {
-  principalId: number;
-  queryConfig?: QueryConfig<typeof getPrincipalMembershipsQueryOptions>;
-};
-
-export const usePrincipalMemberships = ({
-  principalId,
-  queryConfig,
-}: UsePrincipalMembershipsOptions) =>
-  useQuery({
-    ...getPrincipalMembershipsQueryOptions(principalId),
-    ...queryConfig,
-  });
 
 export const getPrincipalRoles = ({
   principalId,
