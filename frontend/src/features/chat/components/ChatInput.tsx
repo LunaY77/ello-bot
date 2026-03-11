@@ -31,7 +31,7 @@ export const ChatInput = () => {
   return (
     <div className="w-full pb-4">
       <div className="mx-auto flex max-w-4xl flex-col px-3">
-        <div className="flex flex-col rounded-3xl border border-gray-200/50 bg-white px-1 shadow-lg backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/50">
+        <div className="flex flex-col rounded-3xl border border-gray-200/50 bg-surface-2 px-1 shadow-lg backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/50">
           {/* Textarea */}
           <div className="px-3 pt-3 pb-1">
             <textarea
@@ -71,7 +71,7 @@ export const ChatInput = () => {
               <button
                 onClick={handleSubmit}
                 disabled={!message.trim()}
-                className="rounded-full bg-black p-1.5 text-white transition hover:bg-gray-800 disabled:opacity-30 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                className="rounded-full bg-black p-1.5 text-white transition hover:bg-gray-800 disabled:opacity-30 dark:bg-accent dark:text-accent-foreground dark:hover:bg-accent-hover"
               >
                 <svg
                   className="size-5"

@@ -24,10 +24,10 @@ export const LanguageSwitcher = ({
   return (
     <label
       className={cn(
-        'relative inline-flex h-11 items-center overflow-hidden rounded-2xl border shadow-sm transition',
+        'relative inline-flex h-11 items-center overflow-hidden rounded-sm border shadow-sm transition',
         tone === 'dark'
-          ? 'border-white/10 bg-white/10 text-white backdrop-blur'
-          : 'border-stone-300 bg-white/80 text-stone-900',
+          ? 'border-border-subtle bg-surface-2/10 text-white backdrop-blur'
+          : 'border-border-default bg-surface-2 text-primary',
         className,
       )}
     >
@@ -35,8 +35,8 @@ export const LanguageSwitcher = ({
         className={cn(
           'pointer-events-none flex h-full items-center border-r px-3',
           tone === 'dark'
-            ? 'border-white/10 text-stone-200'
-            : 'border-stone-200 text-stone-500',
+            ? 'border-border-subtle text-disabled'
+            : 'border-border-default text-tertiary',
         )}
       >
         <Languages className="size-4" aria-hidden="true" />
@@ -46,7 +46,7 @@ export const LanguageSwitcher = ({
         aria-label={t('language.label')}
         className={cn(
           'h-full appearance-none bg-transparent pl-3 pr-9 text-sm font-medium outline-none',
-          tone === 'dark' ? 'text-white' : 'text-stone-900',
+          tone === 'dark' ? 'text-white' : 'text-primary',
         )}
         value={currentLocale}
         onChange={(event) => {
@@ -60,7 +60,7 @@ export const LanguageSwitcher = ({
           <option
             key={option.value}
             value={option.value}
-            className="text-stone-900"
+            className="text-primary"
           >
             {option.label}
           </option>
@@ -70,10 +70,12 @@ export const LanguageSwitcher = ({
         aria-hidden="true"
         className={cn(
           'pointer-events-none absolute right-3 text-[10px] font-semibold uppercase tracking-[0.18em]',
-          tone === 'dark' ? 'text-stone-300' : 'text-stone-400',
+          tone === 'dark' ? 'text-quaternary' : 'text-tertiary',
         )}
       >
-        {currentLocale === 'zh-CN' ? '中文' : 'EN'}
+        {currentLocale === 'zh-CN'
+          ? t('language.short.zhCN')
+          : t('language.short.enUS')}
       </span>
     </label>
   );

@@ -1,15 +1,7 @@
 /**
  * Input Component
- *
- * Description:
- * A form input component based on native input, integrated with react-hook-form.
- *
- * Features:
- * - Supports react-hook-form's register
- * - Automatically displays label and error messages
- * - Supports all native input attributes
+ * V1 Design System Updated
  */
-
 import * as React from 'react';
 import { type UseFormRegisterReturn } from 'react-hook-form';
 
@@ -20,42 +12,26 @@ import {
 
 import { cn } from '@/utils/cn';
 
-/**
- * Input Component Props Type
- */
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> &
   FieldWrapperPassThroughProps & {
-    /** Custom className */
     className?: string;
-    /** react-hook-form's register return value */
     registration: Partial<UseFormRegisterReturn>;
   };
 
-/**
- * Input Component
- *
- * @param label - Field label
- * @param error - Field error
- * @param registration - react-hook-form's register return value
- * @param className - Custom className
- * @param type - Input type
- *
- * @example
- * <Input
- *   label="Email"
- *   type="email"
- *   error={errors.email}
- *   registration={register('email')}
- * />
- */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, registration, ...props }, ref) => {
+    const generatedId = React.useId();
+    const inputId = props.id ?? registration.name ?? generatedId;
+
     return (
-      <FieldWrapper label={label} error={error}>
+      <FieldWrapper label={label} error={error} htmlFor={inputId}>
         <input
           type={type}
+          id={inputId}
           className={cn(
-            'flex h-10 w-full rounded-xl border border-input bg-white/80 px-4 py-2 text-sm text-stone-900 shadow-sm transition file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-[44px] w-full rounded-sm border border-border-default bg-surface-2 px-4 py-2 text-sm text-primary shadow-1 transition-all duration-base ease-out file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-tertiary focus-visible:outline-none focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50',
+            error &&
+              'border-danger focus-visible:border-danger focus-visible:ring-danger',
             className,
           )}
           ref={ref}

@@ -18,7 +18,11 @@ test.describe('public authentication flow', () => {
     await page.getByRole('button', { name: 'Sign In' }).click();
 
     await expect(page).toHaveURL(/\/app$/);
-    await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'What should the agent do next?' }),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Workspaces' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
 
     const persistedSession = await page.evaluate((storageKey) => {
       return localStorage.getItem(storageKey);

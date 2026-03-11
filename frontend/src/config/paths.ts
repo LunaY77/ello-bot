@@ -104,20 +104,43 @@ export const paths = {
     },
 
     /**
-     * IAM console page
+     * Roles page
      */
-    iam: {
-      path: 'iam',
-      getHref: () => '/app/iam',
+    roles: {
+      path: 'roles',
+      getHref: () => '/app/roles',
     },
 
     /**
-     * User detail page
-     * @param id - User's unique identifier
+     * Session management page
      */
-    user: {
-      path: 'users/:userId',
-      getHref: (id: string) => `/app/users/${id}`,
+    sessions: {
+      path: 'sessions',
+      getHref: () => '/app/sessions',
+    },
+
+    /**
+     * Permissions page
+     */
+    permissions: {
+      path: 'permissions',
+      getHref: () => '/app/permissions',
+    },
+
+    /**
+     * Agent identity management page
+     */
+    agents: {
+      path: 'agents',
+      getHref: () => '/app/agents',
+    },
+
+    /**
+     * Workspace management page
+     */
+    workspaces: {
+      path: 'workspaces',
+      getHref: () => '/app/workspaces',
     },
 
     /**
