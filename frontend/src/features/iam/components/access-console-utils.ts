@@ -1,8 +1,46 @@
 import { formatDate, getEmptyDisplayValue } from '@/utils/format';
 
+type TextFormControl =
+  | HTMLInputElement
+  | HTMLTextAreaElement
+  | HTMLSelectElement;
+
+const isTextFormControl = (value: unknown): value is TextFormControl =>
+  value instanceof HTMLInputElement ||
+  value instanceof HTMLTextAreaElement ||
+  value instanceof HTMLSelectElement;
+
 // FormData always returns nullable values, so these helpers keep console forms consistent.
-export const parseRequiredString = (value: FormDataEntryValue | null): string =>
-  String(value ?? '').trim();
+export const parseRequiredString = (
+  value: FormDataEntryValue | null,
+): string | null => {
+  const parsed = String(value ?? '').trim();
+  return parsed || null;
+};
+
+export const readRequiredStringField = (
+  form: HTMLFormElement,
+  fieldName: string,
+): string | null => {
+  const field = form.elements.namedItem(fieldName);
+  const control = isTextFormControl(field) ? field : null;
+  const parsed = parseRequiredString(
+    control ? control.value : new FormData(form).get(fieldName),
+  );
+
+  if (!control) {
+    return parsed;
+  }
+
+  control.value = parsed ?? '';
+
+  if (!parsed) {
+    control.reportValidity();
+    return null;
+  }
+
+  return parsed;
+};
 
 export const parseOptionalString = (
   value: FormDataEntryValue | null,

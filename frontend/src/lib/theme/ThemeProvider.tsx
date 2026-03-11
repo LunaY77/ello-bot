@@ -24,15 +24,21 @@ const applyTheme = (theme: Theme) => {
   root.classList.toggle('dark', theme === 'dark');
 };
 
+const useIsomorphicLayoutEffect =
+  typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = React.useState<Theme>(() => {
-    const initialTheme = resolveStoredTheme();
-    applyTheme(initialTheme);
-    return initialTheme;
-  });
+  const [theme, setThemeState] = React.useState<Theme>(resolveStoredTheme);
+
+  useIsomorphicLayoutEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   React.useEffect(() => {
-    applyTheme(theme);
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     window.localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 

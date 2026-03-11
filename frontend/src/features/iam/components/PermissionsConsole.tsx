@@ -30,7 +30,7 @@ import {
   parseOptionalNumber,
   parseOptionalString,
   parseRequiredNumber,
-  parseRequiredString,
+  readRequiredStringField,
 } from './access-console-utils';
 
 import {
@@ -284,30 +284,46 @@ export const PermissionsConsole = () => {
   const handleCreatePermission = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const code = readRequiredStringField(formElement, 'code');
+    if (!code) return;
+    const resourceType = readRequiredStringField(formElement, 'resourceType');
+    if (!resourceType) return;
+    const action = readRequiredStringField(formElement, 'action');
+    if (!action) return;
+
+    const form = new FormData(formElement);
     const created = await createPermission.mutateAsync({
-      code: parseRequiredString(form.get('code')),
-      resourceType: parseRequiredString(form.get('resourceType')),
-      action: parseRequiredString(form.get('action')),
+      code,
+      resourceType,
+      action,
       description: parseOptionalString(form.get('description')) ?? undefined,
     });
 
     setSelectedPermissionId(created.id);
     setPermissionEditorMode('edit');
-    event.currentTarget.reset();
+    formElement.reset();
   };
 
   const handleUpdatePermission = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedPermission) return;
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const code = readRequiredStringField(formElement, 'code');
+    if (!code) return;
+    const resourceType = readRequiredStringField(formElement, 'resourceType');
+    if (!resourceType) return;
+    const action = readRequiredStringField(formElement, 'action');
+    if (!action) return;
+
+    const form = new FormData(formElement);
     await updatePermission.mutateAsync({
       permissionId: selectedPermission.id,
       payload: {
-        code: parseRequiredString(form.get('code')),
-        resourceType: parseRequiredString(form.get('resourceType')),
-        action: parseRequiredString(form.get('action')),
+        code,
+        resourceType,
+        action,
         description: parseOptionalString(form.get('description')),
       },
     });
@@ -316,7 +332,13 @@ export const PermissionsConsole = () => {
   const handleAclSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const resourceType = readRequiredStringField(formElement, 'resourceType');
+    if (!resourceType) return;
+    const effect = readRequiredStringField(formElement, 'effect');
+    if (!effect) return;
+
+    const form = new FormData(formElement);
     const resourceId = parseRequiredNumber(form.get('resourceId'));
     const permissionId = parseRequiredNumber(form.get('permissionId'));
 
@@ -325,12 +347,12 @@ export const PermissionsConsole = () => {
     }
 
     const payload = {
-      resourceType: parseRequiredString(form.get('resourceType')),
+      resourceType,
       resourceId,
       permissionId,
       subjectPrincipalId: parseOptionalNumber(form.get('subjectPrincipalId')),
       subjectRoleId: parseOptionalNumber(form.get('subjectRoleId')),
-      effect: parseRequiredString(form.get('effect')),
+      effect,
     };
 
     if (selectedAcl && aclEditorMode === 'edit') {
@@ -353,7 +375,7 @@ export const PermissionsConsole = () => {
     });
     setSelectedAclId(created.id);
     setAclEditorMode('edit');
-    event.currentTarget.reset();
+    formElement.reset();
   };
 
   if (!viewer) {

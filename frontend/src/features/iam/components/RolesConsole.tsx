@@ -13,7 +13,7 @@ import { usePermissions } from '../api/permissions';
 
 import {
   parseOptionalString,
-  parseRequiredString,
+  readRequiredStringField,
 } from './access-console-utils';
 
 import {
@@ -122,31 +122,43 @@ export const RolesConsole = () => {
   const handleCreateRole = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const code = readRequiredStringField(formElement, 'code');
+    if (!code) return;
+    const name = readRequiredStringField(formElement, 'name');
+    if (!name) return;
+
+    const form = new FormData(formElement);
     const created = await createRole.mutateAsync({
       tenantId,
       payload: {
-        code: parseRequiredString(form.get('code')),
-        name: parseRequiredString(form.get('name')),
+        code,
+        name,
         description: parseOptionalString(form.get('description')) ?? undefined,
       },
     });
 
     setSelectedRoleId(created.id);
-    event.currentTarget.reset();
+    formElement.reset();
   };
 
   const handleUpdateRole = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedRole) return;
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const code = readRequiredStringField(formElement, 'code');
+    if (!code) return;
+    const name = readRequiredStringField(formElement, 'name');
+    if (!name) return;
+
+    const form = new FormData(formElement);
     await updateRole.mutateAsync({
       tenantId,
       roleId: selectedRole.id,
       payload: {
-        code: parseRequiredString(form.get('code')),
-        name: parseRequiredString(form.get('name')),
+        code,
+        name,
         description: parseOptionalString(form.get('description')),
       },
     });

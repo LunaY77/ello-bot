@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 
 export default {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     container: {
@@ -114,19 +114,19 @@ export default {
         ring: 'var(--accent-primary)',
       },
       spacing: {
-        '1': '4px',
-        '2': '8px',
-        '3': '12px',
-        '4': '16px',
-        '5': '20px',
-        '6': '24px',
-        '8': '32px',
-        '10': '40px',
-        '12': '48px',
-        '16': '64px',
-        '20': '80px',
-        '24': '96px',
-        '32': '128px',
+        1: '4px',
+        2: '8px',
+        3: '12px',
+        4: '16px',
+        5: '20px',
+        6: '24px',
+        8: '32px',
+        10: '40px',
+        12: '48px',
+        16: '64px',
+        20: '80px',
+        24: '96px',
+        32: '128px',
         // Layout specific spacings
         'sidebar-w': '280px',
         'sidebar-collapsed-w': '72px',
@@ -141,9 +141,9 @@ export default {
         pill: 'var(--radius-pill)',
       },
       boxShadow: {
-        '1': 'var(--shadow-1)',
-        '2': 'var(--shadow-2)',
-        '3': 'var(--shadow-3)',
+        1: 'var(--shadow-1)',
+        2: 'var(--shadow-2)',
+        3: 'var(--shadow-3)',
       },
       fontFamily: {
         sans: [
@@ -193,8 +193,5 @@ export default {
       },
     },
   },
-  plugins: [
-    require('tailwindcss-animate'),
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 };

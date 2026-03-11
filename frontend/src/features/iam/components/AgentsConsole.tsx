@@ -22,7 +22,7 @@ import {
   formatOptionalDate,
   parseOptionalNumber,
   parseOptionalString,
-  parseRequiredString,
+  readRequiredStringField,
 } from './access-console-utils';
 
 import {
@@ -150,10 +150,16 @@ export const AgentsConsole = () => {
   const handleCreateAgent = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const code = readRequiredStringField(formElement, 'code');
+    if (!code) return;
+    const displayName = readRequiredStringField(formElement, 'displayName');
+    if (!displayName) return;
+
+    const form = new FormData(formElement);
     const created = await createAgent.mutateAsync({
-      code: parseRequiredString(form.get('code')),
-      displayName: parseRequiredString(form.get('displayName')),
+      code,
+      displayName,
       description: parseOptionalString(form.get('description')) ?? undefined,
       avatarUrl: parseOptionalString(form.get('avatarUrl')),
       ownerPrincipalId: parseOptionalNumber(form.get('ownerPrincipalId')),
@@ -161,21 +167,25 @@ export const AgentsConsole = () => {
 
     setSelectedAgentPrincipalId(created.principalId);
     setEditorMode('edit');
-    event.currentTarget.reset();
+    formElement.reset();
   };
 
   const handleUpdateAgent = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedAgent) return;
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const displayName = readRequiredStringField(formElement, 'displayName');
+    if (!displayName) return;
+
+    const form = new FormData(formElement);
 
     // Agent profile, owner, and activity state are separate backend resources.
     await Promise.all([
       updateAgent.mutateAsync({
         principalId: selectedAgent.principalId,
         payload: {
-          displayName: parseRequiredString(form.get('displayName')),
+          displayName,
           description: parseOptionalString(form.get('description')),
           avatarUrl: parseOptionalString(form.get('avatarUrl')) ?? undefined,
         },

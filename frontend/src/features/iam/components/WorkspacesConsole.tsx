@@ -16,7 +16,7 @@ import {
   useVisibleTenants,
 } from '../api/tenants';
 
-import { parseRequiredString } from './access-console-utils';
+import { readRequiredStringField } from './access-console-utils';
 
 import {
   AccessBadge,
@@ -97,28 +97,39 @@ export const WorkspacesConsole = () => {
   const handleCreateWorkspace = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const name = readRequiredStringField(formElement, 'name');
+    if (!name) return;
+    const slug = readRequiredStringField(formElement, 'slug');
+    if (!slug) return;
+
     const created = await createTenant.mutateAsync({
-      name: parseRequiredString(form.get('name')),
-      slug: parseRequiredString(form.get('slug')),
+      name,
+      slug,
     });
 
     setSelectedWorkspaceId(created.id);
     setEditorMode('edit');
     await switchTenant.mutateAsync({ tenantId: created.id });
-    event.currentTarget.reset();
+    formElement.reset();
   };
 
   const handleUpdateWorkspace = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedWorkspace) return;
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const name = readRequiredStringField(formElement, 'name');
+    if (!name) return;
+    const slug = readRequiredStringField(formElement, 'slug');
+    if (!slug) return;
+
+    const form = new FormData(formElement);
     await updateTenant.mutateAsync({
       tenantId: selectedWorkspace.id,
       payload: {
-        name: parseRequiredString(form.get('name')),
-        slug: parseRequiredString(form.get('slug')),
+        name,
+        slug,
         isActive: form.get('isActive') === 'on',
       },
     });
