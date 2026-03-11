@@ -78,7 +78,11 @@ const DashboardRoute = () => {
           description={t('dashboard.workspaceDescription', {
             slug: viewer.tenant.slug,
           })}
-          meta={viewer.tenant.isActive ? t('dashboard.active') : t('dashboard.inactive')}
+          meta={
+            viewer.tenant.isActive
+              ? t('dashboard.active')
+              : t('dashboard.inactive')
+          }
         />
         <InfoCard
           icon={<ShieldCheck className="size-5" />}
@@ -87,7 +91,11 @@ const DashboardRoute = () => {
             count: sessions.data?.length ?? 0,
           })}
           description={t('dashboard.securityDescription')}
-          meta={viewer.principal.isActive ? t('dashboard.active') : t('dashboard.inactive')}
+          meta={
+            viewer.principal.isActive
+              ? t('dashboard.active')
+              : t('dashboard.inactive')
+          }
         />
       </div>
 
@@ -192,7 +200,9 @@ const DashboardRoute = () => {
                         <Button
                           type="submit"
                           className="h-11 rounded-2xl"
-                          isLoading={createTenant.isPending || switchTenant.isPending}
+                          isLoading={
+                            createTenant.isPending || switchTenant.isPending
+                          }
                         >
                           {t('dashboard.createWorkspace')}
                         </Button>
@@ -301,7 +311,13 @@ type InfoCardProps = {
   meta: string;
 };
 
-const InfoCard = ({ icon, eyebrow, title, description, meta }: InfoCardProps) => (
+const InfoCard = ({
+  icon,
+  eyebrow,
+  title,
+  description,
+  meta,
+}: InfoCardProps) => (
   <section className="rounded-[2rem] border border-stone-200 bg-white/85 p-6 shadow-[0_35px_100px_-60px_rgba(50,31,16,0.35)]">
     <div className="flex items-center gap-3 text-primary">
       <div className="flex size-10 items-center justify-center rounded-2xl bg-primary/10">
@@ -367,7 +383,9 @@ const SessionRow = ({
       <div className="min-w-0">
         <div className="flex items-center gap-2 text-sm font-semibold text-stone-900">
           <CalendarClock className="size-4 shrink-0 text-primary" />
-          <span className="truncate">{session.userAgent || unknownClientLabel}</span>
+          <span className="truncate">
+            {session.userAgent || unknownClientLabel}
+          </span>
         </div>
         <p className="mt-2 text-sm text-stone-600">
           {session.ipAddress || unknownIpLabel}

@@ -1,8 +1,16 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { iamQueryKeys } from './query-keys';
 
-import type { CreateTenantRequest, UpdateTenantRequest } from '@/api/models/req';
+import type {
+  CreateTenantRequest,
+  UpdateTenantRequest,
+} from '@/api/models/req';
 import type { TenantSummaryResponse } from '@/api/models/resp';
 import { api } from '@/lib/api-client';
 import type { MutationConfig, QueryConfig } from '@/lib/react-query';

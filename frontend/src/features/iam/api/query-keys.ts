@@ -14,7 +14,8 @@ export const iamQueryKeys = {
   permission: (permissionId: number) =>
     [...iamQueryKeys.permissions(), 'detail', permissionId] as const,
   acl: () => [...iamQueryKeys.all(), 'acl'] as const,
-  tenantAclScope: (tenantId: number) => [...iamQueryKeys.acl(), tenantId] as const,
+  tenantAclScope: (tenantId: number) =>
+    [...iamQueryKeys.acl(), tenantId] as const,
   tenantAcl: (
     tenantId: number,
     filters?: {

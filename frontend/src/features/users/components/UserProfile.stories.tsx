@@ -25,7 +25,8 @@ const defaultViewer: AuthMeResponse = {
   user: {
     principalId: 1001,
     username: 'cangjingyue',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80',
     bio: 'Owns tenant governance and product operations.',
     gender: 'female',
     dateOfBirth: '1995-03-12',
@@ -113,8 +114,10 @@ export const AgentScopeFallback: Story = {
         principalId: 2001,
         ownerPrincipalId: 1001,
         code: 'doc-bot',
-        avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80',
-        description: 'Indexes workspace documentation and answers access questions.',
+        avatarUrl:
+          'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80',
+        description:
+          'Indexes workspace documentation and answers access questions.',
         displayName: 'Documentation Bot',
         isActive: true,
         createdAt: '2026-03-04T08:00:00Z',

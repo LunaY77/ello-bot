@@ -16,11 +16,17 @@ import { Spinner } from '@/components/ui/spinner';
 import { getViewerDisplayName, useCurrentUser } from '@/lib/auth';
 
 const profileFormSchema = z.object({
-  displayName: z.string().max(updateUserProfileRequestSchemaDisplayNameMax).optional(),
+  displayName: z
+    .string()
+    .max(updateUserProfileRequestSchemaDisplayNameMax)
+    .optional(),
   bio: z.string().max(updateUserProfileRequestSchemaBioMax).optional(),
   gender: z.string().max(updateUserProfileRequestSchemaGenderMax).optional(),
   dateOfBirth: z.union([z.literal(''), z.string().date()]).optional(),
-  timezone: z.string().max(updateUserProfileRequestSchemaTimezoneMax).optional(),
+  timezone: z
+    .string()
+    .max(updateUserProfileRequestSchemaTimezoneMax)
+    .optional(),
 });
 
 const nullable = (value?: string) => {
@@ -88,7 +94,11 @@ export const UserProfile: React.FC = () => {
           <Entry label={t('profile.workspace')} value={viewer.tenant.name} />
           <Entry
             label={t('profile.status')}
-            value={viewer.principal.isActive ? t('profile.active') : t('profile.inactive')}
+            value={
+              viewer.principal.isActive
+                ? t('profile.active')
+                : t('profile.inactive')
+            }
           />
           <Entry label={t('profile.username')} value={user.username} />
           <Entry
@@ -170,7 +180,10 @@ export const UserProfile: React.FC = () => {
                   registration={register('dateOfBirth')}
                   className="h-11 rounded-2xl border-stone-300 bg-white"
                 />
-                <FieldWrapper label={t('profile.bio')} error={formState.errors.bio}>
+                <FieldWrapper
+                  label={t('profile.bio')}
+                  error={formState.errors.bio}
+                >
                   <textarea
                     {...register('bio')}
                     rows={5}

@@ -1,4 +1,9 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import type {
@@ -72,7 +77,10 @@ export const useVisibleTenants = (
 export const switchTenant = async (
   payload: SwitchTenantRequest,
 ): Promise<AuthMeResponse> => {
-  const session: AuthTokenResponse = await api.post('/iam/auth/switch-tenant', payload);
+  const session: AuthTokenResponse = await api.post(
+    '/iam/auth/switch-tenant',
+    payload,
+  );
   getUserStoreState().setSession({
     accessToken: session.accessToken,
     refreshToken: session.refreshToken,

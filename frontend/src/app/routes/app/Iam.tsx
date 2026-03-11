@@ -7,10 +7,7 @@ const IamRoute = () => {
   const { t } = useTranslation('iam');
 
   return (
-    <ContentLayout
-      title={t('page.title')}
-      description={t('page.description')}
-    >
+    <ContentLayout title={t('page.title')} description={t('page.description')}>
       <IamConsole />
     </ContentLayout>
   );

@@ -24,8 +24,7 @@ export default {
   'register.login': 'Sign In',
   'register.passwordMismatch': 'Passwords do not match',
   'layout.eyebrow': 'Agent Security',
-  'layout.title':
-    'Secure access for people, agents, and tools.',
+  'layout.title': 'Secure access for people, agents, and tools.',
   'layout.description':
     'Sessions, workspace scope, and profile controls stay aligned with the backend security model.',
   'layout.stateTitle': 'Included',

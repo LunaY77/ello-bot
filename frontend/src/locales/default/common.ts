@@ -23,8 +23,7 @@ export default {
   'landing.title': 'Ello Bot',
   'landing.subtitle':
     'A cleaner shell for agent security, workspace access, and long-lived sessions.',
-  'landing.headline':
-    'Secure access for people, agents, and workspaces.',
+  'landing.headline': 'Secure access for people, agents, and workspaces.',
   'landing.login': 'Sign In',
   'landing.register': 'Get Started',
   'landing.openWorkspace': 'Open Workspace',
@@ -80,8 +79,7 @@ export default {
   'dashboard.securitySessionsHint':
     'These are the currently active sessions attached to your principal.',
   'dashboard.logoutAll': 'Sign Out Everywhere',
-  'dashboard.emptySessions':
-    'No active sessions were returned by the backend.',
+  'dashboard.emptySessions': 'No active sessions were returned by the backend.',
   'dashboard.revokeSession': 'Revoke Session',
   'dashboard.expires': 'Expires',
   'dashboard.lastSeen': 'Last seen',

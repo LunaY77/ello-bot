@@ -1,4 +1,9 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { iamQueryKeys } from './query-keys';
 
@@ -11,7 +16,11 @@ import type {
   UpdateMembershipRequest,
   UpdateRoleRequest,
 } from '@/api/models/req';
-import type { AclEntryResponse, MembershipResponse, RoleResponse } from '@/api/models/resp';
+import type {
+  AclEntryResponse,
+  MembershipResponse,
+  RoleResponse,
+} from '@/api/models/resp';
 import { api } from '@/lib/api-client';
 import type { MutationConfig, QueryConfig } from '@/lib/react-query';
 

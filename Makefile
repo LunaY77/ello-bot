@@ -8,7 +8,7 @@ SHELL := /bin/bash
 	docker-obs-up docker-obs-down docker-obs-logs \
 	docker-prod-up docker-prod-down docker-prod-logs \
 	docker-dev-obs-up docker-dev-obs-down \
-	frontend-dev frontend-build frontend-lint frontend-check \
+	frontend-dev frontend-build frontend-lint frontend-check frontend-test-unit frontend-test-e2e \
 	lint check test \
 	db-migration db-upgrade db-downgrade db-migrate \
 	sync-api
@@ -53,6 +53,8 @@ help:
 	@echo "  [Frontend]"
 	@echo "  make frontend-lint        Prettier format + ESLint fix"
 	@echo "  make frontend-check       ESLint check"
+	@echo "  make frontend-test-unit   Run frontend Vitest unit tests"
+	@echo "  make frontend-test-e2e    Run Playwright against the real backend test stack"
 	@echo ""
 	@echo "  [Combined]"
 	@echo "  make lint                 Lint+format both frontend & backend"
@@ -164,6 +166,15 @@ frontend-build:
 
 frontend-check:
 	cd frontend && pnpm run lint
+
+frontend-test-unit:
+	cd frontend && pnpm run test:unit
+
+frontend-test-e2e:
+	@set -euo pipefail; \
+	trap 'cd $(CURDIR) && docker compose -f docker-compose.test.yaml down -v --remove-orphans' EXIT; \
+	docker compose -f docker-compose.test.yaml up -d --wait postgres redis backend-e2e; \
+	cd frontend && PLAYWRIGHT_API_URL=http://localhost:8001/api pnpm run test:e2e
 
 frontend-lint:
 	cd frontend && pnpm run format

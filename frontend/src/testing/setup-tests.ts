@@ -1,31 +1,61 @@
-/**
- * Test Environment Configuration File
- *
- * Executes before all tests run, used to set up the test environment
- * Includes extended matchers for DOM testing utilities
- * Initializes MSW (Mock Service Worker) for API mocking
- */
 import '@testing-library/jest-dom';
 
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
-import {
-  closeMockServer,
-  initializeMockServer,
-  resetMockServer,
-} from './mocks';
+const NETWORK_ERROR_MESSAGE =
+  'Network access is disabled in Vitest. Use Playwright with the real backend for HTTP-dependent flows.';
 
-// Initialize MSW server before all tests
+class BlockedXMLHttpRequest {
+  abort() {}
+
+  addEventListener() {}
+
+  dispatchEvent() {
+    return false;
+  }
+
+  getAllResponseHeaders() {
+    return '';
+  }
+
+  getResponseHeader() {
+    return null;
+  }
+
+  open() {
+    throw new Error(NETWORK_ERROR_MESSAGE);
+  }
+
+  overrideMimeType() {}
+
+  removeEventListener() {}
+
+  send() {
+    throw new Error(NETWORK_ERROR_MESSAGE);
+  }
+
+  setRequestHeader() {}
+}
+
 beforeAll(() => {
-  initializeMockServer();
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => {
+      throw new Error(NETWORK_ERROR_MESSAGE);
+    }) as typeof fetch,
+  );
+  vi.stubGlobal(
+    'XMLHttpRequest',
+    BlockedXMLHttpRequest as unknown as typeof XMLHttpRequest,
+  );
 });
 
-// Reset handlers and database after each test
 afterEach(() => {
-  resetMockServer();
+  localStorage.clear();
+  sessionStorage.clear();
+  vi.clearAllMocks();
 });
 
-// Clean up after all tests
 afterAll(() => {
-  closeMockServer();
+  vi.unstubAllGlobals();
 });

@@ -57,7 +57,10 @@ const login = async (data: LoginRequest): Promise<AuthMeResponse> => {
  * @returns The authenticated viewer snapshot.
  */
 const register = async (data: RegisterRequest): Promise<AuthMeResponse> => {
-  const response: AuthTokenResponse = await api.post('/iam/auth/register', data);
+  const response: AuthTokenResponse = await api.post(
+    '/iam/auth/register',
+    data,
+  );
   return await persistSessionAndGetViewer(response);
 };
 

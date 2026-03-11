@@ -99,7 +99,10 @@ async function refreshAuthSession(): Promise<AuthTokenResponse | null> {
   return await refreshPromise;
 }
 
-function shouldAttemptRefresh(config?: RetriableRequestConfig, status?: number): boolean {
+function shouldAttemptRefresh(
+  config?: RetriableRequestConfig,
+  status?: number,
+): boolean {
   if (!config || status !== 401 || config._retry || config._skipAuthRefresh) {
     return false;
   }

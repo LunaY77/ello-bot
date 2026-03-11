@@ -14,7 +14,10 @@ import {
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { AgentAccountResponse, UserAccountResponse } from '@/api/models/resp';
+import type {
+  AgentAccountResponse,
+  UserAccountResponse,
+} from '@/api/models/resp';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { paths } from '@/config/paths';
@@ -79,12 +82,16 @@ const FIELD_CLASS_NAME =
 const TEXTAREA_CLASS_NAME =
   'min-h-28 w-full rounded-[1.4rem] border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-stone-400 focus:ring-2 focus:ring-stone-200';
 
-const parseRequiredNumber = (value: FormDataEntryValue | null): number | null => {
+const parseRequiredNumber = (
+  value: FormDataEntryValue | null,
+): number | null => {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
 
-const parseOptionalNumber = (value: FormDataEntryValue | null): number | null => {
+const parseOptionalNumber = (
+  value: FormDataEntryValue | null,
+): number | null => {
   const stringValue = String(value ?? '').trim();
   if (!stringValue) return null;
   const parsed = Number(stringValue);
@@ -265,9 +272,9 @@ export const IamConsole = () => {
     number | null
   >(null);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
-  const [selectedPermissionId, setSelectedPermissionId] = useState<number | null>(
-    null,
-  );
+  const [selectedPermissionId, setSelectedPermissionId] = useState<
+    number | null
+  >(null);
   const [selectedAgentPrincipalId, setSelectedAgentPrincipalId] = useState<
     number | null
   >(null);
@@ -395,8 +402,9 @@ export const IamConsole = () => {
   const selectedPermission =
     permissions.data?.find((item) => item.id === selectedPermissionId) ?? null;
   const selectedAgent =
-    agents.data?.find((item) => item.principalId === selectedAgentPrincipalId) ??
-    null;
+    agents.data?.find(
+      (item) => item.principalId === selectedAgentPrincipalId,
+    ) ?? null;
   const selectedAcl =
     aclEntries.data?.find((item) => item.id === selectedAclId) ?? null;
   const selectedMember =
@@ -719,7 +727,10 @@ export const IamConsole = () => {
     ]);
   };
 
-  const handleInspectPrincipal = (principalId: number, scopedTenantId?: number) => {
+  const handleInspectPrincipal = (
+    principalId: number,
+    scopedTenantId?: number,
+  ) => {
     if (!principalId) return;
     setInspectFormPrincipalId(String(principalId));
     setInspection({
@@ -764,10 +775,16 @@ export const IamConsole = () => {
                 title={getViewerDisplayName(viewer)}
                 subtitle={getViewerHandle(viewer)}
                 avatarUrl={viewer.user?.avatarUrl ?? undefined}
-                kind={resolvePrincipalKind(viewer.principal.principalType) ?? 'human'}
+                kind={
+                  resolvePrincipalKind(viewer.principal.principalType) ??
+                  'human'
+                }
                 badge={
                   <KindBadge
-                    kind={resolvePrincipalKind(viewer.principal.principalType) ?? 'human'}
+                    kind={
+                      resolvePrincipalKind(viewer.principal.principalType) ??
+                      'human'
+                    }
                     humanLabel={t('shared.human')}
                     agentLabel={t('shared.agent')}
                   />
@@ -943,12 +960,16 @@ export const IamConsole = () => {
                   className="space-y-4 rounded-[1.6rem] border border-dashed border-stone-300 bg-stone-50/70 p-4"
                   onSubmit={handleWorkspaceCreate}
                 >
-                  <SectionEyebrow>{commonT('dashboard.createWorkspace')}</SectionEyebrow>
+                  <SectionEyebrow>
+                    {commonT('dashboard.createWorkspace')}
+                  </SectionEyebrow>
                   <Field label={t('workspace.name')}>
                     <input
                       name="workspaceName"
                       className={FIELD_CLASS_NAME}
-                      placeholder={commonT('dashboard.workspaceNamePlaceholder')}
+                      placeholder={commonT(
+                        'dashboard.workspaceNamePlaceholder',
+                      )}
                       required
                     />
                   </Field>
@@ -956,7 +977,9 @@ export const IamConsole = () => {
                     <input
                       name="workspaceSlug"
                       className={FIELD_CLASS_NAME}
-                      placeholder={commonT('dashboard.workspaceSlugPlaceholder')}
+                      placeholder={commonT(
+                        'dashboard.workspaceSlugPlaceholder',
+                      )}
                       required
                     />
                   </Field>
@@ -1020,11 +1043,23 @@ export const IamConsole = () => {
                     />
                   </Field>
                   <Field label={t('members.status')}>
-                    <select name="status" className={FIELD_CLASS_NAME} defaultValue="active">
-                      <option value="active">{t('members.status.active')}</option>
-                      <option value="invited">{t('members.status.invited')}</option>
-                      <option value="suspended">{t('members.status.suspended')}</option>
-                      <option value="inactive">{t('members.status.inactive')}</option>
+                    <select
+                      name="status"
+                      className={FIELD_CLASS_NAME}
+                      defaultValue="active"
+                    >
+                      <option value="active">
+                        {t('members.status.active')}
+                      </option>
+                      <option value="invited">
+                        {t('members.status.invited')}
+                      </option>
+                      <option value="suspended">
+                        {t('members.status.suspended')}
+                      </option>
+                      <option value="inactive">
+                        {t('members.status.inactive')}
+                      </option>
                     </select>
                   </Field>
                   <Button
@@ -1067,26 +1102,35 @@ export const IamConsole = () => {
                               : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50',
                           )}
                           aria-pressed={isSelected}
-                          onClick={() => setSelectedMemberPrincipalId(membership.principalId)}
+                          onClick={() =>
+                            setSelectedMemberPrincipalId(membership.principalId)
+                          }
                         >
                           <div className="flex items-start gap-3">
                             <IdentityAvatar
-                              label={principal?.label ?? `Principal #${membership.principalId}`}
+                              label={
+                                principal?.label ??
+                                `Principal #${membership.principalId}`
+                              }
                               avatarUrl={principal?.avatarUrl}
                               kind={principalKind}
                             />
                             <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <p className="truncate text-base font-semibold">
-                                  {principal?.label ?? `Principal #${membership.principalId}`}
+                                  {principal?.label ??
+                                    `Principal #${membership.principalId}`}
                                 </p>
                                 <p
                                   className={cn(
                                     'mt-1 truncate text-xs uppercase tracking-[0.22em]',
-                                    isSelected ? 'text-stone-300' : 'text-stone-500',
+                                    isSelected
+                                      ? 'text-stone-300'
+                                      : 'text-stone-500',
                                   )}
                                 >
-                                  {principal?.handle ?? `#${membership.principalId}`}
+                                  {principal?.handle ??
+                                    `#${membership.principalId}`}
                                 </p>
                                 <div className="mt-3">
                                   <KindBadge
@@ -1174,8 +1218,12 @@ export const IamConsole = () => {
                           defaultValue={selectedMember.status}
                           className={FIELD_CLASS_NAME}
                         >
-                          <option value="active">{t('members.status.active')}</option>
-                          <option value="invited">{t('members.status.invited')}</option>
+                          <option value="active">
+                            {t('members.status.active')}
+                          </option>
+                          <option value="invited">
+                            {t('members.status.invited')}
+                          </option>
                           <option value="suspended">
                             {t('members.status.suspended')}
                           </option>
@@ -1228,7 +1276,9 @@ export const IamConsole = () => {
                         <p className="text-sm font-semibold text-stone-900">
                           {t('members.assignedRoles')}
                         </p>
-                        {selectedMemberRoles.isLoading ? <Spinner size="sm" /> : null}
+                        {selectedMemberRoles.isLoading ? (
+                          <Spinner size="sm" />
+                        ) : null}
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {selectedMemberRoleList.length > 0 ? (
@@ -1259,7 +1309,9 @@ export const IamConsole = () => {
                         onSubmit={(event) => {
                           event.preventDefault();
                           const form = new FormData(event.currentTarget);
-                          const roleId = parseRequiredNumber(form.get('roleId'));
+                          const roleId = parseRequiredNumber(
+                            form.get('roleId'),
+                          );
                           if (!roleId) return;
                           void grantRole.mutateAsync({
                             tenantId: currentTenant.id,
@@ -1284,7 +1336,9 @@ export const IamConsole = () => {
                         <Button
                           type="submit"
                           className="h-11 rounded-2xl"
-                          isLoading={grantRole.isPending || revokeRole.isPending}
+                          isLoading={
+                            grantRole.isPending || revokeRole.isPending
+                          }
                         >
                           {t('members.assignRole')}
                         </Button>
@@ -1292,7 +1346,9 @@ export const IamConsole = () => {
                     </div>
                   </>
                 ) : (
-                  <EmptyState className="mt-4">{t('members.selectHint')}</EmptyState>
+                  <EmptyState className="mt-4">
+                    {t('members.selectHint')}
+                  </EmptyState>
                 )}
               </div>
             </div>
@@ -1321,7 +1377,10 @@ export const IamConsole = () => {
                     />
                   </Field>
                   <Field label={t('agents.descriptionField')}>
-                    <textarea name="description" className={TEXTAREA_CLASS_NAME} />
+                    <textarea
+                      name="description"
+                      className={TEXTAREA_CLASS_NAME}
+                    />
                   </Field>
                   <Field label={t('agents.avatarUrl')}>
                     <input
@@ -1332,7 +1391,11 @@ export const IamConsole = () => {
                     />
                   </Field>
                   <Field label={t('agents.owner')}>
-                    <select name="ownerPrincipalId" className={FIELD_CLASS_NAME} defaultValue="">
+                    <select
+                      name="ownerPrincipalId"
+                      className={FIELD_CLASS_NAME}
+                      defaultValue=""
+                    >
                       <option value="">{t('agents.unowned')}</option>
                       {(users.data ?? []).map((user) => (
                         <option key={user.principalId} value={user.principalId}>
@@ -1356,7 +1419,10 @@ export const IamConsole = () => {
                   ) : agents.data && agents.data.length > 0 ? (
                     agents.data.map((agent) => {
                       const owner = agent.ownerPrincipalId
-                        ? resolvePrincipal(principalDirectory, agent.ownerPrincipalId)
+                        ? resolvePrincipal(
+                            principalDirectory,
+                            agent.ownerPrincipalId,
+                          )
                         : null;
                       const isSelected =
                         agent.principalId === selectedAgentPrincipalId;
@@ -1372,7 +1438,9 @@ export const IamConsole = () => {
                               : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50',
                           )}
                           aria-pressed={isSelected}
-                          onClick={() => setSelectedAgentPrincipalId(agent.principalId)}
+                          onClick={() =>
+                            setSelectedAgentPrincipalId(agent.principalId)
+                          }
                         >
                           <div className="flex items-start gap-3">
                             <IdentityAvatar
@@ -1388,7 +1456,9 @@ export const IamConsole = () => {
                                 <p
                                   className={cn(
                                     'mt-1 truncate text-xs uppercase tracking-[0.22em]',
-                                    isSelected ? 'text-stone-300' : 'text-stone-500',
+                                    isSelected
+                                      ? 'text-stone-300'
+                                      : 'text-stone-500',
                                   )}
                                 >
                                   {agent.code}
@@ -1396,7 +1466,9 @@ export const IamConsole = () => {
                                 <p
                                   className={cn(
                                     'mt-2 truncate text-xs',
-                                    isSelected ? 'text-stone-300' : 'text-stone-500',
+                                    isSelected
+                                      ? 'text-stone-300'
+                                      : 'text-stone-500',
                                   )}
                                 >
                                   {owner?.label ?? t('agents.unowned')}
@@ -1510,7 +1582,10 @@ export const IamConsole = () => {
                       >
                         <option value="">{t('agents.unowned')}</option>
                         {(users.data ?? []).map((user) => (
-                          <option key={user.principalId} value={user.principalId}>
+                          <option
+                            key={user.principalId}
+                            value={user.principalId}
+                          >
                             {user.displayName}
                           </option>
                         ))}
@@ -1555,7 +1630,9 @@ export const IamConsole = () => {
                     </div>
                   </form>
                 ) : (
-                  <EmptyState className="mt-4">{t('agents.selectHint')}</EmptyState>
+                  <EmptyState className="mt-4">
+                    {t('agents.selectHint')}
+                  </EmptyState>
                 )}
               </div>
             </div>
@@ -1588,7 +1665,9 @@ export const IamConsole = () => {
                   name="principalId"
                   value={inspectFormPrincipalId}
                   list="iam-principal-directory"
-                  onChange={(event) => setInspectFormPrincipalId(event.target.value)}
+                  onChange={(event) =>
+                    setInspectFormPrincipalId(event.target.value)
+                  }
                   className={FIELD_CLASS_NAME}
                   placeholder="1001"
                 />
@@ -1676,9 +1755,9 @@ export const IamConsole = () => {
                         />
                         <MetaBlock
                           label={t('inspector.lastUpdated')}
-                          value={dayjs(inspectedPrincipal.data.updatedAt).format(
-                            'YYYY-MM-DD HH:mm',
-                          )}
+                          value={dayjs(
+                            inspectedPrincipal.data.updatedAt,
+                          ).format('YYYY-MM-DD HH:mm')}
                         />
                       </div>
                     </div>
@@ -1711,7 +1790,9 @@ export const IamConsole = () => {
                           </div>
                         ))
                       ) : (
-                        <EmptyInline>{t('inspector.noMemberships')}</EmptyInline>
+                        <EmptyInline>
+                          {t('inspector.noMemberships')}
+                        </EmptyInline>
                       )}
                     </div>
                   </div>
@@ -1723,7 +1804,8 @@ export const IamConsole = () => {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {inspectedRoles.isLoading ? (
                         <LoadingBlock />
-                      ) : inspectedRoles.data && inspectedRoles.data.length > 0 ? (
+                      ) : inspectedRoles.data &&
+                        inspectedRoles.data.length > 0 ? (
                         inspectedRoles.data.map((entry) => (
                           <span
                             key={entry.role.id}
@@ -1747,16 +1829,20 @@ export const IamConsole = () => {
                         <LoadingBlock />
                       ) : inspectedPermissions.data?.permissionCodes &&
                         inspectedPermissions.data.permissionCodes.length > 0 ? (
-                        inspectedPermissions.data.permissionCodes.map((code) => (
-                          <span
-                            key={code}
-                            className="rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700"
-                          >
-                            {code}
-                          </span>
-                        ))
+                        inspectedPermissions.data.permissionCodes.map(
+                          (code) => (
+                            <span
+                              key={code}
+                              className="rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-700"
+                            >
+                              {code}
+                            </span>
+                          ),
+                        )
                       ) : (
-                        <EmptyInline>{t('inspector.noPermissions')}</EmptyInline>
+                        <EmptyInline>
+                          {t('inspector.noPermissions')}
+                        </EmptyInline>
                       )}
                     </div>
                   </div>
@@ -1786,7 +1872,10 @@ export const IamConsole = () => {
                     <input name="name" className={FIELD_CLASS_NAME} required />
                   </Field>
                   <Field label={t('roles.descriptionField')}>
-                    <textarea name="description" className={TEXTAREA_CLASS_NAME} />
+                    <textarea
+                      name="description"
+                      className={TEXTAREA_CLASS_NAME}
+                    />
                   </Field>
                   <Button
                     type="submit"
@@ -1837,7 +1926,9 @@ export const IamConsole = () => {
                                 : 'bg-stone-100 text-stone-600',
                             )}
                           >
-                            {role.isBuiltin ? t('roles.builtin') : t('roles.custom')}
+                            {role.isBuiltin
+                              ? t('roles.builtin')
+                              : t('roles.custom')}
                           </span>
                         </div>
                       </button>
@@ -1956,7 +2047,9 @@ export const IamConsole = () => {
                     </form>
                   </>
                 ) : (
-                  <EmptyState className="mt-4">{t('roles.selectHint')}</EmptyState>
+                  <EmptyState className="mt-4">
+                    {t('roles.selectHint')}
+                  </EmptyState>
                 )}
               </div>
             </div>
@@ -1979,14 +2072,25 @@ export const IamConsole = () => {
                   </Field>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field label={t('permissions.resourceType')}>
-                      <input name="resourceType" className={FIELD_CLASS_NAME} required />
+                      <input
+                        name="resourceType"
+                        className={FIELD_CLASS_NAME}
+                        required
+                      />
                     </Field>
                     <Field label={t('permissions.action')}>
-                      <input name="action" className={FIELD_CLASS_NAME} required />
+                      <input
+                        name="action"
+                        className={FIELD_CLASS_NAME}
+                        required
+                      />
                     </Field>
                   </div>
                   <Field label={t('permissions.descriptionField')}>
-                    <textarea name="description" className={TEXTAREA_CLASS_NAME} />
+                    <textarea
+                      name="description"
+                      className={TEXTAREA_CLASS_NAME}
+                    />
                   </Field>
                   <Button
                     type="submit"
@@ -2121,7 +2225,11 @@ export const IamConsole = () => {
                   <SectionEyebrow>{t('acl.create')}</SectionEyebrow>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field label={t('acl.resourceType')}>
-                      <input name="resourceType" className={FIELD_CLASS_NAME} required />
+                      <input
+                        name="resourceType"
+                        className={FIELD_CLASS_NAME}
+                        required
+                      />
                     </Field>
                     <Field label={t('acl.resourceId')}>
                       <input
@@ -2133,7 +2241,12 @@ export const IamConsole = () => {
                     </Field>
                   </div>
                   <Field label={t('acl.permission')}>
-                    <select name="permissionId" className={FIELD_CLASS_NAME} required defaultValue="">
+                    <select
+                      name="permissionId"
+                      className={FIELD_CLASS_NAME}
+                      required
+                      defaultValue=""
+                    >
                       <option value="">{t('shared.select')}</option>
                       {(permissions.data ?? []).map((permission) => (
                         <option key={permission.id} value={permission.id}>
@@ -2152,7 +2265,11 @@ export const IamConsole = () => {
                       />
                     </Field>
                     <Field label={t('acl.subjectRole')}>
-                      <select name="subjectRoleId" className={FIELD_CLASS_NAME} defaultValue="">
+                      <select
+                        name="subjectRoleId"
+                        className={FIELD_CLASS_NAME}
+                        defaultValue=""
+                      >
                         <option value="">{t('shared.none')}</option>
                         {(roles.data ?? []).map((role) => (
                           <option key={role.id} value={role.id}>
@@ -2163,7 +2280,11 @@ export const IamConsole = () => {
                     </Field>
                   </div>
                   <Field label={t('acl.effect')}>
-                    <select name="effect" className={FIELD_CLASS_NAME} defaultValue="allow">
+                    <select
+                      name="effect"
+                      className={FIELD_CLASS_NAME}
+                      defaultValue="allow"
+                    >
                       <option value="allow">{t('acl.effect.allow')}</option>
                       <option value="deny">{t('acl.effect.deny')}</option>
                     </select>
@@ -2306,7 +2427,9 @@ export const IamConsole = () => {
                     </div>
                   </form>
                 ) : (
-                  <EmptyState className="mt-4">{t('acl.selectHint')}</EmptyState>
+                  <EmptyState className="mt-4">
+                    {t('acl.selectHint')}
+                  </EmptyState>
                 )}
               </div>
             </div>
@@ -2430,13 +2553,7 @@ const SectionJumpLink = ({
   </a>
 );
 
-const MetaBlock = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => (
+const MetaBlock = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-[1.2rem] bg-stone-50 px-4 py-4">
     <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-500">
       {label}

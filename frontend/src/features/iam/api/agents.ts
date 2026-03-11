@@ -1,4 +1,9 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { iamQueryKeys } from './query-keys';
 
@@ -9,7 +14,10 @@ import type {
   UpdateAgentRequest,
   UpdateAvatarRequest,
 } from '@/api/models/req';
-import type { AgentAccountResponse, PrincipalResponse } from '@/api/models/resp';
+import type {
+  AgentAccountResponse,
+  PrincipalResponse,
+} from '@/api/models/resp';
 import { api } from '@/lib/api-client';
 import type { MutationConfig, QueryConfig } from '@/lib/react-query';
 

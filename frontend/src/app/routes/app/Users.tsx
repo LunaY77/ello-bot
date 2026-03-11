@@ -53,14 +53,17 @@ const UsersRoute = () => {
                     @{user.username}
                   </p>
                   <p className="mt-2 text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
-                    {user.isActive ? t('profile.active') : t('profile.inactive')}
+                    {user.isActive
+                      ? t('profile.active')
+                      : t('profile.inactive')}
                   </p>
                 </div>
               </div>
 
               <div className="mt-5 grid gap-2 text-sm text-stone-600">
                 <p>
-                  {t('users.timezone')}: {user.timezone || t('users.emptyValue')}
+                  {t('users.timezone')}:{' '}
+                  {user.timezone || t('users.emptyValue')}
                 </p>
                 <p>
                   {t('users.gender')}: {user.gender || t('users.emptyValue')}

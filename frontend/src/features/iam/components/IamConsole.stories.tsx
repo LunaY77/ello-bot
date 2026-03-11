@@ -26,7 +26,8 @@ const viewer: AuthMeResponse = {
   user: {
     principalId: 1001,
     username: 'cangjingyue',
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80',
     bio: 'Owns workspace security and product operations.',
     gender: 'female',
     dateOfBirth: '1995-03-12',
@@ -108,7 +109,8 @@ const users = [
   {
     principalId: 1002,
     username: 'annika',
-    avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80',
     bio: 'Product designer for admin workflows.',
     gender: 'female',
     dateOfBirth: null,
@@ -125,8 +127,10 @@ const agents = [
     principalId: 2001,
     ownerPrincipalId: 1001,
     code: 'doc-bot',
-    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80',
-    description: 'Indexes workspace documentation and answers access questions.',
+    avatarUrl:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80',
+    description:
+      'Indexes workspace documentation and answers access questions.',
     displayName: 'Documentation Bot',
     isActive: true,
     createdAt: '2026-03-04T08:00:00Z',
@@ -201,19 +205,26 @@ const createStoryQueryClient = () => {
 
   queryClient.setQueryData(AUTHENTICATED_USER_QUERY_KEY, viewer);
   queryClient.setQueryData(iamQueryKeys.visibleTenants(), visibleTenants);
-  queryClient.setQueryData(iamQueryKeys.tenant(viewer.tenant.id), viewer.tenant);
+  queryClient.setQueryData(
+    iamQueryKeys.tenant(viewer.tenant.id),
+    viewer.tenant,
+  );
   queryClient.setQueryData(['users', viewer.tenant.id], users);
   queryClient.setQueryData(iamQueryKeys.agentList(viewer.tenant.id), agents);
-  queryClient.setQueryData(iamQueryKeys.tenantMemberships(viewer.tenant.id), memberships);
+  queryClient.setQueryData(
+    iamQueryKeys.tenantMemberships(viewer.tenant.id),
+    memberships,
+  );
   queryClient.setQueryData(iamQueryKeys.tenantRoles(viewer.tenant.id), roles);
   queryClient.setQueryData(iamQueryKeys.permissions(), permissions);
   queryClient.setQueryData(
     iamQueryKeys.tenantAcl(viewer.tenant.id, undefined),
     aclEntries,
   );
-  queryClient.setQueryData(iamQueryKeys.principalRoles(1001, viewer.tenant.id), [
-    { role: roles[0] },
-  ]);
+  queryClient.setQueryData(
+    iamQueryKeys.principalRoles(1001, viewer.tenant.id),
+    [{ role: roles[0] }],
+  );
   queryClient.setQueryData(iamQueryKeys.principal(1001), viewer.principal);
   queryClient.setQueryData(iamQueryKeys.principalMemberships(1001), [
     {
@@ -232,11 +243,14 @@ const createStoryQueryClient = () => {
       tenant: visibleTenants[1],
     },
   ]);
-  queryClient.setQueryData(iamQueryKeys.principalPermissions(1001, viewer.tenant.id), {
-    tenantId: viewer.tenant.id,
-    principalId: 1001,
-    permissionCodes: permissions.map((item) => item.code),
-  });
+  queryClient.setQueryData(
+    iamQueryKeys.principalPermissions(1001, viewer.tenant.id),
+    {
+      tenantId: viewer.tenant.id,
+      principalId: 1001,
+      permissionCodes: permissions.map((item) => item.code),
+    },
+  );
 
   return queryClient;
 };

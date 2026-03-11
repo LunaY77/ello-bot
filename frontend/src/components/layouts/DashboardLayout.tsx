@@ -171,7 +171,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const handle = getViewerHandle(viewer);
 
   const navigation: SideNavigationItem[] = [
-    { name: t('shell.overview'), to: paths.app.dashboard.getHref(), icon: Home },
+    {
+      name: t('shell.overview'),
+      to: paths.app.dashboard.getHref(),
+      icon: Home,
+    },
     { name: t('shell.people'), to: paths.app.users.getHref(), icon: Users },
     { name: t('shell.access'), to: paths.app.iam.getHref(), icon: ShieldCheck },
     { name: t('shell.profile'), to: paths.app.profile.getHref(), icon: User2 },
@@ -226,7 +230,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 variant="outline"
                 className="rounded-2xl border-stone-300 bg-white/80"
               >
-                <Link to={paths.app.profile.getHref()}>{t('shell.profile')}</Link>
+                <Link to={paths.app.profile.getHref()}>
+                  {t('shell.profile')}
+                </Link>
               </Button>
 
               <Button

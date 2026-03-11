@@ -34,17 +34,6 @@ const createEnv = () => {
     // Example: https://api.example.com
     API_URL: z.string(),
 
-    // Whether to enable API Mocking (optional, default false)
-    ENABLE_API_MOCKING: z
-      .string()
-      .refine((s) => s === 'true' || s === 'false')
-      .transform((s) => s === 'true')
-      .optional(),
-
-    // Mock API server port (optional, default 8080)
-    // Only used when ENABLE_API_MOCKING is true, should not conflict with frontend dev server port
-    APP_MOCK_API_PORT: z.string().optional().default('8080'),
-
     // Application base URL (optional, default localhost:3000)
     APP_URL: z.string().optional().default('http://localhost:3000'),
   });

@@ -2,7 +2,11 @@ import { Languages } from 'lucide-react';
 import { startTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { localeOptions, normalizeLocale, type Locales } from '@/locales/resources';
+import {
+  localeOptions,
+  normalizeLocale,
+  type Locales,
+} from '@/locales/resources';
 import { cn } from '@/utils/cn';
 
 type LanguageSwitcherProps = {
@@ -30,7 +34,9 @@ export const LanguageSwitcher = ({
       <span
         className={cn(
           'pointer-events-none flex h-full items-center border-r px-3',
-          tone === 'dark' ? 'border-white/10 text-stone-200' : 'border-stone-200 text-stone-500',
+          tone === 'dark'
+            ? 'border-white/10 text-stone-200'
+            : 'border-stone-200 text-stone-500',
         )}
       >
         <Languages className="size-4" aria-hidden="true" />
@@ -40,9 +46,7 @@ export const LanguageSwitcher = ({
         aria-label={t('language.label')}
         className={cn(
           'h-full appearance-none bg-transparent pl-3 pr-9 text-sm font-medium outline-none',
-          tone === 'dark'
-            ? 'text-white'
-            : 'text-stone-900',
+          tone === 'dark' ? 'text-white' : 'text-stone-900',
         )}
         value={currentLocale}
         onChange={(event) => {
@@ -53,7 +57,11 @@ export const LanguageSwitcher = ({
         }}
       >
         {localeOptions.map((option) => (
-          <option key={option.value} value={option.value} className="text-stone-900">
+          <option
+            key={option.value}
+            value={option.value}
+            className="text-stone-900"
+          >
             {option.label}
           </option>
         ))}

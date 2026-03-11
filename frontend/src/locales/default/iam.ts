@@ -1,9 +1,11 @@
 export default {
   'page.title': 'Security',
-  'page.description': 'Manage workspace access, agents, and runtime guardrails.',
+  'page.description':
+    'Manage workspace access, agents, and runtime guardrails.',
   'hero.eyebrow': 'Agent Security',
   'hero.title': 'People, agents, and rules in one view.',
-  'hero.description': 'Keep workspace context, access, and agent operations aligned.',
+  'hero.description':
+    'Keep workspace context, access, and agent operations aligned.',
   'stats.tenants': 'Workspaces',
   'stats.memberships': 'People',
   'stats.roles': 'Role sets',
@@ -31,7 +33,8 @@ export default {
   'workspace.activeHint':
     'Inactive workspaces remain visible but should not accept new activity.',
   'members.title': 'People',
-  'members.description': 'Who can enter this workspace and what state they are in.',
+  'members.description':
+    'Who can enter this workspace and what state they are in.',
   'members.add': 'Add person',
   'members.manage': 'Selected person',
   'members.empty': 'No people were returned for this workspace.',
@@ -45,7 +48,8 @@ export default {
   'members.assignedRoles': 'Role sets',
   'members.assignRole': 'Attach role',
   'members.noRoles': 'No role sets attached.',
-  'members.selectHint': 'Pick a person to edit access state or inspect details.',
+  'members.selectHint':
+    'Pick a person to edit access state or inspect details.',
   'members.status.active': 'Active',
   'members.status.invited': 'Invited',
   'members.status.suspended': 'Suspended',
@@ -77,7 +81,8 @@ export default {
   'permissions.descriptionField': 'Notes',
   'permissions.selectHint': 'Pick a capability to edit or remove.',
   'agents.title': 'Agents',
-  'agents.description': 'Provision agents, set owners, and control active state.',
+  'agents.description':
+    'Provision agents, set owners, and control active state.',
   'agents.create': 'Create agent',
   'agents.update': 'Update agent',
   'agents.delete': 'Delete agent',
@@ -89,7 +94,8 @@ export default {
   'agents.owner': 'Owner principal',
   'agents.unowned': 'No owner',
   'agents.active': 'Agent active',
-  'agents.selectHint': 'Select an agent to update its profile, ownership, or active state.',
+  'agents.selectHint':
+    'Select an agent to update its profile, ownership, or active state.',
   'acl.title': 'Overrides',
   'acl.description': 'Resource-level exceptions for sensitive operations.',
   'acl.create': 'Create override',
