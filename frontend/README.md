@@ -22,7 +22,7 @@ React 19 + TypeScript frontend for Ello Bot. The current application is a Vite S
 ```text
 src/
 ├── app/                  # App shell, providers, route modules
-├── api/                  # OpenAPI-generated models and schemas
+├── api/                  # OpenAPI-generated models, schemas, operation contracts, runtime helpers
 ├── features/             # auth, users, iam, chat
 ├── components/           # shared UI, layouts, notifications, errors
 ├── lib/                  # api-client, auth, react-query, i18n
@@ -139,7 +139,28 @@ cd backend && uv run gen-openapi
 cd frontend && pnpm run codegen:api
 ```
 
-Do not hand-edit files in `src/api/models/` or `src/api/schemas/`.
+`pnpm run codegen:api` now performs one unified flow:
+
+- runs Orval for request models, response models, and request-body schemas
+- generates `src/api/operations/` contracts with stable `id`, `method`, and `path`
+- reconciles public barrels so support artifacts such as `Result` stay exportable
+- verifies generated public entrypoints before formatting
+
+Treat these directories as generated output:
+
+- `src/api/models/req/`
+- `src/api/models/resp/`
+- `src/api/schemas/`
+- `src/api/operations/`
+
+Use these public entrypoints from app code instead of deep-importing generated files:
+
+- `@/api/models/req`
+- `@/api/models/resp`
+- `@/api/schemas`
+- `@/api/operations`
+
+Handwritten feature wrappers should keep business behavior in `src/features/**/api` and `src/lib/auth`, but they must compose generated operation contracts with the shared Axios client through `@/api/runtime`.
 
 ## Testing Strategy
 

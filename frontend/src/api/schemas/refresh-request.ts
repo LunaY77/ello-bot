@@ -7,6 +7,8 @@
  */
 import { z as zod } from 'zod';
 
-export const RefreshRequestSchema = zod.object({
-  refreshToken: zod.string().describe('Opaque refresh token'),
-});
+export const RefreshRequestSchema = zod
+  .object({
+    refreshToken: zod.string().describe('Opaque refresh token'),
+  })
+  .describe('Request body for refresh-token rotation.');

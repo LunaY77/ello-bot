@@ -1,7 +1,17 @@
-import Axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import Axios, {
+  type AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 
-import type { AuthTokenResponse } from '@/api/models/resp';
-import type { Result } from '@/api/models/resp/result';
+import type { AuthTokenResponse, Result } from '@/api/models/resp';
+import type {
+  ApiOperationContract,
+  ApiOperationMethod,
+} from '@/api/operations';
+import { sessionsOperations } from '@/api/operations';
+import { withApiOperation } from '@/api/runtime';
 import { useNotifications } from '@/components/ui/notifications';
 import { env } from '@/config/env';
 import { paths } from '@/config/paths';
@@ -40,6 +50,26 @@ const rawApi = Axios.create({
 
 api.interceptors.request.use(authRequestInterceptor);
 
+export const requestApi = <TResponse, TData = unknown>(
+  config: AxiosRequestConfig<TData>,
+): Promise<TResponse> => api.request<TResponse, TResponse, TData>(config);
+
+export const requestApiOperation = <
+  TResponse,
+  TRequest,
+  TMethod extends ApiOperationMethod,
+  TPath extends string,
+>(
+  operation: ApiOperationContract<TResponse, TRequest, TMethod, TPath>,
+  config?: AxiosRequestConfig<TRequest>,
+): Promise<TResponse> =>
+  requestApi<TResponse, TRequest>(withApiOperation(operation, config));
+
+const requestRawApi = <TResponse, TData = unknown>(
+  config: AxiosRequestConfig<TData>,
+): Promise<AxiosResponse<TResponse, TData>> =>
+  rawApi.request<TResponse, AxiosResponse<TResponse, TData>, TData>(config);
+
 let refreshPromise: Promise<AuthTokenResponse | null> | null = null;
 
 function isResult<T = unknown>(x: unknown): x is Result<T> {
@@ -68,33 +98,36 @@ async function refreshAuthSession(): Promise<AuthTokenResponse | null> {
   const { refreshToken, setSession, clearSession } = getUserStoreState();
   if (!refreshToken) return null;
 
-  if (!refreshPromise) {
-    refreshPromise = rawApi
-      .post<Result<AuthTokenResponse>>(
-        '/iam/auth/refresh',
-        { refreshToken },
-        { headers: { Accept: 'application/json' } },
-      )
-      .then((response) => {
-        const payload = unwrapResult<AuthTokenResponse>(response.data);
-        if (!payload) {
-          throw new Error('Refresh token response is empty.');
-        }
+  refreshPromise ??= requestRawApi<
+    Result<AuthTokenResponse>,
+    {
+      refreshToken: string;
+    }
+  >(
+    withApiOperation(sessionsOperations.refresh, {
+      data: { refreshToken },
+      headers: { Accept: 'application/json' },
+    }),
+  )
+    .then((response) => {
+      const payload = unwrapResult<AuthTokenResponse>(response.data);
+      if (!payload) {
+        throw new Error('Refresh token response is empty.');
+      }
 
-        setSession({
-          accessToken: payload.accessToken,
-          refreshToken: payload.refreshToken,
-        });
-        return payload;
-      })
-      .catch((error) => {
-        clearSession();
-        throw error;
-      })
-      .finally(() => {
-        refreshPromise = null;
+      setSession({
+        accessToken: payload.accessToken,
+        refreshToken: payload.refreshToken,
       });
-  }
+      return payload;
+    })
+    .catch((error) => {
+      clearSession();
+      throw error;
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
 
   return await refreshPromise;
 }
@@ -109,9 +142,9 @@ function shouldAttemptRefresh(
 
   const url = config.url ?? '';
   if (
-    url.includes('/iam/auth/login') ||
-    url.includes('/iam/auth/register') ||
-    url.includes('/iam/auth/refresh')
+    url.includes(sessionsOperations.login.path) ||
+    url.includes(sessionsOperations.register.path) ||
+    url.includes(sessionsOperations.refresh.path)
   ) {
     return false;
   }

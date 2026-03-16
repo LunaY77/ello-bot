@@ -8,20 +8,20 @@
 import { z as zod } from 'zod';
 
 export const loginRequestSchemaUsernameMin = 3;
-export const loginRequestSchemaUsernameMax = 20;
+export const loginRequestSchemaUsernameMax = 32;
 
 export const loginRequestSchemaPasswordMin = 6;
 export const loginRequestSchemaPasswordMax = 100;
 
-export const LoginRequestSchema = zod.object({
-  username: zod
-    .string()
-    .min(loginRequestSchemaUsernameMin)
-    .max(loginRequestSchemaUsernameMax)
-    .describe('Username'),
-  password: zod
-    .string()
-    .min(loginRequestSchemaPasswordMin)
-    .max(loginRequestSchemaPasswordMax)
-    .describe('Password'),
-});
+export const LoginRequestSchema = zod
+  .object({
+    username: zod
+      .string()
+      .min(loginRequestSchemaUsernameMin)
+      .max(loginRequestSchemaUsernameMax),
+    password: zod
+      .string()
+      .min(loginRequestSchemaPasswordMin)
+      .max(loginRequestSchemaPasswordMax),
+  })
+  .describe('Request body for username/password login.');

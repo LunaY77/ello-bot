@@ -6,21 +6,21 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Request body for user self-registration.
+ */
 export interface RegisterRequest {
   /**
-   * Username
    * @minLength 3
-   * @maxLength 20
+   * @maxLength 32
    */
   username: string;
   /**
-   * Password
    * @minLength 6
    * @maxLength 100
    */
   password: string;
   /**
-   * Display name
    * @minLength 1
    * @maxLength 128
    */

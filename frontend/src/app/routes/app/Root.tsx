@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router';
 
-import { DashboardLayout } from '@/components/layouts';
+import { AppShellLayout } from '@/components/layouts';
 
-/** Error boundary for app routes */
 export const ErrorBoundary = () => {
   const { t } = useTranslation('error');
 
@@ -19,12 +18,11 @@ export const ErrorBoundary = () => {
   );
 };
 
-/** App root component, wraps child routes with DashboardLayout */
 const AppRoot = () => {
   return (
-    <DashboardLayout>
+    <AppShellLayout>
       <Outlet />
-    </DashboardLayout>
+    </AppShellLayout>
   );
 };
 

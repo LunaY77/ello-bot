@@ -7,51 +7,49 @@ import {
   getViewerHandle,
 } from './viewer';
 
-import type { AuthMeResponse } from '@/api/models/resp';
+import type { CurrentUserResponse } from '@/api/models/resp';
 
 describe('viewer helpers', () => {
-  it('prefers the human user account when available', () => {
+  it('reads the single-user account payload directly', () => {
     const viewer = {
-      principal: {
-        displayName: 'Alice Principal',
-      },
-      tenant: {
-        slug: 'personal',
-      },
       user: {
         username: 'alice',
         displayName: 'Alice User',
         avatarUrl: 'https://example.com/alice.png',
       },
-      agent: null,
-    } as AuthMeResponse;
+      settings: {
+        locale: 'en-US',
+        theme: 'system',
+        systemPrompt: '',
+        defaultModel: 'gpt-4o-mini',
+      },
+    } as CurrentUserResponse;
 
     expect(getViewerAccount(viewer)).toBe(viewer.user);
-    expect(getViewerDisplayName(viewer)).toBe('Alice Principal');
+    expect(getViewerDisplayName(viewer)).toBe('Alice User');
     expect(getViewerHandle(viewer)).toBe('alice');
     expect(getViewerAvatarUrl(viewer)).toBe('https://example.com/alice.png');
   });
 
-  it('falls back to agent and tenant metadata when no user exists', () => {
+  it('falls back to the username when displayName is empty', () => {
     const viewer = {
-      principal: {
-        displayName: null,
+      user: {
+        username: 'ops',
+        displayName: '',
+        avatarUrl: '',
       },
-      tenant: {
-        slug: 'ops',
+      settings: {
+        locale: 'en-US',
+        theme: 'dark',
+        systemPrompt: '',
+        defaultModel: 'gpt-4o',
       },
-      user: null,
-      agent: {
-        code: 'ops-bot',
-        displayName: 'Ops Bot',
-        avatarUrl: 'https://example.com/bot.png',
-      },
-    } as AuthMeResponse;
+    } as CurrentUserResponse;
 
-    expect(getViewerAccount(viewer)).toBe(viewer.agent);
-    expect(getViewerDisplayName(viewer)).toBe('Ops Bot');
-    expect(getViewerHandle(viewer)).toBe('ops-bot');
-    expect(getViewerAvatarUrl(viewer)).toBe('https://example.com/bot.png');
+    expect(getViewerAccount(viewer)).toBe(viewer.user);
+    expect(getViewerDisplayName(viewer)).toBe('ops');
+    expect(getViewerHandle(viewer)).toBe('ops');
+    expect(getViewerAvatarUrl(viewer)).toBe('');
   });
 
   it('returns safe guest defaults for an empty viewer', () => {

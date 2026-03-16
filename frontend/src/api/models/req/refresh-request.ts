@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Request body for refresh-token rotation.
+ */
 export interface RefreshRequest {
   /** Opaque refresh token */
   refreshToken: string;

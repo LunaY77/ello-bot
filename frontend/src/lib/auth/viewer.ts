@@ -1,38 +1,30 @@
 import type {
-  AgentAccountResponse,
-  AuthMeResponse,
-  UserAccountResponse,
+  CurrentUserResponse,
+  UserSummaryResponse,
 } from '@/api/models/resp';
 
 export const getViewerAccount = (
-  viewer: AuthMeResponse | null | undefined,
-): UserAccountResponse | AgentAccountResponse | null => {
-  return viewer?.user ?? viewer?.agent ?? null;
+  viewer: CurrentUserResponse | null | undefined,
+): UserSummaryResponse | null => {
+  return viewer?.user ?? null;
 };
 
 export const getViewerDisplayName = (
-  viewer: AuthMeResponse | null | undefined,
+  viewer: CurrentUserResponse | null | undefined,
 ): string => {
   return (
-    viewer?.principal.displayName ??
-    getViewerAccount(viewer)?.displayName ??
-    'Ello'
+    getViewerAccount(viewer)?.displayName || viewer?.user?.username || 'Ello'
   );
 };
 
 export const getViewerHandle = (
-  viewer: AuthMeResponse | null | undefined,
+  viewer: CurrentUserResponse | null | undefined,
 ): string => {
-  return (
-    viewer?.user?.username ??
-    viewer?.agent?.code ??
-    viewer?.tenant.slug ??
-    'guest'
-  );
+  return viewer?.user?.username ?? 'guest';
 };
 
 export const getViewerAvatarUrl = (
-  viewer: AuthMeResponse | null | undefined,
+  viewer: CurrentUserResponse | null | undefined,
 ): string => {
-  return viewer?.user?.avatarUrl ?? viewer?.agent?.avatarUrl ?? '';
+  return viewer?.user?.avatarUrl ?? '';
 };

@@ -18,13 +18,15 @@ FastAPI backend service for Ello Bot, a personal LLM application platform.
 
 ```text
 app/
-├── main.py              # FastAPI app, lifespan, bootstrap, health check
-├── core/                # config, db, redis, auth, exceptions, logging, Result
-├── modules/iam/         # auth, tenants, RBAC, ACL, agent management
-├── infra/               # infrastructure
+├── main.py              # FastAPI entrypoint
+├── api/                 # routes, schemas, deps, error mapping
+├── runtime/             # AppRuntime lifecycle and assembly
+├── core/                # config, logging, exceptions, IDs, clock, constants
+├── domain/              # user and session entities/errors
+├── application/         # use-case orchestration services
+├── infra/               # db, cache, observability
 ├── static/              # default avatars and other static assets
-├── tools/scripts.py     # lint/check/gen-openapi
-└── utils/               # auth helpers and security utilities
+└── tools/scripts.py     # lint/check/gen-openapi
 ```
 
 ## Quick Start
@@ -74,6 +76,7 @@ BOOTSTRAP_ADMIN_PASSWORD=change-this-bootstrap-password
 Important notes:
 
 - When bootstrap is enabled outside debug mode, `BOOTSTRAP_ADMIN_PASSWORD` must be set.
+- MVP registration is disabled by default. Enable it explicitly with `AUTH_REGISTRATION_ENABLED=true` if needed.
 
 ### 5. Apply migrations and run the server
 
@@ -89,6 +92,8 @@ make backend-run
 
 - API docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
+- Sessions: `POST /api/sessions/login`, `POST /api/sessions/refresh`, `GET /api/sessions`
+- User: `GET /api/user/me`, `PATCH /api/user/profile`, `PATCH /api/user/settings`
 - Static assets: `http://localhost:8000/static/...`
 
 ## Common Commands
@@ -124,10 +129,11 @@ Integration tests use a dedicated PostgreSQL database on host port `5433` and a 
 
 ## Backend Conventions
 
-- Keep routers thin. HTTP handlers should delegate to `workflow.py`, `commands.py`, or `queries.py`.
-- Use `DbSession`, `RedisDep`, and `CurrentAuthDep` for dependency injection.
-- Return `Result[T]` from APIs and raise `BusinessException` / `AuthException` for failures.
-- Avoid lazy loading. IAM relationships are configured with `lazy="raise"`, so queries must preload the graph they need.
+- Keep routes thin. HTTP handlers should validate schemas, call application services, and return `Result[T]`.
+- Let `AppRuntime` own DB, Redis, and service assembly. FastAPI lifespan should only start and stop the runtime.
+- Keep domain types free of FastAPI and SQLAlchemy imports.
+- Use repositories plus `infra/db/uow.py` for persistence coordination.
+- Raise `BusinessException` / `AuthException` for failures and let the shared API error handlers translate them.
 - Treat `backend/AGENTS.md` as the source of truth for AI-assisted backend changes.
 
 ## Related Docs

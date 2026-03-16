@@ -1,10 +1,6 @@
-"""
-Core Configuration Module
+"""Application configuration for the single-user rewrite."""
 
-Uses pydantic-settings for environment variable management.
-Settings are split into logical sub-classes, each with its own env_prefix.
-Environment variable priority: system environment variables > .env file > default values
-"""
+from __future__ import annotations
 
 from functools import lru_cache
 
@@ -12,104 +8,102 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app import __app_name__, __version__
-from app.infra.ai.config import AISettings
 
 
 class ServerSettings(BaseSettings):
-    """Server configuration — env prefix: SERVER_"""
+    """HTTP server configuration loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="SERVER_", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="SERVER_",
+        extra="ignore",
     )
 
-    HOST: str = Field(default="0.0.0.0", description="Server host")
-    PORT: int = Field(default=8000, description="Server port")
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
 
 
 class DatabaseSettings(BaseSettings):
-    """Database configuration — env prefix: DB_
-
-    Supported dialects:
-    - PostgreSQL (async): postgresql+asyncpg://user:password@localhost/dbname
-    """
+    """Database connectivity settings."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="DB_", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="DB_",
+        extra="ignore",
     )
 
-    URL: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/ello_bot",
-        description="Database connection string",
-    )
+    URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ello_bot"
 
 
 class CacheSettings(BaseSettings):
-    """Redis cache configuration — env prefix: REDIS_"""
+    """Redis connectivity settings."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="REDIS_", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="REDIS_",
+        extra="ignore",
     )
 
-    URL: str = Field(default="redis://localhost:6379/0", description="Redis connection URL")
+    URL: str = "redis://localhost:6379/0"
 
 
 class LogSettings(BaseSettings):
-    """Logging configuration — env prefix: LOG_"""
+    """Application logging configuration."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="LOG_", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="LOG_",
+        extra="ignore",
     )
 
-    LEVEL: str = Field(default="INFO", description="Log level: DEBUG, INFO, WARNING, ERROR")
-    FILE: str = Field(default="logs/app.log", description="Log file path")
-    MAX_SIZE: int = Field(
-        default=10 * 1024 * 1024, description="Maximum log file size in bytes, default 10MB"
-    )
+    LEVEL: str = "INFO"
+    FILE: str = "logs/app.log"
+    MAX_SIZE: int = 10 * 1024 * 1024
 
 
 class OtelSettings(BaseSettings):
-    """OpenTelemetry observability configuration — env prefix: OTEL_"""
+    """Optional OpenTelemetry configuration."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="OTEL_", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="OTEL_",
+        extra="ignore",
     )
 
-    ENABLED: bool = Field(default=False, description="Enable OpenTelemetry instrumentation")
-    SERVICE_NAME: str = Field(default="ello-bot-backend", description="OTel service name")
-    EXPORTER_OTLP_ENDPOINT: str = Field(
-        default="http://localhost:4318", description="OTLP HTTP endpoint"
-    )
-    ENVIRONMENT: str = Field(default="dev", description="Deployment environment tag")
+    ENABLED: bool = False
+    SERVICE_NAME: str = "ello-bot-backend"
+    EXPORTER_OTLP_ENDPOINT: str = "http://localhost:4318"
+    ENVIRONMENT: str = "dev"
 
 
 class BootstrapSettings(BaseSettings):
-    """IAM bootstrap configuration — env prefix: BOOTSTRAP_."""
+    """Bootstrap-admin configuration."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_prefix="BOOTSTRAP_", extra="ignore"
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="BOOTSTRAP_",
+        extra="ignore",
     )
 
-    ENABLED: bool = Field(default=True, description="Enable automatic IAM bootstrap")
-    TENANT_SLUG: str = Field(default="personal", description="Initial tenant slug")
-    TENANT_NAME: str = Field(default="Personal", description="Initial tenant display name")
-    ADMIN_USERNAME: str = Field(default="admin", description="Bootstrap administrator username")
-    ADMIN_PASSWORD: str = Field(
-        default="",
-        description="Bootstrap administrator password; must be set outside debug mode",
-    )
-    ADMIN_DISPLAY_NAME: str = Field(
-        default="System Admin",
-        description="Bootstrap administrator display name",
-    )
+    ENABLED: bool = True
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = ""
+    ADMIN_DISPLAY_NAME: str = "System Admin"
 
     def resolved_admin_password(self, *, debug: bool) -> str:
-        """Resolve the bootstrap administrator password.
+        """Return the configured bootstrap password or a debug-only fallback.
 
         Args:
-            debug: Whether the application is currently running in debug mode.
+            debug: Whether the application is running in debug mode.
 
         Returns:
-            The configured bootstrap administrator password, or a debug-only fallback value.
+            Bootstrap-admin password to apply during initialization.
         """
         if self.ADMIN_PASSWORD:
             return self.ADMIN_PASSWORD
@@ -120,12 +114,23 @@ class BootstrapSettings(BaseSettings):
         )
 
 
-class Settings(BaseSettings):
-    """Top-level application configuration — aggregates all sub-settings.
+class AuthSettings(BaseSettings):
+    """Authentication and session timing configuration."""
 
-    Sub-settings are instantiated via default_factory; each reads its own
-    prefixed env vars independently from the same .env file.
-    """
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="AUTH_",
+        extra="ignore",
+    )
+
+    REGISTRATION_ENABLED: bool = False
+    ACCESS_TOKEN_TTL_SECONDS: int = 30 * 60
+    REFRESH_TOKEN_TTL_DAYS: int = 30
+
+
+class Settings(BaseSettings):
+    """Root application settings composed from the backend subsystems."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -134,55 +139,43 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # ---- App-level (no prefix) ----
     APP_NAME: str = __app_name__
     APP_VERSION: str = __version__
-    DEBUG: bool = Field(default=False, description="Debug mode, should be False in production")
-    CORS_ORIGINS: list[str] = Field(default=["*"], description="Allowed CORS origins")
+    DEBUG: bool = False
+    CORS_ORIGINS: list[str] = Field(default_factory=lambda: ["*"])
 
-    # ---- Sub-settings ----
     server: ServerSettings = Field(default_factory=ServerSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     cache: CacheSettings = Field(default_factory=CacheSettings)
     log: LogSettings = Field(default_factory=LogSettings)
     otel: OtelSettings = Field(default_factory=OtelSettings)
     bootstrap: BootstrapSettings = Field(default_factory=BootstrapSettings)
-    ai: AISettings = Field(default_factory=AISettings)
+    auth: AuthSettings = Field(default_factory=AuthSettings)
 
     @model_validator(mode="after")
-    def validate_security_settings(self) -> "Settings":
-        """Validate security-sensitive settings after loading configuration.
-
-        Args:
-            None
+    def validate_security_settings(self) -> Settings:
+        """Validate bootstrap security requirements after settings load.
 
         Returns:
             The validated settings object.
         """
         if self.DEBUG:
             return self
-
-        # Bootstrap is allowed in production, but only when the initial admin password is explicit.
         if self.bootstrap.ENABLED and not self.bootstrap.ADMIN_PASSWORD:
             raise ValueError(
                 "BOOTSTRAP_ADMIN_PASSWORD must be set when DEBUG is False and bootstrap is enabled"
             )
-
         return self
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return the cached application settings singleton.
-
-    Args:
-        None
+    """Return the cached application settings instance.
 
     Returns:
-        Settings: The cached configuration object for the current process.
+        Process-wide settings object.
     """
     return Settings()
 
 
-# Global configuration instance
 settings = get_settings()

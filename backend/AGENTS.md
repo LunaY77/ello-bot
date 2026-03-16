@@ -12,31 +12,14 @@
 backend/
 ├── app/
 │   ├── __init__.py              # __app_name__, __version__
-│   ├── main.py                  # FastAPI 入口、lifespan、自举、异常注册、健康检查
-│   ├── core/                    # 框架层：配置、数据库、Redis、认证、异常、日志、Result
-│   │   ├── config.py            # Settings（多子配置类）
-│   │   ├── database.py          # Async engine、SessionLocal、DbSession、Base
-│   │   ├── redis.py             # Redis 客户端、RedisKeyDef、RedisDep
-│   │   ├── auth.py              # require_auth / CurrentAuthDep
-│   │   ├── exception.py         # CommonErrorCode、BusinessException、AuthException
-│   │   ├── schema.py            # ApiModel、Result[T]
-│   │   ├── logger.py            # Loguru 配置
-│   │   ├── observability.py     # OpenTelemetry 初始化
-│   │   └── __init__.py          # 公共导出
-│   ├── modules/
-│   │   └── iam/                 # 当前唯一完整业务模块：认证、租户、RBAC、ACL、Agent
-│   │       ├── consts.py        # 业务常量、Redis key、内建角色/权限
-│   │       ├── errors.py        # IamErrorCode
-│   │       ├── model.py         # ORM 模型
-│   │       ├── schemas.py       # 请求/响应 Schema
-│   │       ├── commands.py      # 写操作
-│   │       ├── queries.py       # 读操作
-│   │       ├── workflow.py      # 跨领域编排
-│   │       ├── router.py        # /api/iam/*
-│   │       └── __init__.py      # 模块公共导出
-│   ├── infra/                   # 外部集成预留命名空间
+│   ├── main.py                  # FastAPI 入口，只负责 app 组装
+│   ├── api/                     # HTTP 适配层：routes、schemas、deps、errors
+│   ├── runtime/                 # AppRuntime、容器、lifespan、状态机
+│   ├── core/                    # config、logging、exceptions、ids、clock、json、types、constants
+│   ├── domain/                  # 领域实体、枚举、领域错误
+│   ├── application/             # 用例编排服务
+│   ├── infra/                   # db、cache、observability 等技术实现
 │   ├── tools/                   # 脚本入口（lint/check/gen-openapi）
-│   ├── utils/                   # token、密码哈希等工具函数
 │   └── static/                  # 默认头像等静态资源
 ├── alembic/                     # 数据库迁移
 ├── tests/
@@ -47,50 +30,51 @@ backend/
 └── pyproject.toml               # 依赖、pytest、ruff 配置
 ```
 
-### 模块文件约定
+### 当前切片约定
 
-新增业务模块时，优先沿用当前 `iam` 模块的拆分方式：
-
-| 文件 | 职责 |
-| ---- | ---- |
-| `consts.py` | 常量、RedisKey、内建配置 |
-| `errors.py` | 业务错误码定义 |
-| `model.py` | SQLAlchemy ORM 模型 |
-| `schemas.py` | Pydantic 请求/响应 Schema |
-| `commands.py` | 写操作业务逻辑 |
-| `queries.py` | 读操作业务逻辑 |
-| `workflow.py` | 跨流程编排，按需存在 |
-| `router.py` | FastAPI Router，只处理 HTTP 层 |
-| `__init__.py` | 公共导出 + `__all__` |
-
-禁止回退到旧的 `service/repository` 分层命名。
+- 请求/响应契约统一放在 `app/api/schemas/`，不要在 application 层新增 `dto.py`。
+- 业务切片按 `domain/<bounded-context>/` + `application/<bounded-context>/` 组织。
+- 持久化统一放在 `infra/db/models/`、`infra/db/repositories/`、`infra/db/uow.py`。
+- Redis / observability 等技术能力分别放在 `infra/cache/`、`infra/observability/`。
+- 允许使用 `service/repository/uow` 这套分层命名；不要回退到旧的 `modules/iam` 形态。
 
 ---
 
 ## 2. 分层架构
 
 ```text
-Router -> Workflow / Commands / Queries -> Model / Redis
+api/routes -> application/services -> infra/repositories/uow -> db/cache
+           -> domain/entities/errors
+runtime -> assemble resources and services
 ```
 
 ### 规则
 
-- **Router 层**：只负责请求解析、依赖注入、权限入口检查、`Result` 包装，不写业务逻辑，不直接拼 SQL。
-- **Workflow 层**：处理跨领域编排，适用于注册、登录、刷新令牌、聚合 `/auth/me` 这类流程。
-- **Commands 层**：只负责写操作与状态变更。
-- **Queries 层**：只负责读操作与显式预加载查询。
-- **Model 层**：只定义表结构和关系，不承载业务逻辑。
+- **API 层**：只负责请求解析、依赖注入、权限入口检查、`Result` 包装，不写业务逻辑，不直接拼 SQL。
+- **Application 层**：负责编排完整用例，例如 bootstrap、注册、登录、刷新会话、更新个人设置。
+- **Domain 层**：只放实体、枚举、领域错误，不依赖 FastAPI、SQLAlchemy。
+- **Infra 层**：实现数据库模型、repository、Unit of Work、Redis、observability。
+- **Runtime 层**：持有长生命周期资源，启动时组装服务，停止时统一释放资源。
 
 ```python
-# ✅ 正确：Router 调用 workflow / commands
-@router.post("/auth/login")
-async def login(request: LoginRequest, workflow: IamWorkflowDep):
-    return Result.ok(data=await workflow.login(request.username, request.password))
+# ✅ 正确：route 调用 application service
+@router.post("/api/sessions/login")
+async def login(request: LoginRequest, service: SessionServiceDep):
+    return Result.ok(
+        data=AuthTokenResponse.from_state(
+            await service.login(
+                username=request.username,
+                password=request.password,
+                user_agent="",
+                ip_address="",
+            )
+        )
+    )
 
-# ❌ 错误：Router 直接查库写业务
-@router.post("/auth/login")
-async def login(request: LoginRequest, db: DbSession):
-    user = await db.scalar(select(UserAccount).where(UserAccount.username == request.username))
+# ❌ 错误：route 直接查库写业务
+@router.post("/api/sessions/login")
+async def login(request: LoginRequest, session: AsyncSession):
+    user = await session.scalar(select(UserModel).where(UserModel.username == request.username))
 ```
 
 ---

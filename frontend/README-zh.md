@@ -22,7 +22,7 @@ Ello Bot 的前端使用 React 19 + TypeScript 构建。当前应用是一个基
 ```text
 src/
 ├── app/                  # 应用壳、Provider、route module
-├── api/                  # OpenAPI 生成的模型与 schema
+├── api/                  # OpenAPI 生成的模型、schema、operation contract 与 runtime helper
 ├── features/             # auth、users、iam、chat
 ├── components/           # 通用 UI、布局、通知、错误边界
 ├── lib/                  # api-client、auth、react-query、i18n
@@ -139,7 +139,28 @@ cd backend && uv run gen-openapi
 cd frontend && pnpm run codegen:api
 ```
 
-不要手动修改 `src/api/models/` 和 `src/api/schemas/` 下的生成文件。
+`pnpm run codegen:api` 现在会统一完成下面几步：
+
+- 通过 Orval 生成请求模型、响应模型和请求体 Zod Schema
+- 生成 `src/api/operations/` 下的 operation contract，输出稳定的 `id`、`method`、`path`
+- 统一修正公共 barrel，确保 `Result` 这类后处理产物也能从公开入口导出
+- 在格式化前校验公开入口是否完整
+
+下面这些目录都视为生成物，不要手改：
+
+- `src/api/models/req/`
+- `src/api/models/resp/`
+- `src/api/schemas/`
+- `src/api/operations/`
+
+前端代码应通过这些公共入口消费生成契约，而不是 deep import：
+
+- `@/api/models/req`
+- `@/api/models/resp`
+- `@/api/schemas`
+- `@/api/operations`
+
+手写 feature wrapper 仍然放在 `src/features/**/api` 和 `src/lib/auth`，业务行为也保留在那里，但请求 path / method 必须通过 `@/api/runtime` 组合 generated operation contract 与共享 Axios client。
 
 ## 测试策略
 

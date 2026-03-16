@@ -48,18 +48,6 @@
     --info-soft-bg: rgba(77, 163, 255, 0.14);
     --info-soft-text: #97cbff;
 
-    /* Agent-Specific Tokens */
-    --agent-user-bubble: #151a22;
-    --agent-assistant-bubble: #101726;
-    --agent-tool-bg: #131c2c;
-    --agent-tool-border: rgba(124, 140, 255, 0.2);
-
-    --run-pending: #8a94a6;
-    --run-running: #7c8cff;
-    --run-success: #34c759;
-    --run-failed: #ff5d73;
-    --run-paused: #ffb340;
-
     /* Glass / Material Tokens */
     --glass-bg: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.14);
@@ -143,17 +131,6 @@
     --info: #2563eb;
     --info-soft-bg: rgba(37, 99, 235, 0.1);
     --info-soft-text: #1d4ed8;
-
-    --agent-user-bubble: #f3f5f9;
-    --agent-assistant-bubble: #eef2ff;
-    --agent-tool-bg: #f6f8fc;
-    --agent-tool-border: rgba(109, 124, 255, 0.18);
-
-    --run-pending: #98a2b3;
-    --run-running: #6d7cff;
-    --run-success: #16a34a;
-    --run-failed: #dc2626;
-    --run-paused: #d97706;
 
     --glass-bg: rgba(255, 255, 255, 0.72);
     --glass-border: rgba(255, 255, 255, 0.5);

@@ -18,7 +18,7 @@ export class UserAuthActionImpl {
     this.#set = set;
   }
 
-  /** Persist the current auth session after login, register, refresh, or tenant switch. */
+  /** Persist the current auth session after login, registration, or refresh. */
   setSession = ({
     accessToken,
     refreshToken,

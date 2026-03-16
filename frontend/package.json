@@ -17,7 +17,7 @@
         "test:e2e:ui": "pnpm exec playwright test --ui",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
-        "codegen:api": "orval --config orval.config.ts && node src/api/internal/postprocess-orval.mjs && eslint --fix \"src/api/models/**/*.ts\" \"src/api/schemas/**/*.ts\" && prettier --write \"src/api/models/**/*.ts\" \"src/api/schemas/**/*.ts\"",
+        "codegen:api": "orval --config orval.config.ts && node src/api/internal/generate-operation-contracts.mjs && node src/api/internal/postprocess-orval.mjs && node src/api/internal/verify-generated-api-contracts.mjs && eslint --fix \"src/api/models/**/*.ts\" \"src/api/schemas/**/*.ts\" \"src/api/operations/**/*.ts\" && prettier --write \"src/api/models/**/*.ts\" \"src/api/schemas/**/*.ts\" \"src/api/operations/**/*.ts\"",
         "workflow:i18n": "tsx scripts/i18nWorkflow/index.ts",
         "i18n": "pnpm run workflow:i18n && prettier --write \"locales/**\"",
         "prepare": "uv run pre-commit install --install-hooks || true"

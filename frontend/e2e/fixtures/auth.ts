@@ -44,7 +44,7 @@ export const registerUser = async (
   request: APIRequestContext,
   credentials: Credentials,
 ): Promise<AuthTokenPayload> => {
-  const response = await request.post(`${getApiBaseUrl()}/iam/auth/register`, {
+  const response = await request.post(`${getApiBaseUrl()}/sessions/register`, {
     data: credentials,
   });
 
@@ -58,7 +58,7 @@ export const loginUser = async (
   request: APIRequestContext,
   credentials: Pick<Credentials, 'username' | 'password'>,
 ): Promise<AuthTokenPayload> => {
-  const response = await request.post(`${getApiBaseUrl()}/iam/auth/login`, {
+  const response = await request.post(`${getApiBaseUrl()}/sessions/login`, {
     data: credentials,
   });
 

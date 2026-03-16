@@ -8,7 +8,7 @@ import { flattenActions } from '../utils/flatten-actions';
 import { type UserState, initialState } from './initial-state';
 import { type UserAuthAction, createAuthSlice } from './slices/auth/action';
 
-/** Combined user store type: state + all slice actions */
+/** Combined auth-session store type: state + all slice actions */
 export type UserStore = UserState & UserAuthAction;
 
 type UserStoreAction = UserAuthAction;
@@ -19,7 +19,7 @@ const createStore: StateCreator<UserStore> = (...parameters) => ({
 });
 
 /**
- * User store hook with persisted auth session tokens and shallow equality.
+ * Persisted auth-session store with shallow equality.
  * Use `useUserStore(selector)` in React components.
  */
 export const useUserStore = createWithEqualityFn<UserStore>()(
@@ -35,5 +35,5 @@ export const useUserStore = createWithEqualityFn<UserStore>()(
   shallow,
 );
 
-/** Get user store state outside React components (e.g., in axios interceptors) */
+/** Get auth-session state outside React components (e.g., in API interceptors). */
 export const getUserStoreState = () => useUserStore.getState();

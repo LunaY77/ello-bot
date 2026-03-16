@@ -8,16 +8,19 @@
   "paths": {
     "/health": {
       "get": {
-        "summary": "Health Check",
-        "description": "Report basic database and Redis health information.\n\nArgs:\n    None\n\nReturns:\n    A result payload that reports whether PostgreSQL and Redis are reachable.",
-        "operationId": "health_check_health_get",
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health",
+        "description": "Report database and Redis readiness for the running process.\n\nArgs:\n    runtime: Started application runtime.\n\nReturns:\n    Shared response envelope containing health booleans.",
+        "operationId": "health_health_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result"
+                  "$ref": "#/components/schemas/Result_HealthResponse_"
                 }
               }
             }
@@ -25,14 +28,36 @@
         }
       }
     },
-    "/api/iam/auth/register": {
+    "/api/debug/runtime": {
+      "get": {
+        "tags": [
+          "Debug"
+        ],
+        "summary": "Runtime Status",
+        "description": "Return a lightweight snapshot of runtime state for debugging.\n\nArgs:\n    runtime: Started application runtime.\n\nReturns:\n    Shared response envelope containing runtime debug fields.",
+        "operationId": "runtime_status_api_debug_runtime_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RuntimeDebugResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/register": {
       "post": {
         "tags": [
-          "IAM"
+          "Sessions"
         ],
         "summary": "Register",
-        "description": "Register a human user and return the initial auth session.\n\nArgs:\n    request: The incoming request payload or FastAPI request object.\n    workflow: The IAM workflow service for cross-domain orchestration.\n\nReturns:\n    None",
-        "operationId": "register_api_iam_auth_register_post",
+        "description": "Register a user account and immediately issue session tokens.\n\nArgs:\n    payload: Registration payload validated by the schema layer.\n    request: Incoming HTTP request used for metadata extraction.\n    service: Session application service.\n\nReturns:\n    Shared response envelope containing the new auth tokens.",
+        "operationId": "register_api_sessions_register_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -67,14 +92,14 @@
         }
       }
     },
-    "/api/iam/auth/login": {
+    "/api/sessions/login": {
       "post": {
         "tags": [
-          "IAM"
+          "Sessions"
         ],
         "summary": "Login",
-        "description": "Authenticate a human user and return an auth session.\n\nArgs:\n    request: The incoming request payload or FastAPI request object.\n    workflow: The IAM workflow service for cross-domain orchestration.\n\nReturns:\n    None",
-        "operationId": "login_api_iam_auth_login_post",
+        "description": "Authenticate a user and issue a new pair of opaque tokens.\n\nArgs:\n    payload: Login payload validated by the schema layer.\n    request: Incoming HTTP request used for metadata extraction.\n    service: Session application service.\n\nReturns:\n    Shared response envelope containing the authenticated session state.",
+        "operationId": "login_api_sessions_login_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -109,14 +134,14 @@
         }
       }
     },
-    "/api/iam/auth/refresh": {
+    "/api/sessions/refresh": {
       "post": {
         "tags": [
-          "IAM"
+          "Sessions"
         ],
         "summary": "Refresh",
-        "description": "Refresh an auth session from a refresh token.\n\nArgs:\n    body: The validated request body.\n    workflow: The IAM workflow service for cross-domain orchestration.\n\nReturns:\n    None",
-        "operationId": "refresh_api_iam_auth_refresh_post",
+        "description": "Rotate an existing auth session using the supplied refresh token.\n\nArgs:\n    payload: Refresh payload validated by the schema layer.\n    request: Incoming HTTP request used for metadata extraction.\n    service: Session application service.\n\nReturns:\n    Shared response envelope containing the rotated auth tokens.",
+        "operationId": "refresh_api_sessions_refresh_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -151,14 +176,14 @@
         }
       }
     },
-    "/api/iam/auth/logout": {
+    "/api/sessions/logout": {
       "post": {
         "tags": [
-          "IAM"
+          "Sessions"
         ],
         "summary": "Logout",
-        "description": "Revoke the current access session.\n\nArgs:\n    request: The incoming request payload or FastAPI request object.\n    iam: The IAM command service for write operations.\n    _: Unused authenticated context required by dependency injection.\n\nReturns:\n    None",
-        "operationId": "logout_api_iam_auth_logout_post",
+        "description": "Revoke the current access token and remove its cached snapshot.\n\nArgs:\n    auth: Authenticated request context.\n    service: Session application service.\n\nReturns:\n    Shared success envelope without payload data.",
+        "operationId": "logout_api_sessions_logout_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -173,14 +198,14 @@
         }
       }
     },
-    "/api/iam/auth/logout-all": {
+    "/api/sessions/logout-all": {
       "post": {
         "tags": [
-          "IAM"
+          "Sessions"
         ],
         "summary": "Logout All",
-        "description": "Revoke every active session for the current principal.\n\nArgs:\n    auth: The authenticated request context.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "logout_all_api_iam_auth_logout_all_post",
+        "description": "Revoke all active sessions for the authenticated user.\n\nArgs:\n    auth: Authenticated request context.\n    service: Session application service.\n\nReturns:\n    Shared success envelope without payload data.",
+        "operationId": "logout_all_api_sessions_logout_all_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -195,14 +220,14 @@
         }
       }
     },
-    "/api/iam/auth/sessions": {
+    "/api/sessions/list": {
       "get": {
         "tags": [
-          "IAM"
+          "Sessions"
         ],
         "summary": "List Sessions",
-        "description": "List active sessions for the current principal.\n\nArgs:\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "list_sessions_api_iam_auth_sessions_get",
+        "description": "List active auth sessions for the authenticated user.\n\nArgs:\n    auth: Authenticated request context.\n    service: Session application service.\n\nReturns:\n    Shared response envelope containing active session summaries.",
+        "operationId": "list_sessions_api_sessions_list_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -217,84 +242,21 @@
         }
       }
     },
-    "/api/iam/auth/sessions/{session_id}": {
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Revoke Session",
-        "description": "Revoke one active session owned by the current principal.\n\nArgs:\n    session_id: The auth session identifier.\n    auth: The authenticated request context.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "revoke_session_api_iam_auth_sessions__session_id__delete",
-        "parameters": [
-          {
-            "name": "session_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/auth/switch-tenant": {
+    "/api/user/bootstrap-admin": {
       "post": {
         "tags": [
-          "IAM"
+          "User"
         ],
-        "summary": "Switch Tenant",
-        "description": "Switch the current session into another tenant membership scope.\n\nArgs:\n    body: The validated request body.\n    request: The incoming request payload or FastAPI request object.\n    auth: The authenticated request context.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "switch_tenant_api_iam_auth_switch_tenant_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SwitchTenantRequest"
-              }
-            }
-          },
-          "required": true
-        },
+        "summary": "Bootstrap Admin",
+        "description": "Initialize or repair the bootstrap admin account.\n\nArgs:\n    service: User application service.\n\nReturns:\n    Shared response envelope containing bootstrap-admin state.",
+        "operationId": "bootstrap_admin_api_user_bootstrap_admin_post",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_AuthTokenResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/Result_BootstrapAdminResponse_"
                 }
               }
             }
@@ -302,21 +264,21 @@
         }
       }
     },
-    "/api/iam/auth/me": {
+    "/api/user/get-current-user": {
       "get": {
         "tags": [
-          "IAM"
+          "User"
         ],
-        "summary": "Auth Me",
-        "description": "Return the authenticated principal profile payload.\n\nArgs:\n    auth: The authenticated request context.\n    workflow: The IAM workflow service for cross-domain orchestration.\n\nReturns:\n    None",
-        "operationId": "auth_me_api_iam_auth_me_get",
+        "summary": "Get Current User",
+        "description": "Return the current authenticated user plus settings.\n\nArgs:\n    auth: Authenticated request context.\n    service: User application service.\n\nReturns:\n    Shared response envelope containing the current-user state.",
+        "operationId": "get_current_user_api_user_get_current_user_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_AuthMeResponse_"
+                  "$ref": "#/components/schemas/Result_CurrentUserResponse_"
                 }
               }
             }
@@ -324,76 +286,36 @@
         }
       }
     },
-    "/api/iam/auth/password/reset": {
+    "/api/user/get-profile": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get Profile",
+        "description": "Return the authenticated user's profile summary.\n\nArgs:\n    auth: Authenticated request context.\n    service: User application service.\n\nReturns:\n    Shared response envelope containing the user profile.",
+        "operationId": "get_profile_api_user_get_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_UserSummaryResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/update-profile": {
       "post": {
         "tags": [
-          "IAM"
+          "User"
         ],
-        "summary": "Reset Password",
-        "description": "Reset the current user password.\n\nArgs:\n    request: The incoming request payload or FastAPI request object.\n    auth: The authenticated request context.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "reset_password_api_iam_auth_password_reset_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPasswordRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/users/me": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Me",
-        "description": "Return the current user-account profile.\n\nArgs:\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_me_api_iam_users_me_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_UserAccountResponse_"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Me",
-        "description": "Update the current user-account profile.\n\nArgs:\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_me_api_iam_users_me_patch",
+        "summary": "Update Profile",
+        "description": "Update the authenticated user's profile fields.\n\nArgs:\n    payload: Profile update payload validated by the schema layer.\n    auth: Authenticated request context.\n    service: User application service.\n\nReturns:\n    Shared response envelope containing the updated profile.",
+        "operationId": "update_profile_api_user_update_profile_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -410,7 +332,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_UserAccountResponse_"
+                  "$ref": "#/components/schemas/Result_UserSummaryResponse_"
                 }
               }
             }
@@ -428,19 +350,41 @@
         }
       }
     },
-    "/api/iam/users/me/avatar": {
-      "put": {
+    "/api/user/get-settings": {
+      "get": {
         "tags": [
-          "IAM"
+          "User"
         ],
-        "summary": "Update My Avatar",
-        "description": "Update the current user avatar URL.\n\nArgs:\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_my_avatar_api_iam_users_me_avatar_put",
+        "summary": "Get Settings",
+        "description": "Return the authenticated user's settings.\n\nArgs:\n    auth: Authenticated request context.\n    service: User application service.\n\nReturns:\n    Shared response envelope containing the user's settings.",
+        "operationId": "get_settings_api_user_get_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_UserSettingsResponse_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/update-settings": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update Settings",
+        "description": "Update the authenticated user's settings.\n\nArgs:\n    payload: Settings update payload validated by the schema layer.\n    auth: Authenticated request context.\n    service: User application service.\n\nReturns:\n    Shared response envelope containing the updated settings.",
+        "operationId": "update_settings_api_user_update_settings_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAvatarRequest"
+                "$ref": "#/components/schemas/UpdateUserSettingsRequest"
               }
             }
           },
@@ -452,2189 +396,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Result_UserAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/users": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Users",
-        "description": "List user accounts visible in the requested tenant scope.\n\nArgs:\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    tenant_id: The tenant identifier for the current operation.\n\nReturns:\n    None",
-        "operationId": "list_users_api_iam_users_get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_UserAccountResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/users/{principal_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get User",
-        "description": "Return one user account by principal id.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_user_api_iam_users__principal_id__get",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_UserAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/users/{principal_id}/active": {
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Set User Active",
-        "description": "Activate or deactivate a user principal.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "set_user_active_api_iam_users__principal_id__active_patch",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetActiveRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PrincipalResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/agents": {
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Create Agent",
-        "description": "Create an agent account in the current tenant.\n\nArgs:\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "create_agent_api_iam_agents_post",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAgentRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AgentAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Agents",
-        "description": "List agent accounts visible in the requested tenant scope.\n\nArgs:\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    tenant_id: The tenant identifier for the current operation.\n\nReturns:\n    None",
-        "operationId": "list_agents_api_iam_agents_get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_AgentAccountResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/agents/{principal_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Agent",
-        "description": "Return one agent account by principal id.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_agent_api_iam_agents__principal_id__get",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AgentAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Agent",
-        "description": "Update an agent account profile.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_agent_api_iam_agents__principal_id__patch",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAgentRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AgentAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Agent",
-        "description": "Delete an agent account.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_agent_api_iam_agents__principal_id__delete",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/agents/{principal_id}/avatar": {
-      "put": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Agent Avatar",
-        "description": "Update an agent avatar URL.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_agent_avatar_api_iam_agents__principal_id__avatar_put",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAvatarRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AgentAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/agents/{principal_id}/owner": {
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Change Agent Owner",
-        "description": "Change the human owner of an agent account.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "change_agent_owner_api_iam_agents__principal_id__owner_patch",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChangeAgentOwnerRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AgentAccountResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/agents/{principal_id}/active": {
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Set Agent Active",
-        "description": "Activate or deactivate an agent principal.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "set_agent_active_api_iam_agents__principal_id__active_patch",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetActiveRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PrincipalResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Tenants",
-        "description": "List tenants visible to the current principal.\n\nArgs:\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "list_tenants_api_iam_tenants_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_TenantSummaryResponse__"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Create Tenant",
-        "description": "Create a new tenant owned by the current principal.\n\nArgs:\n    request: The incoming request payload or FastAPI request object.\n    auth: The authenticated request context.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "create_tenant_api_iam_tenants_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTenantRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_TenantSummaryResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Tenant",
-        "description": "Return one visible tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_tenant_api_iam_tenants__tenant_id__get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_TenantSummaryResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Tenant",
-        "description": "Update tenant metadata.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_tenant_api_iam_tenants__tenant_id__patch",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateTenantRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_TenantSummaryResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Tenant",
-        "description": "Delete a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_tenant_api_iam_tenants__tenant_id__delete",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/members": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Members",
-        "description": "List tenant memberships.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "list_members_api_iam_tenants__tenant_id__members_get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_MembershipResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Add Member",
-        "description": "Add a principal to a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "add_member_api_iam_tenants__tenant_id__members_post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMembershipRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_MembershipResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/members/{principal_id}": {
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Member",
-        "description": "Update a tenant membership record.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    principal_id: The principal identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_member_api_iam_tenants__tenant_id__members__principal_id__patch",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMembershipRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_MembershipResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Member",
-        "description": "Remove a principal from a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    principal_id: The principal identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_member_api_iam_tenants__tenant_id__members__principal_id__delete",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/members/{principal_id}/roles/{role_id}": {
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Grant Role",
-        "description": "Grant a tenant role to a principal.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    principal_id: The principal identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "grant_role_api_iam_tenants__tenant_id__members__principal_id__roles__role_id__post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Revoke Role",
-        "description": "Revoke a tenant role from a principal.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    principal_id: The principal identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "revoke_role_api_iam_tenants__tenant_id__members__principal_id__roles__role_id__delete",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/roles": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Roles",
-        "description": "List roles defined in a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "list_roles_api_iam_tenants__tenant_id__roles_get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_RoleResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Create Role",
-        "description": "Create a custom role in a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "create_role_api_iam_tenants__tenant_id__roles_post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateRoleRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_RoleResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/roles/{role_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Role",
-        "description": "Return one tenant role.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_role_api_iam_tenants__tenant_id__roles__role_id__get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_RoleResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Role",
-        "description": "Update a tenant role.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_role_api_iam_tenants__tenant_id__roles__role_id__patch",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateRoleRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_RoleResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Role",
-        "description": "Delete a tenant role.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_role_api_iam_tenants__tenant_id__roles__role_id__delete",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/roles/{role_id}/permissions": {
-      "put": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Replace Role Permissions",
-        "description": "Replace the permission set of a role.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "replace_role_permissions_api_iam_tenants__tenant_id__roles__role_id__permissions_put",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReplaceRolePermissionsRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_RoleResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/roles/{role_id}/permissions/{permission_id}": {
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Add Role Permission",
-        "description": "Attach a permission to a role.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    permission_id: The permission identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "add_role_permission_api_iam_tenants__tenant_id__roles__role_id__permissions__permission_id__post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          },
-          {
-            "name": "permission_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Permission Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Role Permission",
-        "description": "Remove a permission from a role.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    role_id: The role identifier for the current operation.\n    permission_id: The permission identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_role_permission_api_iam_tenants__tenant_id__roles__role_id__permissions__permission_id__delete",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Role Id"
-            }
-          },
-          {
-            "name": "permission_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Permission Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/permissions": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Permissions",
-        "description": "List every permission definition.\n\nArgs:\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "list_permissions_api_iam_permissions_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_PermissionResponse__"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Create Permission",
-        "description": "Create a new permission definition.\n\nArgs:\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "create_permission_api_iam_permissions_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePermissionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PermissionResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/permissions/{permission_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Permission",
-        "description": "Return one permission definition.\n\nArgs:\n    permission_id: The permission identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_permission_api_iam_permissions__permission_id__get",
-        "parameters": [
-          {
-            "name": "permission_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Permission Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PermissionResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Permission",
-        "description": "Update a permission definition.\n\nArgs:\n    permission_id: The permission identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_permission_api_iam_permissions__permission_id__patch",
-        "parameters": [
-          {
-            "name": "permission_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Permission Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePermissionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PermissionResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Permission",
-        "description": "Delete a permission definition.\n\nArgs:\n    permission_id: The permission identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_permission_api_iam_permissions__permission_id__delete",
-        "parameters": [
-          {
-            "name": "permission_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Permission Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/acl": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "List Acl Entries",
-        "description": "List ACL entries for a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    resource_type: The resource type involved in the operation.\n    resource_id: The resource identifier involved in the operation.\n    permission_id: The permission identifier for the current operation.\n\nReturns:\n    None",
-        "operationId": "list_acl_entries_api_iam_tenants__tenant_id__acl_get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "resource_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Resource Type"
-            }
-          },
-          {
-            "name": "resource_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Resource Id"
-            }
-          },
-          {
-            "name": "permission_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Permission Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_AclEntryResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Create Acl Entry",
-        "description": "Create an ACL entry inside a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "create_acl_entry_api_iam_tenants__tenant_id__acl_post",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAclEntryRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AclEntryResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/tenants/{tenant_id}/acl/{acl_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Acl Entry",
-        "description": "Return one ACL entry inside a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    acl_id: The ACL entry identifier.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_acl_entry_api_iam_tenants__tenant_id__acl__acl_id__get",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "acl_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Acl Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AclEntryResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Update Acl Entry",
-        "description": "Update an ACL entry inside a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    acl_id: The ACL entry identifier.\n    body: The validated request body.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "update_acl_entry_api_iam_tenants__tenant_id__acl__acl_id__patch",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "acl_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Acl Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateAclEntryRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_AclEntryResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Delete Acl Entry",
-        "description": "Delete an ACL entry inside a tenant.\n\nArgs:\n    tenant_id: The tenant identifier for the current operation.\n    acl_id: The ACL entry identifier.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n    iam: The IAM command service for write operations.\n\nReturns:\n    None",
-        "operationId": "delete_acl_entry_api_iam_tenants__tenant_id__acl__acl_id__delete",
-        "parameters": [
-          {
-            "name": "tenant_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "name": "acl_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Acl Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_NoneType_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/principals/{principal_id}": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Principal",
-        "description": "Return one principal record.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_principal_api_iam_principals__principal_id__get",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PrincipalResponse_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/principals/{principal_id}/memberships": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Principal Memberships",
-        "description": "List memberships held by a principal.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_principal_memberships_api_iam_principals__principal_id__memberships_get",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_PrincipalMembershipResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/principals/{principal_id}/roles": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Principal Roles",
-        "description": "List roles granted to a principal inside a tenant.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_principal_roles_api_iam_principals__principal_id__roles_get",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          },
-          {
-            "name": "tenant_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_list_PrincipalRoleAssignmentResponse__"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/iam/principals/{principal_id}/permissions": {
-      "get": {
-        "tags": [
-          "IAM"
-        ],
-        "summary": "Get Principal Permissions",
-        "description": "Return the effective permission snapshot for a principal.\n\nArgs:\n    principal_id: The principal identifier for the current operation.\n    tenant_id: The tenant identifier for the current operation.\n    auth: The authenticated request context.\n    queries: The IAM query service for read operations.\n\nReturns:\n    None",
-        "operationId": "get_principal_permissions_api_iam_principals__principal_id__permissions_get",
-        "parameters": [
-          {
-            "name": "principal_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Principal Id"
-            }
-          },
-          {
-            "name": "tenant_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Tenant Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Result_PrincipalPermissionSnapshotResponse_"
+                  "$ref": "#/components/schemas/Result_UserSettingsResponse_"
                 }
               }
             }
@@ -2655,205 +417,13 @@
   },
   "components": {
     "schemas": {
-      "AclEntryResponse": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "tenantId": {
-            "type": "integer",
-            "title": "Tenantid"
-          },
-          "resourceType": {
-            "type": "string",
-            "title": "Resourcetype"
-          },
-          "resourceId": {
-            "type": "integer",
-            "title": "Resourceid"
-          },
-          "permissionId": {
-            "type": "integer",
-            "title": "Permissionid"
-          },
-          "subjectPrincipalId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subjectprincipalid"
-          },
-          "subjectRoleId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subjectroleid"
-          },
-          "effect": {
-            "type": "string",
-            "title": "Effect"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updatedat"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "tenantId",
-          "resourceType",
-          "resourceId",
-          "permissionId",
-          "effect",
-          "createdAt",
-          "updatedAt"
-        ],
-        "title": "AclEntryResponse"
-      },
-      "AgentAccountResponse": {
-        "properties": {
-          "principalId": {
-            "type": "integer",
-            "title": "Principalid"
-          },
-          "ownerPrincipalId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ownerprincipalid"
-          },
-          "code": {
-            "type": "string",
-            "title": "Code"
-          },
-          "avatarUrl": {
-            "type": "string",
-            "title": "Avatarurl",
-            "default": ""
-          },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "default": ""
-          },
-          "displayName": {
-            "type": "string",
-            "title": "Displayname"
-          },
-          "isActive": {
-            "type": "boolean",
-            "title": "Isactive"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updatedat"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "principalId",
-          "code",
-          "displayName",
-          "isActive",
-          "createdAt",
-          "updatedAt"
-        ],
-        "title": "AgentAccountResponse"
-      },
-      "AuthMeResponse": {
-        "properties": {
-          "principal": {
-            "$ref": "#/components/schemas/PrincipalResponse"
-          },
-          "tenant": {
-            "$ref": "#/components/schemas/TenantSummaryResponse"
-          },
-          "user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserAccountResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "agent": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AgentAccountResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "principal",
-          "tenant"
-        ],
-        "title": "AuthMeResponse"
-      },
       "AuthTokenResponse": {
         "properties": {
           "user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserAccountResponse"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Authenticated user account"
+            "$ref": "#/components/schemas/UserSummaryResponse"
           },
-          "agent": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AgentAccountResponse"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Authenticated agent account"
-          },
-          "tenant": {
-            "$ref": "#/components/schemas/TenantSummaryResponse",
-            "description": "Active tenant"
+          "settings": {
+            "$ref": "#/components/schemas/UserSettingsResponse"
           },
           "accessToken": {
             "type": "string",
@@ -2869,247 +439,54 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "tenant",
+          "user",
+          "settings",
           "accessToken",
           "refreshToken"
         ],
-        "title": "AuthTokenResponse"
+        "title": "AuthTokenResponse",
+        "description": "Response body containing user info plus opaque auth tokens."
       },
-      "ChangeAgentOwnerRequest": {
+      "BootstrapAdminResponse": {
         "properties": {
-          "ownerPrincipalId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ownerprincipalid"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "ChangeAgentOwnerRequest"
-      },
-      "CreateAclEntryRequest": {
-        "properties": {
-          "resourceType": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 1,
-            "title": "Resourcetype"
+          "initialized": {
+            "type": "boolean",
+            "title": "Initialized"
           },
-          "resourceId": {
-            "type": "integer",
-            "title": "Resourceid"
+          "user": {
+            "$ref": "#/components/schemas/UserSummaryResponse"
           },
-          "permissionId": {
-            "type": "integer",
-            "title": "Permissionid"
-          },
-          "subjectPrincipalId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subjectprincipalid"
-          },
-          "subjectRoleId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subjectroleid"
-          },
-          "effect": {
-            "type": "string",
-            "maxLength": 16,
-            "minLength": 1,
-            "title": "Effect"
+          "settings": {
+            "$ref": "#/components/schemas/UserSettingsResponse"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "resourceType",
-          "resourceId",
-          "permissionId",
-          "effect"
+          "initialized",
+          "user",
+          "settings"
         ],
-        "title": "CreateAclEntryRequest"
+        "title": "BootstrapAdminResponse",
+        "description": "Response body for bootstrap-admin initialization."
       },
-      "CreateAgentRequest": {
+      "CurrentUserResponse": {
         "properties": {
-          "code": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 2,
-            "title": "Code",
-            "description": "Stable unique agent code"
+          "user": {
+            "$ref": "#/components/schemas/UserSummaryResponse"
           },
-          "displayName": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 1,
-            "title": "Displayname",
-            "description": "Display name"
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 4000,
-            "title": "Description",
-            "default": ""
-          },
-          "avatarUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avatarurl"
-          },
-          "ownerPrincipalId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ownerprincipalid"
+          "settings": {
+            "$ref": "#/components/schemas/UserSettingsResponse"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "code",
-          "displayName"
+          "user",
+          "settings"
         ],
-        "title": "CreateAgentRequest"
-      },
-      "CreateMembershipRequest": {
-        "properties": {
-          "principalId": {
-            "type": "integer",
-            "title": "Principalid"
-          },
-          "status": {
-            "type": "string",
-            "maxLength": 32,
-            "minLength": 1,
-            "title": "Status",
-            "default": "active"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "principalId"
-        ],
-        "title": "CreateMembershipRequest"
-      },
-      "CreatePermissionRequest": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 3,
-            "title": "Code"
-          },
-          "resourceType": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 1,
-            "title": "Resourcetype"
-          },
-          "action": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 1,
-            "title": "Action"
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Description",
-            "default": ""
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "code",
-          "resourceType",
-          "action"
-        ],
-        "title": "CreatePermissionRequest"
-      },
-      "CreateRoleRequest": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 2,
-            "title": "Code"
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 1,
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Description",
-            "default": ""
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "code",
-          "name"
-        ],
-        "title": "CreateRoleRequest"
-      },
-      "CreateTenantRequest": {
-        "properties": {
-          "slug": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 2,
-            "title": "Slug",
-            "description": "Tenant slug"
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 1,
-            "title": "Name"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "slug",
-          "name"
-        ],
-        "title": "CreateTenantRequest"
+        "title": "CurrentUserResponse",
+        "description": "Response body for the authenticated user's combined state."
       },
       "HTTPValidationError": {
         "properties": {
@@ -3124,27 +501,39 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HealthResponse": {
+        "properties": {
+          "db": {
+            "type": "boolean",
+            "title": "Db"
+          },
+          "redis": {
+            "type": "boolean",
+            "title": "Redis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "db",
+          "redis"
+        ],
+        "title": "HealthResponse",
+        "description": "Readiness details for the health endpoint."
+      },
       "LoginRequest": {
         "properties": {
           "username": {
             "type": "string",
-            "maxLength": 20,
+            "maxLength": 32,
             "minLength": 3,
-            "title": "Username",
-            "description": "Username",
-            "examples": [
-              "john_doe"
-            ]
+            "title": "Username"
           },
           "password": {
             "type": "string",
             "maxLength": 100,
             "minLength": 6,
-            "title": "Password",
-            "description": "Password",
-            "examples": [
-              "password123"
-            ]
+            "title": "Password"
           }
         },
         "additionalProperties": false,
@@ -3153,202 +542,8 @@
           "username",
           "password"
         ],
-        "title": "LoginRequest"
-      },
-      "MembershipResponse": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "tenantId": {
-            "type": "integer",
-            "title": "Tenantid"
-          },
-          "principalId": {
-            "type": "integer",
-            "title": "Principalid"
-          },
-          "status": {
-            "type": "string",
-            "title": "Status"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updatedat"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "tenantId",
-          "principalId",
-          "status",
-          "createdAt",
-          "updatedAt"
-        ],
-        "title": "MembershipResponse"
-      },
-      "PermissionResponse": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "code": {
-            "type": "string",
-            "title": "Code"
-          },
-          "resourceType": {
-            "type": "string",
-            "title": "Resourcetype"
-          },
-          "action": {
-            "type": "string",
-            "title": "Action"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updatedat"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "code",
-          "resourceType",
-          "action",
-          "description",
-          "createdAt",
-          "updatedAt"
-        ],
-        "title": "PermissionResponse"
-      },
-      "PrincipalMembershipResponse": {
-        "properties": {
-          "membership": {
-            "$ref": "#/components/schemas/MembershipResponse"
-          },
-          "tenant": {
-            "$ref": "#/components/schemas/TenantSummaryResponse"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "membership",
-          "tenant"
-        ],
-        "title": "PrincipalMembershipResponse"
-      },
-      "PrincipalPermissionSnapshotResponse": {
-        "properties": {
-          "tenantId": {
-            "type": "integer",
-            "title": "Tenantid"
-          },
-          "principalId": {
-            "type": "integer",
-            "title": "Principalid"
-          },
-          "permissionCodes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Permissioncodes"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "tenantId",
-          "principalId",
-          "permissionCodes"
-        ],
-        "title": "PrincipalPermissionSnapshotResponse"
-      },
-      "PrincipalResponse": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "principalType": {
-            "type": "string",
-            "title": "Principaltype"
-          },
-          "displayName": {
-            "type": "string",
-            "title": "Displayname"
-          },
-          "isActive": {
-            "type": "boolean",
-            "title": "Isactive"
-          },
-          "sessionVersion": {
-            "type": "integer",
-            "title": "Sessionversion"
-          },
-          "authzVersion": {
-            "type": "integer",
-            "title": "Authzversion"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updatedat"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "principalType",
-          "displayName",
-          "isActive",
-          "sessionVersion",
-          "authzVersion",
-          "createdAt",
-          "updatedAt"
-        ],
-        "title": "PrincipalResponse"
-      },
-      "PrincipalRoleAssignmentResponse": {
-        "properties": {
-          "role": {
-            "$ref": "#/components/schemas/RoleResponse"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "role"
-        ],
-        "title": "PrincipalRoleAssignmentResponse"
+        "title": "LoginRequest",
+        "description": "Request body for username/password login."
       },
       "RefreshRequest": {
         "properties": {
@@ -3363,29 +558,22 @@
         "required": [
           "refreshToken"
         ],
-        "title": "RefreshRequest"
+        "title": "RefreshRequest",
+        "description": "Request body for refresh-token rotation."
       },
       "RegisterRequest": {
         "properties": {
           "username": {
             "type": "string",
-            "maxLength": 20,
+            "maxLength": 32,
             "minLength": 3,
-            "title": "Username",
-            "description": "Username",
-            "examples": [
-              "john_doe"
-            ]
+            "title": "Username"
           },
           "password": {
             "type": "string",
             "maxLength": 100,
             "minLength": 6,
-            "title": "Password",
-            "description": "Password",
-            "examples": [
-              "password123"
-            ]
+            "title": "Password"
           },
           "displayName": {
             "anyOf": [
@@ -3398,8 +586,7 @@
                 "type": "null"
               }
             ],
-            "title": "Displayname",
-            "description": "Display name"
+            "title": "Displayname"
           }
         },
         "additionalProperties": false,
@@ -3408,169 +595,8 @@
           "username",
           "password"
         ],
-        "title": "RegisterRequest"
-      },
-      "ReplaceRolePermissionsRequest": {
-        "properties": {
-          "permissionIds": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Permissionids"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "ReplaceRolePermissionsRequest"
-      },
-      "ResetPasswordRequest": {
-        "properties": {
-          "newPassword": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 6,
-            "title": "Newpassword",
-            "description": "New password",
-            "examples": [
-              "newpassword123"
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "newPassword"
-        ],
-        "title": "ResetPasswordRequest"
-      },
-      "Result": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {},
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result",
-        "description": "Result wrapper for service layer operations\n\nEncapsulates success/failure of an operation along with data or error information.\n\nAttributes:\n    success: Indicates if the operation was successful\n    data: The result data if successful, otherwise None\n    code: Error code if failed, \"0\" if successful\n    message: Error message if failed, \"Success\" if successful"
-      },
-      "Result_AclEntryResponse_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AclEntryResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[AclEntryResponse]"
-      },
-      "Result_AgentAccountResponse_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AgentAccountResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[AgentAccountResponse]"
-      },
-      "Result_AuthMeResponse_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthMeResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[AuthMeResponse]"
+        "title": "RegisterRequest",
+        "description": "Request body for user self-registration."
       },
       "Result_AuthTokenResponse_": {
         "properties": {
@@ -3604,7 +630,7 @@
         "type": "object",
         "title": "Result[AuthTokenResponse]"
       },
-      "Result_MembershipResponse_": {
+      "Result_BootstrapAdminResponse_": {
         "properties": {
           "code": {
             "type": "string",
@@ -3619,7 +645,7 @@
           "data": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/MembershipResponse"
+                "$ref": "#/components/schemas/BootstrapAdminResponse"
               },
               {
                 "type": "null"
@@ -3634,7 +660,71 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "Result[MembershipResponse]"
+        "title": "Result[BootstrapAdminResponse]"
+      },
+      "Result_CurrentUserResponse_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CurrentUserResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Result[CurrentUserResponse]"
+      },
+      "Result_HealthResponse_": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "default": "0"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HealthResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Result[HealthResponse]"
       },
       "Result_NoneType_": {
         "properties": {
@@ -3662,7 +752,7 @@
         "type": "object",
         "title": "Result[NoneType]"
       },
-      "Result_PermissionResponse_": {
+      "Result_RuntimeDebugResponse_": {
         "properties": {
           "code": {
             "type": "string",
@@ -3677,7 +767,7 @@
           "data": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/PermissionResponse"
+                "$ref": "#/components/schemas/RuntimeDebugResponse"
               },
               {
                 "type": "null"
@@ -3692,9 +782,9 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "Result[PermissionResponse]"
+        "title": "Result[RuntimeDebugResponse]"
       },
-      "Result_PrincipalPermissionSnapshotResponse_": {
+      "Result_UserSettingsResponse_": {
         "properties": {
           "code": {
             "type": "string",
@@ -3709,7 +799,7 @@
           "data": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/PrincipalPermissionSnapshotResponse"
+                "$ref": "#/components/schemas/UserSettingsResponse"
               },
               {
                 "type": "null"
@@ -3724,9 +814,9 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "Result[PrincipalPermissionSnapshotResponse]"
+        "title": "Result[UserSettingsResponse]"
       },
-      "Result_PrincipalResponse_": {
+      "Result_UserSummaryResponse_": {
         "properties": {
           "code": {
             "type": "string",
@@ -3741,7 +831,7 @@
           "data": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/PrincipalResponse"
+                "$ref": "#/components/schemas/UserSummaryResponse"
               },
               {
                 "type": "null"
@@ -3756,355 +846,7 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "Result[PrincipalResponse]"
-      },
-      "Result_RoleResponse_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RoleResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[RoleResponse]"
-      },
-      "Result_TenantSummaryResponse_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TenantSummaryResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[TenantSummaryResponse]"
-      },
-      "Result_UserAccountResponse_": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserAccountResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[UserAccountResponse]"
-      },
-      "Result_list_AclEntryResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/AclEntryResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[AclEntryResponse]]"
-      },
-      "Result_list_AgentAccountResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/AgentAccountResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[AgentAccountResponse]]"
-      },
-      "Result_list_MembershipResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/MembershipResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[MembershipResponse]]"
-      },
-      "Result_list_PermissionResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/PermissionResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[PermissionResponse]]"
-      },
-      "Result_list_PrincipalMembershipResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/PrincipalMembershipResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[PrincipalMembershipResponse]]"
-      },
-      "Result_list_PrincipalRoleAssignmentResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/PrincipalRoleAssignmentResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[PrincipalRoleAssignmentResponse]]"
-      },
-      "Result_list_RoleResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/RoleResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[RoleResponse]]"
+        "title": "Result[UserSummaryResponse]"
       },
       "Result_list_SessionInfoResponse__": {
         "properties": {
@@ -4142,519 +884,89 @@
         "type": "object",
         "title": "Result[list[SessionInfoResponse]]"
       },
-      "Result_list_TenantSummaryResponse__": {
+      "RuntimeDebugResponse": {
         "properties": {
-          "code": {
+          "state": {
             "type": "string",
-            "title": "Code",
-            "default": "0"
+            "title": "State"
           },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/TenantSummaryResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
+          "debug": {
             "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[TenantSummaryResponse]]"
-      },
-      "Result_list_UserAccountResponse__": {
-        "properties": {
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "default": "0"
+            "title": "Debug"
           },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "default": "Success"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/UserAccountResponse"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "success": {
+          "bootstrapEnabled": {
             "type": "boolean",
-            "title": "Success",
-            "default": true
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "Result[list[UserAccountResponse]]"
-      },
-      "RoleResponse": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
+            "title": "Bootstrapenabled"
           },
-          "tenantId": {
-            "type": "integer",
-            "title": "Tenantid"
-          },
-          "code": {
-            "type": "string",
-            "title": "Code"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "isBuiltin": {
+          "dbReady": {
             "type": "boolean",
-            "title": "Isbuiltin"
+            "title": "Dbready"
           },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Createdat"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updatedat"
-          },
-          "permissions": {
-            "items": {
-              "$ref": "#/components/schemas/PermissionResponse"
-            },
-            "type": "array",
-            "title": "Permissions"
+          "redisReady": {
+            "type": "boolean",
+            "title": "Redisready"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "tenantId",
-          "code",
-          "name",
-          "description",
-          "isBuiltin",
-          "createdAt",
-          "updatedAt"
+          "state",
+          "debug",
+          "bootstrapEnabled",
+          "dbReady",
+          "redisReady"
         ],
-        "title": "RoleResponse"
+        "title": "RuntimeDebugResponse",
+        "description": "Runtime state snapshot returned by the debug endpoint."
       },
       "SessionInfoResponse": {
         "properties": {
           "id": {
             "type": "integer",
-            "title": "Id",
-            "description": "Session id"
-          },
-          "tenantId": {
-            "type": "integer",
-            "title": "Tenantid",
-            "description": "Tenant id"
+            "title": "Id"
           },
           "userAgent": {
             "type": "string",
-            "title": "Useragent",
-            "description": "Client User-Agent",
-            "default": ""
+            "title": "Useragent"
           },
           "ipAddress": {
             "type": "string",
-            "title": "Ipaddress",
-            "description": "Client IP address",
-            "default": ""
+            "title": "Ipaddress"
           },
           "expiresAt": {
             "type": "string",
-            "title": "Expiresat",
-            "description": "Session expiration time (ISO 8601)"
+            "format": "date-time",
+            "title": "Expiresat"
           },
           "lastSeenAt": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Lastseenat",
-            "description": "Last request time (ISO 8601)"
+            "title": "Lastseenat"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
-          "tenantId",
-          "expiresAt"
+          "userAgent",
+          "ipAddress",
+          "expiresAt",
+          "createdAt"
         ],
-        "title": "SessionInfoResponse"
-      },
-      "SetActiveRequest": {
-        "properties": {
-          "isActive": {
-            "type": "boolean",
-            "title": "Isactive",
-            "description": "Whether the principal is active"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "isActive"
-        ],
-        "title": "SetActiveRequest"
-      },
-      "SwitchTenantRequest": {
-        "properties": {
-          "tenantId": {
-            "type": "integer",
-            "title": "Tenantid",
-            "description": "Target tenant id"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "tenantId"
-        ],
-        "title": "SwitchTenantRequest"
-      },
-      "TenantSummaryResponse": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "slug": {
-            "type": "string",
-            "title": "Slug"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "isActive": {
-            "type": "boolean",
-            "title": "Isactive"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "id",
-          "slug",
-          "name",
-          "isActive"
-        ],
-        "title": "TenantSummaryResponse"
-      },
-      "UpdateAclEntryRequest": {
-        "properties": {
-          "permissionId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Permissionid"
-          },
-          "subjectPrincipalId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subjectprincipalid"
-          },
-          "subjectRoleId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subjectroleid"
-          },
-          "effect": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 16,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Effect"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "UpdateAclEntryRequest"
-      },
-      "UpdateAgentRequest": {
-        "properties": {
-          "displayName": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Displayname"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 4000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "avatarUrl": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avatarurl"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "UpdateAgentRequest"
-      },
-      "UpdateAvatarRequest": {
-        "properties": {
-          "avatarUrl": {
-            "type": "string",
-            "title": "Avatarurl",
-            "description": "Avatar URL"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "avatarUrl"
-        ],
-        "title": "UpdateAvatarRequest"
-      },
-      "UpdateMembershipRequest": {
-        "properties": {
-          "status": {
-            "type": "string",
-            "maxLength": 32,
-            "minLength": 1,
-            "title": "Status"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "status"
-        ],
-        "title": "UpdateMembershipRequest"
-      },
-      "UpdatePermissionRequest": {
-        "properties": {
-          "code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128,
-                "minLength": 3
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code"
-          },
-          "resourceType": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 64,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Resourcetype"
-          },
-          "action": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 64,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Action"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "UpdatePermissionRequest"
-      },
-      "UpdateRoleRequest": {
-        "properties": {
-          "code": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 64,
-                "minLength": 2
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "UpdateRoleRequest"
-      },
-      "UpdateTenantRequest": {
-        "properties": {
-          "slug": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 64,
-                "minLength": 2
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Slug"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128,
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "isActive": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Isactive"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "UpdateTenantRequest"
+        "title": "SessionInfoResponse",
+        "description": "Serialized view of an active auth session."
       },
       "UpdateUserProfileRequest": {
         "properties": {
@@ -4683,30 +995,6 @@
             ],
             "title": "Bio"
           },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 32
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "dateOfBirth": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dateofbirth"
-          },
           "timezone": {
             "anyOf": [
               {
@@ -4723,50 +1011,119 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "UpdateUserProfileRequest"
+        "title": "UpdateUserProfileRequest",
+        "description": "Request body for profile updates."
       },
-      "UserAccountResponse": {
+      "UpdateUserSettingsRequest": {
         "properties": {
-          "principalId": {
+          "locale": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "systemPrompt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Systemprompt"
+          },
+          "defaultModel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Defaultmodel"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UpdateUserSettingsRequest",
+        "description": "Request body for user-settings updates."
+      },
+      "UserSettingsResponse": {
+        "properties": {
+          "locale": {
+            "type": "string",
+            "title": "Locale"
+          },
+          "theme": {
+            "type": "string",
+            "title": "Theme"
+          },
+          "systemPrompt": {
+            "type": "string",
+            "title": "Systemprompt"
+          },
+          "defaultModel": {
+            "type": "string",
+            "title": "Defaultmodel"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "locale",
+          "theme",
+          "systemPrompt",
+          "defaultModel"
+        ],
+        "title": "UserSettingsResponse",
+        "description": "Serialized view of user preference settings."
+      },
+      "UserSummaryResponse": {
+        "properties": {
+          "id": {
             "type": "integer",
-            "title": "Principalid"
+            "title": "Id"
           },
           "username": {
             "type": "string",
             "title": "Username"
           },
+          "displayName": {
+            "type": "string",
+            "title": "Displayname"
+          },
           "avatarUrl": {
             "type": "string",
-            "title": "Avatarurl",
-            "default": ""
+            "title": "Avatarurl"
           },
           "bio": {
             "type": "string",
-            "title": "Bio",
-            "default": ""
-          },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "dateOfBirth": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dateofbirth"
+            "title": "Bio"
           },
           "timezone": {
             "anyOf": [
@@ -4778,10 +1135,6 @@
               }
             ],
             "title": "Timezone"
-          },
-          "displayName": {
-            "type": "string",
-            "title": "Displayname"
           },
           "isActive": {
             "type": "boolean",
@@ -4801,14 +1154,17 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "principalId",
+          "id",
           "username",
           "displayName",
+          "avatarUrl",
+          "bio",
           "isActive",
           "createdAt",
           "updatedAt"
         ],
-        "title": "UserAccountResponse"
+        "title": "UserSummaryResponse",
+        "description": "Serialized view of a user profile."
       },
       "ValidationError": {
         "properties": {

@@ -26,12 +26,6 @@ export default defineConfig({
             },
             namingConvention: "kebab-case",
             clean: true,
-            override: {
-                mutator: {
-                    path: "src/api/internal/case-fetch.ts",
-                    name: "customFetch",
-                },
-            },
         },
     },
 
@@ -54,12 +48,6 @@ export default defineConfig({
             },
             namingConvention: "kebab-case",
             clean: true,
-            override: {
-                mutator: {
-                    path: "src/api/internal/case-fetch.ts",
-                    name: "customFetch",
-                },
-            },
         },
     },
 
@@ -83,10 +71,6 @@ export default defineConfig({
             namingConvention: "kebab-case",
             clean: true,
             override: {
-                mutator: {
-                    path: "src/api/internal/case-fetch.ts",
-                    name: "customFetch",
-                },
                 components: {
                     schemas: {
                         suffix: "Schema", // ResetPasswordRequest -> ResetPasswordRequestSchema

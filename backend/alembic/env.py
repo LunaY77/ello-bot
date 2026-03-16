@@ -10,9 +10,10 @@ from alembic import context
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import app.modules.iam.model  # noqa: F401
+import app.infra.db.models.session  # noqa: F401
+import app.infra.db.models.user  # noqa: F401
 from app.core.config import settings
-from app.core.database import Base
+from app.infra.db.base import Base
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.db.URL)

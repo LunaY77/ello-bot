@@ -16,9 +16,7 @@ setup('authenticate', async ({ page, request }) => {
   await persistAuthSession(page, session);
   await page.goto('/app');
 
-  await expect(
-    page.getByRole('heading', { name: 'What should the agent do next?' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
 
   const persistedSession = await page.evaluate((storageKey) => {

@@ -14,9 +14,9 @@ const LandingRoute = () => {
 
   const handleStart = () => {
     if (user) {
-      navigate(paths.app.dashboard.getHref());
+      navigate(paths.app.overview.getHref());
     } else {
-      navigate(paths.auth.login.getHref());
+      navigate(paths.auth.register.getHref());
     }
   };
 
@@ -48,7 +48,13 @@ const LandingRoute = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => navigate(paths.auth.login.getHref())}
+                  onClick={() =>
+                    navigate(
+                      user
+                        ? paths.app.profile.getHref()
+                        : paths.auth.login.getHref(),
+                    )
+                  }
                   className="h-12 rounded-sm border-border-default bg-surface-2 px-6 text-base"
                 >
                   {user ? t('landing.viewProfile') : t('landing.login')}
@@ -71,9 +77,9 @@ const LandingRoute = () => {
                   description={t('landing.panel.authDescription')}
                 />
                 <Panel
-                  eyebrow={t('landing.panel.tenants')}
-                  title={t('landing.panel.tenantsTitle')}
-                  description={t('landing.panel.tenantsDescription')}
+                  eyebrow={t('landing.panel.settings')}
+                  title={t('landing.panel.settingsTitle')}
+                  description={t('landing.panel.settingsDescription')}
                 />
                 <Panel
                   eyebrow={t('landing.panel.profile')}

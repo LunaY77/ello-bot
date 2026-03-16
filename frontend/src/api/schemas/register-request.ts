@@ -8,28 +8,27 @@
 import { z as zod } from 'zod';
 
 export const registerRequestSchemaUsernameMin = 3;
-export const registerRequestSchemaUsernameMax = 20;
+export const registerRequestSchemaUsernameMax = 32;
 
 export const registerRequestSchemaPasswordMin = 6;
 export const registerRequestSchemaPasswordMax = 100;
 
 export const registerRequestSchemaDisplayNameMax = 128;
 
-export const RegisterRequestSchema = zod.object({
-  username: zod
-    .string()
-    .min(registerRequestSchemaUsernameMin)
-    .max(registerRequestSchemaUsernameMax)
-    .describe('Username'),
-  password: zod
-    .string()
-    .min(registerRequestSchemaPasswordMin)
-    .max(registerRequestSchemaPasswordMax)
-    .describe('Password'),
-  displayName: zod
-    .string()
-    .min(1)
-    .max(registerRequestSchemaDisplayNameMax)
-    .nullish()
-    .describe('Display name'),
-});
+export const RegisterRequestSchema = zod
+  .object({
+    username: zod
+      .string()
+      .min(registerRequestSchemaUsernameMin)
+      .max(registerRequestSchemaUsernameMax),
+    password: zod
+      .string()
+      .min(registerRequestSchemaPasswordMin)
+      .max(registerRequestSchemaPasswordMax),
+    displayName: zod
+      .string()
+      .min(1)
+      .max(registerRequestSchemaDisplayNameMax)
+      .nullish(),
+  })
+  .describe('Request body for user self-registration.');

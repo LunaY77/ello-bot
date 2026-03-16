@@ -6,15 +6,16 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Request body for username/password login.
+ */
 export interface LoginRequest {
   /**
-   * Username
    * @minLength 3
-   * @maxLength 20
+   * @maxLength 32
    */
   username: string;
   /**
-   * Password
    * @minLength 6
    * @maxLength 100
    */

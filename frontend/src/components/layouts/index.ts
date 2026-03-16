@@ -1,3 +1,3 @@
 export * from './AuthLayout';
 export * from './ContentLayout';
-export * from './DashboardLayout';
+export * from './AppShellLayout';

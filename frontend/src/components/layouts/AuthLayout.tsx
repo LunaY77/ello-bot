@@ -28,7 +28,7 @@ export const AuthLayout = ({ children, title, description }: LayoutProps) => {
   // Redirect authenticated user to dashboard
   useEffect(() => {
     if (user.data) {
-      navigate(redirectTo || paths.app.dashboard.getHref(), {
+      navigate(redirectTo || paths.app.overview.getHref(), {
         replace: true,
       });
     }

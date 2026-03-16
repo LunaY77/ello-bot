@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { paths } from '@/config/paths';
-import { RegisterForm } from '@/features/iam';
+import { RegisterForm } from '@/features/auth';
 
 const RegisterRoute = () => {
   const { t } = useTranslation('auth');
@@ -19,7 +19,7 @@ const RegisterRoute = () => {
       <RegisterForm
         onSuccess={() => {
           navigate(
-            `${redirectTo ? `${redirectTo}` : paths.app.dashboard.getHref()}`,
+            `${redirectTo ? `${redirectTo}` : paths.app.overview.getHref()}`,
             { replace: true },
           );
         }}

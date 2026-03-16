@@ -141,7 +141,7 @@ make help
 | **组合**                       |                                              |
 | `make lint`                    | Lint + 格式化前后端代码                      |
 | `make check`                   | 检查前后端代码                               |
-| `make sync-api`                | 生成 OpenAPI 规范并同步前端客户端代码        |
+| `make sync-api`                | 生成 OpenAPI 规范并同步前端 API 契约         |
 
 ## License
 

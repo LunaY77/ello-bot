@@ -1,11 +1,19 @@
-import { api } from '../api-client';
-
 import type { LoginRequest, RegisterRequest } from '@/api/models/req';
-import type { AuthMeResponse, AuthTokenResponse } from '@/api/models/resp';
+import type { AuthTokenResponse, CurrentUserResponse } from '@/api/models/resp';
+import { sessionsOperations, userOperations } from '@/api/operations';
+import { requestApiOperation } from '@/lib/api-client';
 import i18n from '@/lib/i18n';
 import { getUserStoreState } from '@/store/user';
 
 export const AUTHENTICATED_USER_QUERY_KEY = ['authenticated-user'] as const;
+
+const toCurrentUser = ({
+  user,
+  settings,
+}: AuthTokenResponse): CurrentUserResponse => ({
+  user,
+  settings,
+});
 
 /**
  * Fetches the current user's information from the backend API.
@@ -13,26 +21,25 @@ export const AUTHENTICATED_USER_QUERY_KEY = ['authenticated-user'] as const;
  *
  * @returns A promise that resolves to the user info or null if not authenticated.
  */
-export const fetchCurrentViewer = async (): Promise<AuthMeResponse | null> => {
-  const { accessToken, refreshToken } = getUserStoreState();
-  if (!accessToken && !refreshToken) return null;
+export const fetchCurrentViewer =
+  async (): Promise<CurrentUserResponse | null> => {
+    const { accessToken, refreshToken } = getUserStoreState();
+    if (!accessToken && !refreshToken) return null;
 
-  return await api.get('/iam/auth/me');
-};
+    return await requestApiOperation(userOperations.getCurrentUser);
+  };
 
 /**
- * Store a freshly issued auth session and resolve the current viewer snapshot.
+ * Store a freshly issued auth session and return the normalized current-user snapshot.
  */
-const persistSessionAndGetViewer = async (
-  session: AuthTokenResponse,
-): Promise<AuthMeResponse> => {
+const persistSession = (session: AuthTokenResponse): CurrentUserResponse => {
   getUserStoreState().setSession({
     accessToken: session.accessToken,
     refreshToken: session.refreshToken,
   });
 
-  const viewer = await fetchCurrentViewer();
-  if (!viewer) {
+  const viewer = toCurrentUser(session);
+  if (!viewer.user) {
     throw new Error(i18n.t('restoreFailure', { ns: 'auth' }));
   }
 
@@ -45,9 +52,11 @@ const persistSessionAndGetViewer = async (
  * @param data - Login credentials (username and password)
  * @returns The authenticated viewer snapshot.
  */
-const login = async (data: LoginRequest): Promise<AuthMeResponse> => {
-  const response: AuthTokenResponse = await api.post('/iam/auth/login', data);
-  return await persistSessionAndGetViewer(response);
+const login = async (data: LoginRequest): Promise<CurrentUserResponse> => {
+  const response = await requestApiOperation(sessionsOperations.login, {
+    data,
+  });
+  return persistSession(response);
 };
 
 /**
@@ -56,12 +65,13 @@ const login = async (data: LoginRequest): Promise<AuthMeResponse> => {
  * @param data - Registration data (username and password)
  * @returns The authenticated viewer snapshot.
  */
-const register = async (data: RegisterRequest): Promise<AuthMeResponse> => {
-  const response: AuthTokenResponse = await api.post(
-    '/iam/auth/register',
+const register = async (
+  data: RegisterRequest,
+): Promise<CurrentUserResponse> => {
+  const response = await requestApiOperation(sessionsOperations.register, {
     data,
-  );
-  return await persistSessionAndGetViewer(response);
+  });
+  return persistSession(response);
 };
 
 /**
@@ -69,7 +79,7 @@ const register = async (data: RegisterRequest): Promise<AuthMeResponse> => {
  */
 const logout = async (): Promise<void> => {
   try {
-    await api.post('/iam/auth/logout');
+    await requestApiOperation(sessionsOperations.logout);
   } finally {
     getUserStoreState().clearSession();
   }

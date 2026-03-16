@@ -1,18 +1,15 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-const TMP_DIR = path.resolve('src/api/.orval');
-const SCHEMAS_DIR = path.resolve('src/api/schemas');
-const MODELS_RESP_DIR = path.resolve('src/api/models/resp');
-
-async function exists(p) {
-  try {
-    await fs.stat(p);
-    return true;
-  } catch {
-    return false;
-  }
-}
+import {
+  exists,
+  MODELS_REQ_DIR,
+  MODELS_RESP_DIR,
+  OPERATIONS_DIR,
+  reconcileBarrel,
+  SCHEMAS_DIR,
+  TMP_DIR,
+} from './codegen-utils.mjs';
 
 async function stripZodInputTypes(dir) {
   if (!(await exists(dir))) return;
@@ -33,6 +30,26 @@ async function stripZodInputTypes(dir) {
       .replace(/\n{3,}/g, '\n\n');
 
     if (next !== src) await fs.writeFile(p, next, 'utf8');
+  }
+}
+
+async function stripEscapedForwardSlashes(dir) {
+  if (!(await exists(dir))) return;
+
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const filePath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      await stripEscapedForwardSlashes(filePath);
+      continue;
+    }
+    if (!entry.isFile() || !filePath.endsWith('.ts')) continue;
+
+    const source = await fs.readFile(filePath, 'utf8');
+    const nextSource = source.replaceAll('\\/', '/');
+    if (nextSource !== source) {
+      await fs.writeFile(filePath, nextSource, 'utf8');
+    }
   }
 }
 
@@ -135,6 +152,11 @@ async function renameSchemaFiles(dir) {
 }
 
 await stripZodInputTypes(SCHEMAS_DIR);
+await stripEscapedForwardSlashes(SCHEMAS_DIR);
 await renameSchemaFiles(SCHEMAS_DIR);
 await writeResultType();
+await reconcileBarrel(MODELS_REQ_DIR);
+await reconcileBarrel(MODELS_RESP_DIR);
+await reconcileBarrel(SCHEMAS_DIR);
+await reconcileBarrel(OPERATIONS_DIR);
 await removeTmpTargets();

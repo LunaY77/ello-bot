@@ -11,22 +11,20 @@ export const updateUserProfileRequestSchemaDisplayNameMax = 128;
 
 export const updateUserProfileRequestSchemaBioMax = 2000;
 
-export const updateUserProfileRequestSchemaGenderMax = 32;
-
 export const updateUserProfileRequestSchemaTimezoneMax = 64;
 
-export const UpdateUserProfileRequestSchema = zod.object({
-  displayName: zod
-    .string()
-    .min(1)
-    .max(updateUserProfileRequestSchemaDisplayNameMax)
-    .nullish(),
-  bio: zod.string().max(updateUserProfileRequestSchemaBioMax).nullish(),
-  gender: zod.string().max(updateUserProfileRequestSchemaGenderMax).nullish(),
-  dateOfBirth: zod.string().date().nullish(),
-  timezone: zod
-    .string()
-    .min(1)
-    .max(updateUserProfileRequestSchemaTimezoneMax)
-    .nullish(),
-});
+export const UpdateUserProfileRequestSchema = zod
+  .object({
+    displayName: zod
+      .string()
+      .min(1)
+      .max(updateUserProfileRequestSchemaDisplayNameMax)
+      .nullish(),
+    bio: zod.string().max(updateUserProfileRequestSchemaBioMax).nullish(),
+    timezone: zod
+      .string()
+      .min(1)
+      .max(updateUserProfileRequestSchemaTimezoneMax)
+      .nullish(),
+  })
+  .describe('Request body for profile updates.');

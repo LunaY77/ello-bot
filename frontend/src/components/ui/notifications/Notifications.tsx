@@ -6,7 +6,8 @@
  */
 
 import { Notification } from './Notification';
-import { useNotifications } from './notifications-store';
+
+import { useNotifications } from '@/store/notifications';
 
 /**
  * Notification Container Component

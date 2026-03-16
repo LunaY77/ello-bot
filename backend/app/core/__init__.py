@@ -1,58 +1,40 @@
-"""Core Module"""
+"""Exports for the rewritten foundational layer."""
 
-from .auth import (
-    AuthContext,
-    CurrentAuthDep,
-    require_auth,
+from app.core.clock import utc_now
+from app.core.config import Settings, get_settings, settings
+from app.core.constants import (
+    API_PREFIX,
+    DEFAULT_USER_AVATAR_URL,
+    DEFAULT_USER_LOCALE,
+    DEFAULT_USER_MODEL,
+    DEFAULT_USER_SYSTEM_PROMPT,
+    DEFAULT_USER_THEME,
 )
-from .config import settings
-from .database import (
-    Base,
-    DbSession,
-    SessionLocal,
-)
-from .exception import (
-    AuthException,
-    BusinessException,
-    CommonErrorCode,
-    ErrorCode,
-    auth_exception_handler,
-    business_exception_handler,
-    general_exception_handler,
-    validation_exception_handler,
-)
-from .logger import log
-from .observability import init_observability
-from .redis import (
-    RedisDep,
-    RedisKeyDef,
-    close_redis,
-    redis_client,
-)
-from .schema import ApiModel, Result
+from app.core.exceptions import AuthException, BusinessException, CommonErrorCode, ErrorCode
+from app.core.ids import generate_opaque_token, hash_password, hash_token, verify_password
+from app.core.json import dump_json, load_json
+from app.core.logging import log
 
 __all__ = [
-    "settings",
-    "log",
-    "ErrorCode",
-    "CommonErrorCode",
-    "BusinessException",
+    "API_PREFIX",
     "AuthException",
-    "business_exception_handler",
-    "auth_exception_handler",
-    "validation_exception_handler",
-    "general_exception_handler",
-    "DbSession",
-    "SessionLocal",
-    "Base",
-    "Result",
-    "ApiModel",
-    "require_auth",
-    "AuthContext",
-    "CurrentAuthDep",
-    "redis_client",
-    "RedisKeyDef",
-    "RedisDep",
-    "close_redis",
-    "init_observability",
+    "BusinessException",
+    "CommonErrorCode",
+    "DEFAULT_USER_AVATAR_URL",
+    "DEFAULT_USER_LOCALE",
+    "DEFAULT_USER_MODEL",
+    "DEFAULT_USER_SYSTEM_PROMPT",
+    "DEFAULT_USER_THEME",
+    "ErrorCode",
+    "Settings",
+    "dump_json",
+    "generate_opaque_token",
+    "get_settings",
+    "hash_password",
+    "hash_token",
+    "load_json",
+    "log",
+    "settings",
+    "utc_now",
+    "verify_password",
 ]

@@ -21,20 +21,22 @@ os.environ.setdefault("DB_URL", "postgresql+asyncpg://ello:12345678@localhost:54
 os.environ.setdefault("REDIS_URL", "redis://:12345678@localhost:6380/0")
 os.environ.setdefault("OTEL_ENABLED", "false")
 os.environ.setdefault("BOOTSTRAP_ENABLED", "true")
-os.environ.setdefault("BOOTSTRAP_TENANT_SLUG", "personal")
-os.environ.setdefault("BOOTSTRAP_TENANT_NAME", "Personal")
 os.environ.setdefault("BOOTSTRAP_ADMIN_USERNAME", "admin")
 os.environ.setdefault("BOOTSTRAP_ADMIN_PASSWORD", "BootstrapAdmin_123456")
 os.environ.setdefault("BOOTSTRAP_ADMIN_DISPLAY_NAME", "Bootstrap Admin")
+os.environ.setdefault("AUTH_REGISTRATION_ENABLED", "false")
 
-database_module = importlib.import_module("app.core.database")
-redis_module = importlib.import_module("app.core.redis")
+config_module = importlib.import_module("app.core.config")
+database_base_module = importlib.import_module("app.infra.db.base")
+database_session_module = importlib.import_module("app.infra.db.session")
+redis_module = importlib.import_module("app.infra.cache.redis")
 app_module = importlib.import_module("app.main")
 
-Base = database_module.Base
-SessionLocal = database_module.SessionLocal
-engine = database_module.engine
-redis_client = redis_module.redis_client
+settings = config_module.settings
+Base = database_base_module.Base
+engine = database_session_module.create_db_engine(settings)
+SessionLocal = database_session_module.create_session_factory(engine)
+redis_client = redis_module.create_redis_client(settings.cache.URL)
 app = app_module.app
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -69,7 +71,7 @@ async def integration_state(
         yield
         return
 
-    # Start each integration case from an empty state before the app lifespan bootstraps IAM data.
+    # Start each integration case from an empty state before the app lifespan bootstraps product data.
     await _truncate_all_tables()
     await redis_client.flushdb()
     try:

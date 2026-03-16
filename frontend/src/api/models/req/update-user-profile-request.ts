@@ -6,6 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
+/**
+ * Request body for profile updates.
+ */
 export interface UpdateUserProfileRequest {
   /**
    * @minLength 1
@@ -14,9 +17,6 @@ export interface UpdateUserProfileRequest {
   displayName?: string | null;
   /** @maxLength 2000 */
   bio?: string | null;
-  /** @maxLength 32 */
-  gender?: string | null;
-  dateOfBirth?: string | null;
   /**
    * @minLength 1
    * @maxLength 64

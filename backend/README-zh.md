@@ -18,13 +18,15 @@
 
 ```text
 app/
-├── main.py              # FastAPI 应用、lifespan、自举、健康检查
-├── core/                # 配置、数据库、Redis、认证、异常、日志、Result
-├── modules/iam/         # 认证、租户、RBAC、ACL、Agent 管理
-├── infra/               # 基础设施
+├── main.py              # FastAPI 入口
+├── api/                 # routes、schemas、deps、错误映射
+├── runtime/             # AppRuntime 生命周期与依赖装配
+├── core/                # config、logging、exceptions、ids、clock、constants
+├── domain/              # user / session 领域实体与错误
+├── application/         # 用例编排服务
+├── infra/               # db、cache、observability
 ├── static/              # 默认头像等静态资源
-├── tools/scripts.py     # lint/check/gen-openapi
-└── utils/               # 鉴权与安全相关工具
+└── tools/scripts.py     # lint/check/gen-openapi
 ```
 
 ## 快速开始
@@ -74,6 +76,7 @@ BOOTSTRAP_ADMIN_PASSWORD=替换成管理员初始密码
 注意：
 
 - 当关闭调试模式且仍启用 bootstrap 时，`BOOTSTRAP_ADMIN_PASSWORD` 也必须显式配置。
+- MVP 默认关闭公开注册；如需开启，显式设置 `AUTH_REGISTRATION_ENABLED=true`。
 
 ### 5. 执行迁移并启动服务
 
@@ -89,6 +92,8 @@ make backend-run
 
 - Swagger 文档：`http://localhost:8000/docs`
 - 健康检查：`http://localhost:8000/health`
+- 会话接口：`POST /api/sessions/login`、`POST /api/sessions/refresh`、`GET /api/sessions`
+- 用户接口：`GET /api/user/me`、`PATCH /api/user/profile`、`PATCH /api/user/settings`
 - 静态资源：`http://localhost:8000/static/...`
 
 ## 常用命令
@@ -129,10 +134,11 @@ uv run gen-openapi
 
 ## 后端协作约定
 
-- Router 保持轻量，HTTP 处理尽量下沉到 `workflow.py`、`commands.py`、`queries.py`。
-- 依赖注入优先使用 `DbSession`、`RedisDep`、`CurrentAuthDep`。
-- API 统一返回 `Result[T]`，失败统一抛 `BusinessException` 或 `AuthException`。
-- 不要依赖懒加载。IAM 模型大量关系使用了 `lazy="raise"`，查询时必须显式预加载。
+- Route 保持轻量，只负责 schema 校验、调用 application service、返回 `Result[T]`。
+- 由 `AppRuntime` 统一持有数据库、Redis 与服务装配；FastAPI lifespan 只负责启动和停止 runtime。
+- 领域层不要依赖 FastAPI 或 SQLAlchemy。
+- 持久化通过 repository + `infra/db/uow.py` 协调。
+- 失败统一抛出 `BusinessException` / `AuthException`，由共享错误处理器转换为 HTTP 响应。
 - 进行 AI 辅助开发时，以 `backend/AGENTS.md` 作为后端约束的准绳。
 
 ## 相关文档

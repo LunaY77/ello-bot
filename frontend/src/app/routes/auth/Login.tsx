@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { paths } from '@/config/paths';
-import { LoginForm } from '@/features/iam';
+import { LoginForm } from '@/features/auth';
 
 const LoginRoute = () => {
   const { t } = useTranslation('auth');
@@ -16,7 +16,7 @@ const LoginRoute = () => {
       <LoginForm
         onSuccess={() => {
           navigate(
-            `${redirectTo ? `${redirectTo}` : paths.app.dashboard.getHref()}`,
+            `${redirectTo ? `${redirectTo}` : paths.app.overview.getHref()}`,
             { replace: true },
           );
         }}

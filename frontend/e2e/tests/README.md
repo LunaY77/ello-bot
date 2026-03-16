@@ -24,6 +24,6 @@ PLAYWRIGHT_API_URL=http://localhost:8001/api pnpm run test:e2e
 
 ## Writing Tests
 
-- Use `e2e/fixtures/auth.ts` to create users through the public IAM API.
+- Use `e2e/fixtures/auth.ts` to create users through the rewritten public session API.
 - Persist browser auth by writing `ELLO_AUTH_SESSION`, not legacy token keys.
 - Keep true backend setup in Playwright or Makefile, not in Vitest.

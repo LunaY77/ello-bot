@@ -5,17 +5,15 @@
  * Ello Bot Backend API
  * OpenAPI spec version: 1.0.0
  */
-import type { AgentAccountResponse } from './agent-account-response';
-import type { TenantSummaryResponse } from './tenant-summary-response';
-import type { UserAccountResponse } from './user-account-response';
+import type { UserSettingsResponse } from './user-settings-response';
+import type { UserSummaryResponse } from './user-summary-response';
 
+/**
+ * Response body containing user info plus opaque auth tokens.
+ */
 export interface AuthTokenResponse {
-  /** Authenticated user account */
-  user?: UserAccountResponse | null;
-  /** Authenticated agent account */
-  agent?: AgentAccountResponse | null;
-  /** Active tenant */
-  tenant: TenantSummaryResponse;
+  user: UserSummaryResponse;
+  settings: UserSettingsResponse;
   /** Opaque access token */
   accessToken: string;
   /** Opaque refresh token */

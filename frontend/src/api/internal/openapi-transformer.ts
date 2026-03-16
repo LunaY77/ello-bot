@@ -70,26 +70,41 @@ function rewriteAndDropResultSchemas(spec: AnyObj) {
   if (!schemas.AnyObject)
     schemas.AnyObject = { type: 'object', additionalProperties: true };
 
-  const refMap = new Map<string, string>();
+  const refMap = new Map<string, string | AnyObj>();
   const noneResultRef = new Set<string>();
 
   for (const name of Object.keys(schemas)) {
     if (!name.startsWith(RESULT_PREFIX)) continue;
 
-    const innerRaw = name.slice(RESULT_PREFIX.length).replace(/_+$/, '');
     const from = `#/components/schemas/${name}`;
+    const resultSchema = schemas[name];
+    const dataSchema = isObj(resultSchema?.properties?.data)
+      ? resultSchema.properties.data
+      : null;
 
-    if (innerRaw === 'NoneType' || innerRaw === 'None') {
+    if (!isObj(dataSchema)) {
       noneResultRef.add(from);
       continue;
     }
 
-    const to =
-      innerRaw === 'dict' || innerRaw === 'Dict'
-        ? '#/components/schemas/AnyObject'
-        : `#/components/schemas/${innerRaw}`;
+    const payloadSchema = structuredClone(dataSchema);
+    delete payloadSchema.nullable;
+    delete payloadSchema.title;
 
-    refMap.set(from, to);
+    if (typeof payloadSchema.$ref === 'string') {
+      refMap.set(from, payloadSchema.$ref);
+      continue;
+    }
+
+    if (
+      payloadSchema.type === 'object' &&
+      payloadSchema.additionalProperties === true
+    ) {
+      refMap.set(from, '#/components/schemas/AnyObject');
+      continue;
+    }
+
+    refMap.set(from, payloadSchema);
   }
 
   // Also handle bare "Result" (e.g. /health endpoint) — treat as NoneType (void response)
@@ -105,7 +120,18 @@ function rewriteAndDropResultSchemas(spec: AnyObj) {
     }
 
     const replaced = refMap.get(r);
-    if (replaced) obj.$ref = replaced;
+    if (!replaced) return;
+
+    if (typeof replaced === 'string') {
+      obj.$ref = replaced;
+      return;
+    }
+
+    for (const key of Object.keys(obj)) {
+      delete obj[key];
+    }
+
+    Object.assign(obj, structuredClone(replaced));
   });
 
   // 对 Result_NoneType_ 的响应：删掉 application/json（让 client 侧是 void/无 body）
@@ -138,12 +164,17 @@ function collectSchemaRefsFromRequestBodies(spec: AnyObj): Set<string> {
     if (!isObj(pathItem)) continue;
     for (const op of Object.values(pathItem)) {
       if (!isObj(op)) continue;
-      const ref = op.requestBody?.content?.['application/json']?.schema?.$ref;
-      const m =
-        typeof ref === 'string'
-          ? ref.match(/^#\/components\/schemas\/(.+)$/)
-          : null;
-      if (m?.[1]) names.add(m[1]);
+      const schema = op.requestBody?.content?.['application/json']?.schema;
+      if (!schema) continue;
+
+      walk(schema, (obj) => {
+        const ref = obj.$ref;
+        const m =
+          typeof ref === 'string'
+            ? ref.match(/^#\/components\/schemas\/(.+)$/)
+            : null;
+        if (m?.[1]) names.add(m[1]);
+      });
     }
   }
   return names;
@@ -158,12 +189,17 @@ function collectSchemaRefsFromSuccessResponses(spec: AnyObj): Set<string> {
       for (const [status, resp] of Object.entries(op.responses)) {
         if (!status.startsWith('2')) continue;
         if (!isObj(resp)) continue;
-        const ref = resp.content?.['application/json']?.schema?.$ref;
-        const m =
-          typeof ref === 'string'
-            ? ref.match(/^#\/components\/schemas\/(.+)$/)
-            : null;
-        if (m?.[1]) names.add(m[1]);
+        const schema = resp.content?.['application/json']?.schema;
+        if (!schema) continue;
+
+        walk(schema, (obj) => {
+          const ref = obj.$ref;
+          const m =
+            typeof ref === 'string'
+              ? ref.match(/^#\/components\/schemas\/(.+)$/)
+              : null;
+          if (m?.[1]) names.add(m[1]);
+        });
       }
     }
   }

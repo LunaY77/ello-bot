@@ -141,7 +141,7 @@ make help
 | **Combined**                   |                                                          |
 | `make lint`                    | Lint + format both backend and frontend                  |
 | `make check`                   | Check both backend and frontend                          |
-| `make sync-api`                | Generate OpenAPI spec and codegen frontend client        |
+| `make sync-api`                | Generate OpenAPI spec and sync frontend API contracts    |
 
 ## License
 

@@ -17,8 +17,10 @@ frontend/
 │   │   └── routes/              # route module
 │   ├── api/
 │   │   ├── models/              # Orval 生成的请求/响应模型
+│   │   ├── operations/          # OpenAPI 派生的 operation contracts
+│   │   ├── runtime/             # 运行时 request helper（供手写 wrapper 组合 contract）
 │   │   ├── schemas/             # Orval 生成的 Zod Schema
-│   │   └── internal/            # codegen 后处理脚本与转换逻辑
+│   │   └── internal/            # 纯 build-time codegen 脚本、转换与校验逻辑
 │   ├── features/                # iam、chat 等业务模块
 │   ├── components/              # 通用 UI、布局、错误边界、SEO、通知
 │   ├── lib/                     # api-client、auth、react-query、i18n 等基础设施
@@ -41,7 +43,7 @@ frontend/
 | `src/components/` | 无业务归属的共享 UI 与布局                                                                            |
 | `src/lib/`        | 跨业务基础设施能力                                                                                    |
 | `src/store/`      | 仅存放客户端状态，不存放整块服务端实体数据                                                            |
-| `src/api/`        | OpenAPI 生成物与生成辅助逻辑                                                                          |
+| `src/api/`        | OpenAPI 生成物、operation contracts，以及生成/运行时 API helper 边界                                 |
 | `src/testing/`    | Vitest 测试辅助                                                                                       |
 
 ---
@@ -122,18 +124,21 @@ import IamRoute from '@/app/routes/app/Iam';
 
 - `src/api/models/req/`
 - `src/api/models/resp/`
+- `src/api/operations/`
 - `src/api/schemas/`
 
 如果后端接口契约变更：
 
-- 重新生成模型与 schema
-- 如生成规则需要调整，改 `src/api/internal/` 下的后处理逻辑，不要直接补丁生成文件
+- 运行 `make sync-api` 或 `cd frontend && pnpm run codegen:api`
+- 如生成规则需要调整，改 `src/api/internal/` 下的 build-time 脚本，不要直接补丁生成文件
+- 业务代码消费生成契约时，统一走 `@/api/models/req`、`@/api/models/resp`、`@/api/schemas`、`@/api/operations` 这些公开入口，不要 deep import 生成文件
 
 ### HTTP 入口
 
 - 所有业务 HTTP 请求统一通过 `src/lib/api-client.ts` 的 `api` 实例。
 - 不要在 feature 内随意创建新的 axios 实例。
 - `rawApi` 只用于 `api-client` 内部的 refresh 场景，业务代码不要直接复用。
+- 手写 feature wrapper 中的 path / method 必须来自 generated operation contract，并通过 `src/api/runtime/` 的 helper 与共享 `api` 实例组合。
 - workspace / tenant CRUD 与列表能力统一收敛在 `src/features/iam/api/tenants.ts`，不要在 auth feature 内复制一套 tenant hooks。
 
 ### `api-client` 责任边界

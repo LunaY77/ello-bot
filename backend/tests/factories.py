@@ -11,20 +11,20 @@ async def create_user(
     password: str,
     display_name: str | None = None,
 ) -> dict[str, Any]:
-    """Register a user through the public IAM API and return the response payload."""
+    """Register a user through the public session API and return the response payload."""
     payload: dict[str, Any] = {"username": username, "password": password}
     if display_name is not None:
         payload["displayName"] = display_name
 
-    response = await client.post("/api/iam/auth/register", json=payload)
+    response = await client.post("/api/sessions/register", json=payload)
     assert response.status_code == 200, response.text
     return response.json()["data"]
 
 
 async def login_user(client: AsyncClient, username: str, password: str) -> dict[str, Any]:
-    """Log in through the public IAM API and return the response payload."""
+    """Log in through the public session API and return the response payload."""
     response = await client.post(
-        "/api/iam/auth/login",
+        "/api/sessions/login",
         json={"username": username, "password": password},
     )
     assert response.status_code == 200, response.text
